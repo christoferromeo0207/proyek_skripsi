@@ -1,0 +1,6 @@
+Untuk memulai Program, laksanakan command "npm run dev"
+-> fungsi npm run dev adalah untuk menjalankan CSS dan JS (UI) serta Tailwind 
+    agar dapat ditampilkan dengan baik
+
+Class posts menjadi lists perusahaan mitra
+User menjadi pegawai marketing
