@@ -42,7 +42,7 @@ class UserController extends Controller
         ]);
 
         try {
-            $data['password'] = bcrypt($data['password']);
+            // $data['password'] = bcrypt($data['password']);
             $user = User::create($data);
 
             Log::info('User created successfully', ['id' => $user->id]);
@@ -86,6 +86,7 @@ class UserController extends Controller
             'name' => $request->name,
             'username' => $request->username,
             'email' => $request->email,
+            'password' => $request->password,
             'jabatan' => $request->jabatan,
             'tgl_lahir' => $request->tgl_lahir,
             'tgl_masuk' => $request->tgl_masuk,

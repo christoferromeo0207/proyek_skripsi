@@ -21,24 +21,26 @@ class RegisterController extends Controller
      * Handle a registration request.
      */
     public function register(Request $request)
-    {
-        // Validate the registration input
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'username' => 'required|string|unique:users,username|max:255',
-            'email' => 'required|email|unique:users,email|max:255',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
+        {
+            // 1) Validate everything
+            $data = $request->validate([
+                'name'              => 'required|string|max:255',
+                'username'          => 'required|string|max:255|unique:users,username',
+                'email'             => 'required|email|max:255|unique:users,email',
+                'password'          => 'required|string|min:8|confirmed',
+                'jabatan'           => 'nullable|string|max:100',
+                'tgl_lahir'         => 'nullable|date',
+                'tgl_masuk'         => 'nullable|date',
+                'tempat_lahir'      => 'nullable|string|max:100',
+                'no_telp'           => 'nullable|string|max:20',
+            ]);
 
-        // Create the new user and hash the password
-        User::create([
-            'name' => $request->name,
-            'username' => $request->username,
-            'email' => $request->email,
-            'password' => $request->password, 
-        ]);
+            // 2) Create (password mutator will hash automatically)
+            User::create($data);
 
-        // Redirect to the login page after registration
-        return redirect()->route('login')->with('success', 'Registration successful, please log in!');
-    }
+            // 3) Redirect & flash
+            return redirect()
+                ->route('login')
+                ->with('success', 'Registration successful! Please log in.');
+        }
 }

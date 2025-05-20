@@ -23,8 +23,10 @@
                         <a href="{{ '/posts' }}" class="text-white font-bold hover:text-orange-100 transition no-underline text-center leading-tight">
                             Perusahaan<br>Mitra
                         </a>
-                        <a href="{{ url('/notifikasi') }}" class="text-white font-bold hover:text-orange-100 transition no-underline">Notifikasi</a>
-                        <a href="{{ url('/schedule') }}" class="text-white font-bold hover:text-orange-100 transition no-underline text-center leading-tight">
+                        <a href="{{ route('notifications') }}" class="text-white font-bold hover:text-orange-100 transition no-underline">
+                            Notifikasi
+                        </a>                       
+                         <a href="{{ url('/schedule') }}" class="text-white font-bold hover:text-orange-100 transition no-underline text-center leading-tight">
                             Jadwal<br>Mitra
                         </a>
                         <a href="{{ url('/users') }}" class="text-white font-bold hover:text-orange-100 transition no-underline text-center leading-tight">

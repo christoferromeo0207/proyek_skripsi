@@ -37,20 +37,20 @@
     @endif
     <form action="{{ route('login') }}" method="POST" class="space-y-5">
       @csrf
-      {{-- Email --}}
+      {{-- username --}}
       <div>
-        <label for="email" class="block text-sm font-semibold text-orange">Email</label>
+        <label for="username" class="block text-sm font-semibold text-orange">Username</label>
         <input
-          id="email"
-          name="email"
-          type="email"
-          value="{{ old('email') }}"
+          id="username"
+          name="username"
+          type="username"
+          value="{{ old('username') }}"
           required
           autofocus
-          class="w-full px-4 py-2 mt-1 border rounded-md focus:outline-none focus:ring-2 ring-orange @error('email') border-red-500 @enderror"
-          placeholder="you@example.com"
+          class="w-full px-4 py-2 mt-1 border rounded-md focus:outline-none focus:ring-2 ring-orange @error('username') border-red-500 @enderror"
+          placeholder="username"
         >
-        @error('email')
+        @error('username')
           <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
         @enderror
       </div>
@@ -69,19 +69,7 @@
           <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
         @enderror
       </div>
-      <div class="flex items-center justify-between">
-        <label class="inline-flex items-center text-sm text-gray-600">
-          <input type="checkbox" name="remember" {{ old('remember') ? 'checked' : '' }}
-                 class="mr-2 border-gray-300 rounded">
-          <span class="ml-2">Remember Me</span>
-        </label>
-        @if (Route::has('password.request'))  
-          <a href="{{ route('password.request') }}"
-             class="text-sm text-orange hover:underline">
-            Forgot password?
-          </a>
-        @endif
-      </div>
+      
       <button type="submit"
               class="w-full px-4 py-2 font-semibold btn-orange rounded-md focus:outline-none focus:ring-2 ring-orange transition-colors duration-200">
         Login

@@ -18,36 +18,40 @@
                x-transition
                class="absolute right-0 mt-2 w-48 bg-orange-100 border border-orange-300 rounded-lg shadow-xl z-50 overflow-hidden">
            
-            <!-- Fungsi Edit -->
-            <a href="{{ route('posts.edit', $post->slug) }}"
-              class="flex items-center gap-2 w-full px-4 py-2 text-md font-bold text-orange-400 hover:bg-orange-300 hover:text-orange-700 transition no-underline">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="m18.988 2.012 3 3L19.701 7.3l-3-3zM8 16h3l7.287-7.287-3-3L8 13z"/>
-              <path d="M19 19H8.158c-.026 0-.053.01-.079.01-.033 0-.066-.009-.1-.01H5V5h6.847l2-2H5c-1.103 0-2 .896-2 2v14c0 1.104.897 2 2 2h14a2 2 0 0 0 2-2v-8.668l-2 2V19z"/>
-            </svg>
-            Edit Perusahaan
-            </a>
+              <!-- Edit Perusahaan -->
+              <a href="{{ route('posts.edit', $post->slug) }}"
+                class="flex items-center gap-2 w-full px-4 py-2 text-md font-bold text-orange-400 hover:bg-orange-300 hover:text-orange-700 transition no-underline">
+                <i class="fas fa-edit"></i>
+                Edit
+              </a>
 
-            <!--Fungsi Delete-->
-            <form 
-                method="POST"
-                action="{{ route('posts.destroy', $post) }}"
-                onsubmit="return confirm('Apakah Anda yakin ingin menghapus mitra ini?');"
-            >
-              @csrf
-              @method('DELETE')
-              <button 
-                type="submit"
-                class="flex items-center gap-2 w-full px-4 py-2 text-md font-bold text-orange-400 hover:bg-orange-300 hover:text-orange-700 transition"
-              >
-                <!-- ikon trash -->
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M5 20a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8h2V6h-4V4a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v2H3v2h2zM9 4h6v2H9zM8 8h9v12H7V8z"/>
-                  <path d="M9 10h2v8H9zm4 0h2v8h-2z"/>
-                </svg>
-                Hapus Perusahaan
-              </button>
-            </form>
+              <!-- Hapus Perusahaan -->
+              <form method="POST"
+                    action="{{ route('posts.destroy', $post) }}"
+                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus mitra ini?');">
+                @csrf
+                @method('DELETE')
+                <button type="submit"
+                        class="flex items-center gap-2 w-full px-4 py-2 text-md font-bold text-orange-400 hover:bg-orange-300 hover:text-orange-700 transition">
+                  <i class="fas fa-trash-alt"></i>
+                  Hapus
+                </button>
+              </form>
+
+
+             <!--Lihat Pesan -->
+              <a href="{{ route('posts.messages.index', $post) }}"
+                class="flex items-center gap-2 w-full px-4 py-2 text-md font-bold text-orange-400 hover:bg-orange-300 hover:text-orange-700 transition no-underline">
+                <i class="fas fa-envelope"></i>
+                Lihat Pesan
+              </a>
+
+              <!--Kirim Pesan -->
+              <a href="{{ route('posts.messages.create', $post) }}"
+                class="flex items-center gap-2 w-full px-4 py-2 text-md font-bold text-orange-400 hover:bg-orange-300 hover:text-orange-700 transition no-underline">
+                <i class="fas fa-paper-plane"></i>
+                Kirim Pesan
+              </a>
 
       
 
@@ -291,11 +295,11 @@
 
       
   
-      <!-- Produk KErjasama Hasil Transaksi -->
+      <!-- Produk Kerjasama Hasil Transaksi -->
       <div class="w-11/12 md:w-4/5 lg:w-3/4 bg-white/60 rounded-xl shadow-lg p-6 mt-8">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-orange-500 font-bold text-lg">Produk Kerjasama</h2>
-          <a href="{{ route('transactions.create', $post) }}"
+          <a href="{{ route('posts.transactions.create', $post) }}"
             class="bg-orange-400 hover:bg-orange-500 text-white font-bold px-4 py-2 rounded-lg no-underline">
             Tambah
           </a>
@@ -343,25 +347,27 @@
             <!-- Action -->
             <td class="px-4 py-2 flex gap-2">
               <!-- Detail: popup atau ke halaman edit -->
-              <a href="{{ route('transactions.show', [$post, $transaction]) }}"
+              <a href="{{ route('posts.transactions.show', [$post, $transaction]) }}"
                 class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-lg text-xs font-bold no-underline">
                 Detail
               </a>
 
               <!-- Hapus -->
-              <form
-                action="{{ route('transactions.destroy', $transaction) }}"
+             <form
+                action="{{ route('posts.transactions.destroy', [$post, $transaction]) }}"
                 method="POST"
                 onsubmit="return confirm('Yakin ingin menghapus transaksi ini?');"
                 class="inline">
-                @csrf
-                @method('DELETE')
-                <button
-                  type="submit"
-                  class="bg-red-400 hover:bg-red-500 text-white px-3 py-1 rounded-lg text-xs font-bold">
-                  Hapus
-                </button>
+                  @csrf
+                  @method('DELETE')
+                  <button
+                    type="submit"
+                    class="bg-red-400 hover:bg-red-500 text-white px-3 py-1 rounded-lg text-xs font-bold"
+                  >
+                    Hapus
+                  </button>
               </form>
+
             </td>
           </tr>
         @empty

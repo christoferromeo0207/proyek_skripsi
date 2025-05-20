@@ -8,7 +8,7 @@
             </h1>
 
 
-            <form method="POST" action="{{ route('transactions.store', $post) }}" enctype="multipart/form-data" class="space-y-6">
+            <form method="POST" action="{{ route('posts.transactions.store', $post) }}" enctype="multipart/form-data" class="space-y-6">
                 @csrf
 
                 <!-- Nama Produk -->
@@ -68,10 +68,34 @@
 
 
                 <!-- PIC RS -->
-                <div>
+                {{-- <div>
                     <label class="block text-orange-500 font-semibold mb-1">PIC Rumah Sakit:</label>
                     <input type="text" name="pic_rs" class="w-full rounded-lg border-gray-300 focus:ring-orange-400 focus:border-orange-400" placeholder="Masukkan teks">
+                </div> --}}
+
+              <div>
+                    <label for="pic_rs" class="block text-orange-500 font-semibold mb-1">PIC Rumah Sakit:</label>
+                    <select 
+                        name="pic_rs" 
+                        id="pic_rs"
+                        class="w-full rounded-lg border-gray-300 focus:ring-orange-400 focus:border-orange-400 @error('pic_rs') border-red-500 @enderror"
+                        required
+                    >
+                        <option value="">— Pilih PIC RS —</option>
+                        @foreach($users as $user)
+                            <option 
+                                value="{{ $user->id }}" 
+                                {{ old('pic_rs', $post->pic_rs ?? '') == $user->id ? 'selected' : '' }}
+                            >
+                                {{ $user->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('pic_rs')
+                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
+                      
 
                 <!--Approval RS-->
                 <div>
@@ -82,11 +106,21 @@
                     </select>                
                 </div>
 
-                <!-- PIC Mitra -->
+                
+                {{-- PIC Mitra (sesuai dengan PIC perusahaan) --}}
                 <div>
-                    <label class="block text-orange-500 font-semibold mb-1">PIC Mitra:</label>
-                    <input type="text" name="pic_mitra" class="w-full rounded-lg border-gray-300 focus:ring-orange-400 focus:border-orange-400"  placeholder="Masukkan teks" required>
+                    <label for="pic_mitra" class="mt-4 block">PIC Mitra</label>
+                    <input type="text"
+                            name="pic_mitra"
+                            id="pic_mitra"
+                            value="{{ old('pic_mitra', $post->pic_mitra) }}"
+                            placeholder="Masukkan nama PIC Mitra…"
+                            class="w-full border rounded px-3 py-2 @error('pic_mitra') border-red-500 @enderror">
+                    @error('pic_mitra')
+                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
+
 
                 <!--Approval Mitra-->
                 <div>

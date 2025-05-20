@@ -20,12 +20,12 @@ class LoginController extends Controller
     {
         Log::info("xxxx");
         $request->validate([
-            'email' => 'required|string',
+            'username' => 'required|string',
             'password' => 'required|string',
         ]);
 
-        Log::info($request['email']);
-        $user = User::where('email', $request->email)->first();
+        Log::info($request['username']);
+        $user = User::where('username', $request->username)->first();
 
         // Check if the password matches exactly without hashing
         if ($user && $user->password === $request->password) {

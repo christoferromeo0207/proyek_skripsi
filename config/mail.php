@@ -36,7 +36,7 @@ return [
     */
 
     'mailers' => [
-
+        //untuk Mailtrap
         'smtp' => [
             'transport' => 'smtp',
             'url' => env('MAIL_URL'),
@@ -49,8 +49,27 @@ return [
             'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url(env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
         ],
 
+        'sendgrid' => [
+                'transport'  => 'smtp',
+                'host'       => 'smtp.sendgrid.net',
+                'port'       => 587,
+                'encryption' => 'tls',
+                'username'   => 'apikey',
+                'password'   => env('SENDGRID_API_KEY'),
+                'timeout'      => null,
+                'auth_mode'    => null,
+            ],
+
         'ses' => [
             'transport' => 'ses',
+        ],
+
+        'mailgun' => [
+            'transport' => 'mailgun',
+            'domain' => env('MAILGUN_DOMAIN'),
+            'secret' => env('MAILGUN_SECRET'),
+            'endpoint' => env('MAILGUN_ENDPOINT', 'api.mailgun.net'),
+            'scheme' => 'https',
         ],
 
         'postmark' => [

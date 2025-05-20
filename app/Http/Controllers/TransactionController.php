@@ -7,6 +7,7 @@ use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
@@ -26,7 +27,9 @@ class TransactionController extends Controller
     public function create(Post $post)
     {
         $users = User::all();
-        return view('transactions.create', compact('post','users'));
+        return view('transaction', compact('post','users'), [
+            'title'=> 'Data Transaksi Produk',
+        ]);
     }
 
     public function show(Post $post, Transaction $transaction)
@@ -39,7 +42,7 @@ class TransactionController extends Controller
     public function store(Post $post, Request $request)
     {
         $data = $request->validate([
-            'nama_produk'         => 'required|string',
+            'nama_produk'         => 'required|string|max:255',
             'jumlah'              => 'required|numeric|min:1',
             'merk'                => 'required|string',
             'harga_satuan'        => 'required|numeric|min:1',
@@ -50,8 +53,9 @@ class TransactionController extends Controller
             'approval_mitra'      => 'required|boolean',
             'status'              => 'required|string',
             'bukti_pembayaran'    => 'nullable|array',
-            'bukti_pembayaran.*'  => 'file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'bukti_pembayaran.*'  => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
+        // dd($data);
 
         $data['total_harga'] = $data['jumlah'] * $data['harga_satuan'];
 
@@ -105,7 +109,7 @@ class TransactionController extends Controller
         $newPaths = [];
         foreach ($request->file('bukti_pembayaran', []) as $file) {
             if ($file instanceof UploadedFile && $file->isValid()) {
-                $newPaths[] = $file->store('public/bukti_pembayaran');
+                $newPaths[] = $file->store('bukti_pembayaran', 'public');
             }   
         }
 
@@ -133,20 +137,4 @@ class TransactionController extends Controller
     }
 
 
-
-    // Hapus salah satu file bukti
-    public function destroyFile($id, Transaction $transaction, $filename)
-    {
-        // hapus file fisik
-        Storage::disk('public')->delete("bukti_pembayaran/$filename");
-
-        // update array di DB
-        $files = $transaction->bukti_pembayaran ?: [];
-        $files = array_values(
-            array_filter($files, fn($path) => basename($path) !== $filename)
-        );
-        $transaction->update(['bukti_pembayaran' => $files]);
-
-        return back()->with('success', "File $filename berhasil dihapus.");
-    }
 }

@@ -12,13 +12,21 @@ use App\Http\Controllers\{
     TransactionController,
     ScheduleController,
     PasswordController,
-    TestingUpload
+    TestingUpload,
+    PostMessageController,
+    NotificationController,
 };
 use App\Http\Controllers\Auth\{
     LoginController,
     RegisterController
 };
 use App\Models\{Category, Post, User};
+use App\Mail\Email;
+use App\Mail\NewMessageMail;
+
+
+
+
 
 // Authentication Routes
 Route::middleware('guest')->group(function () {
@@ -37,34 +45,42 @@ Route::controller(PasswordController::class)->group(function () {
 
 // Authenticated Routes
 Route::middleware('auth')->group(function () {
-    // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::post('/logout', function () {
-        Auth::logout();
-        return redirect()->route('login');
-    })->name('logout');
-
+    Route::post('/logout', function () {Auth::logout();return redirect()->route('login');})->name('logout');
     Route::get('/users',                 [UserController::class, 'index'])->name('user.index');
     Route::get('/users/create',          [UserController::class, 'create'])->name('user.create');
     Route::post('/users',                [UserController::class, 'store'])->name('user.store');
     Route::get('/users/{user}/edit',     [UserController::class, 'edit'])->name('user.edit');
     Route::put('/users/{user}',          [UserController::class, 'update'])->name('user.update');
     Route::delete('/users/{user}',       [UserController::class, 'destroy'])->name('user.destroy');
+    Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifications');
 
     // Posts Resource
-    Route::prefix('posts')
-         ->controller(PostController::class)
-         ->group(function () {
+    Route::prefix('posts')->controller(PostController::class)->group(function () {
         Route::get('/',               'index')->name('posts.index');
         Route::get('/create',         'create')->name('posts.create');
         Route::post('/',              'store')->name('posts.store');
         Route::get('/{post:slug}',    'show')->name('posts.show');
         Route::get('/{post:slug}/edit','edit')->name('posts.edit');
         Route::put('/{post:slug}',     'update')->name('posts.update');
-        Route::delete('/posts/{post}',       'destroy')->name('posts.destroy');
+        Route::delete('/posts/{post}',       'destroy')->name('posts.destroy'); 
         Route::post('/{id}/changePIC','changePIC')->name('posts.changePIC');
         Route::get('/category/{category:slug}', 'index')->name('posts.category');
     });
+
+    // Messages
+    Route::prefix('posts/{post}/messages')->name('posts.messages.')->controller(PostMessageController::class)->group(function(){
+            Route::get('/',           'index')->name('index');
+            Route::get('/create',     'create')->name('create');
+            Route::post('/',          'store')->name('store');
+            Route::get('/{message}',  'show')->name('show');
+            Route::post('/{message}/read', 'markRead')->name('read');
+            Route::post('/sendgrid',  'storeViaSendgrid')->name('sendgrid');
+        });
+    
+    
+    
+
 
     // Categories
     Route::controller(CategoryController::class)->prefix('categories')->group(function () {
@@ -79,28 +95,31 @@ Route::middleware('auth')->group(function () {
     });
     
     //Transactions
-    Route::controller(TransactionController::class)->prefix('transactions')->group(function () {
-        Route::get('transactions',          [TransactionController::class, 'index'])  ->name('transactions.index');
-        Route::get('/posts/{post}/transactions/{transaction}', [TransactionController::class, 'show'])->name('transactions.show');
-        Route::get('posts/{post}/transactions/create',   [TransactionController::class, 'create']) ->name('transactions.create');
-        Route::post('posts/{post}/transactions', [TransactionController::class, 'store'])->name('transactions.store');
-        Route::get('transactions/{transaction}/edit',   [TransactionController::class, 'edit'])   ->name('transactions.edit');
-        Route::put(
-        'posts/{post}/transactions/{transaction}',
-        [TransactionController::class, 'update']
-        )->name('posts.transactions.update');
+    // Route::controller(TransactionController::class)->prefix('transactions')->group(function () {
+    //     Route::get('transactions',          [TransactionController::class, 'index'])  ->name('transactions.index');
+    //     Route::get('/posts/{post}/transactions/{transaction}', [TransactionController::class, 'show'])->name('transactions.show');
+    //     Route::get('/posts/create/{post}',   [TransactionController::class, 'create']) ->name('transactions.create');
+    //     Route::post('/posts/store/{post}/', [TransactionController::class, 'store'])->name('transactions.store');
+    //     Route::get('transactions/{transaction}/edit',   [TransactionController::class, 'edit'])   ->name('transactions.edit');
+    //     Route::put('posts/{post}/transactions/{transaction}',[TransactionController::class, 'update'])->name('posts.transactions.update');
+    //     Route::delete('transactions/{transaction}',     [TransactionController::class, 'destroy'])->name('transactions.destroy');
+    //     //Detail Transaction
+    //     Route::get('posts/{post}/transactions/{transaction}', [TransactionController::class, 'show'])->name('transactions.show');
+    //     Route::delete('posts/{post}/transactions/{transaction}/file/{filename}',[TransactionController::class, 'destroyFile'])->name('posts.transactions.file.destroy');
+    // });
+    
+    Route::prefix('posts/{post}/transactions')->name('posts.transactions.')->controller(TransactionController::class)->group(function(){
+         Route::get('/',                 'index')->name('index');
+         Route::get('/create',           'create')->name('create');
+         Route::post('/',                'store')->name('store');
+         Route::get('/{transaction}',    'show')->name('show');
+         Route::get('/{transaction}/edit','edit')->name('edit');
+         Route::put('/{transaction}',    'update')->name('update');
+         Route::delete('/{transaction}', 'destroy')->name('destroy');
+         Route::post('/{transaction}/files/delete', 'deleteFile')->name('files.delete');
+         Route::post('/{transaction}/files/rename', 'renameFile')->name('files.rename');
+     });
 
-        Route::delete('transactions/{transaction}',     [TransactionController::class, 'destroy'])->name('transactions.destroy');
-        //Detail Transaction
-       
-        Route::get('posts/{post}/transactions/{transaction}', [TransactionController::class, 'show'])->name('transactions.show');
-        
-        
-        Route::delete(
-            'posts/{post}/transactions/{transaction}/file/{filename}',
-            [TransactionController::class, 'destroyFile']
-        )->name('posts.transactions.file.destroy');
-    });
 
     // Schedule
     Route::get('/schedule', [ScheduleController::class, 'index'])->name('schedule.index');
@@ -129,3 +148,5 @@ Route::get('/categories/{category:slug}', function(Category $category) {
         'posts' => $category->posts
     ]);
 });
+
+

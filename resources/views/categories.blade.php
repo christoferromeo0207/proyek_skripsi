@@ -180,14 +180,14 @@
                         </div>
 
                         <div>
-                            <label class="block text-orange-500 font-semibold mb-1">Dokumentasi:</label>
+                            <label class="block text-black-500 font-semibold mb-1">Dokumentasi:</label>
                             
                             <!-- File upload area -->
-                            <div id="file-upload-area" class="border-2 border-dashed border-orange-300 rounded-lg p-4 text-center cursor-pointer hover:bg-orange-50 transition">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <div id="file-upload-area" class="border-2 border-dashed border-black-300 rounded-lg p-4 text-center cursor-pointer hover:bg-orange-50 transition">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                 </svg>
-                                <p class="mt-2 text-orange-600 font-medium">Klik untuk mengunggah file</p>
+                                <p class="mt-2 text-black font-medium">Klik untuk mengunggah file</p>
                                 <p class="text-xs text-gray-500 mt-1">Format: PNG, JPG, JPEG, PDF (Maks. 2MB)</p>
                                 <input type="file" name="file_path[]" id="file-upload-input" class="hidden" accept=".png,.jpg,.jpeg,.pdf" multiple>
                             </div>
@@ -197,7 +197,7 @@
                         </div>
 
                         
-                        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Submit</button>
+                        <button type="submit" class="px-4 py-2 bg-green-400 text-white rounded hover:bg-green-600">Submit</button>
                     </form>
                     <!--End Form-->
                 </div>
