@@ -10,12 +10,13 @@ use Illuminate\Support\Str;
 
 class PostController extends Controller
 {
-    /**
-     * Tampilkan daftar perusahaan (posts).
-     */
+
+
+
     public function index(Request $request)
     {
         $query = Post::query();
+        $categories = Category::orderBy('name')->get();
 
         // Pencarian judul
         if ($request->filled('search')) {
@@ -29,7 +30,7 @@ class PostController extends Controller
 
         $posts = $query->paginate(10);
 
-        return view('posts', compact('posts'))
+        return view('posts', compact('posts', 'categories'))
         -> with('title', 'Daftar Perusahaan');
     }
 

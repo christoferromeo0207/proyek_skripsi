@@ -6,10 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Post extends Model
 {
     use HasFactory;
+    use LogsActivity;
+
     protected $fillable = ['title', 'pic_mitra', 'slug', 'body','phone', 'email', 'alamat', 'keterangan_bpjs', 'pembayaran', 
     'tanggal_awal', 'tanggal_akhir', 'file_path', 'PIC'];
    
@@ -56,6 +60,15 @@ class Post extends Model
     public function messages()
     {
         return $this->hasMany(Message::class);
+    }
+
+     public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('post')
+            ->logFillable()
+            ->logOnlyDirty()
+            ->setDescriptionForEvent(fn(string $eventName) => "Telah {$eventName} data mitra: “{$this->title}”");
     }
 
 

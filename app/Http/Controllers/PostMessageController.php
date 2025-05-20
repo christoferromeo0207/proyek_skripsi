@@ -60,6 +60,8 @@ class PostMessageController extends Controller
             'user_id' => Auth::id(),
             'subject' => $data['subject'],
             'body'    => $data['body'],
+            'attachments' => $attachments,
+            'is_read' => false,
         ]);
 
         $mailData = [
