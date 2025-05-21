@@ -16,6 +16,7 @@ class NotificationController extends Controller
 
     public function index(Request $request)
     {
+        
         // 1) semua mitra untuk dropdown
         $posts = Post::orderBy('title')->get();
 
@@ -40,7 +41,7 @@ class NotificationController extends Controller
             ->where('subject_id',   $selectedPost->id)
             ->latest()
             ->get();
-
+// dd($posts, $messages,$selectedPost, $activities);
         // 5) render view
         return view('notifications.index', compact(
             'posts','selectedPost','messages','q','activities'

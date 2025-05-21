@@ -15,7 +15,7 @@ class Post extends Model
     use LogsActivity;
 
     protected $fillable = ['title', 'pic_mitra', 'slug', 'body','phone', 'email', 'alamat', 'keterangan_bpjs', 'pembayaran', 
-    'tanggal_awal', 'tanggal_akhir', 'file_path', 'PIC'];
+    'tanggal_awal', 'tanggal_akhir', 'file_path', 'PIC', 'parent_id', 'commission_percentage', 'commission_amount'];
    
     protected $with = ['category', 'picUser'];
 
@@ -70,6 +70,19 @@ class Post extends Model
             ->logOnlyDirty()
             ->setDescriptionForEvent(fn(string $eventName) => "Telah {$eventName} data mitra: “{$this->title}”");
     }
+
+    // children
+    public function children()
+    {
+        return $this->hasMany(Post::class, 'parent_id');
+    }
+
+    // parent 
+    public function parent()
+    {
+        return $this->belongsTo(Post::class, 'parent_id');
+    }
+
 
 
 }

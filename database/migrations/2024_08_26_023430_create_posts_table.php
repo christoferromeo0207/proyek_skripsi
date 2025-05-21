@@ -32,12 +32,22 @@ return new class extends Migration
             $table->date('tanggal_akhir')->nullable();
             $table->string('file_path')->nullable();
 
-            // PIC user FK
             $table->foreignId('PIC')
                   ->nullable()
                   ->constrained('users', 'id')
                   ->cascadeOnUpdate()
                   ->nullOnDelete();
+
+            $table->foreignId('parent_id')
+                ->nullable()
+                ->constrained('posts')
+                ->onDelete('set null');
+
+            $table->decimal('commission_percentage', 5, 2)
+                ->nullable();
+
+            $table->decimal('commission_amount', 15, 2)
+                ->nullable();
 
             // Timestamps
             $table->timestamps();

@@ -1,4 +1,4 @@
-{{-- resources/views/notifications/index.blade.php --}}
+
 <x-layout>
   <x-slot:title>Notifikasi</x-slot:title>
 
@@ -60,11 +60,13 @@
         <div class="mt-8 bg-white rounded-lg p-4 space-y-4">
           <h2 class="text-xl font-bold text-orange-600 mb-4">Activity Log</h2>
       
+          
           @forelse($activities as $act)
             <div class="border-2 border-gray-300 rounded-lg bg-white p-6 space-y-2">
               <div class="flex justify-between items-start">
                 <div class="space-y-1">
                   <p class="text-gray-800 bold">{{ $act->description }}</p>
+                  
                   @if($act->causer)
                     <p class="text-orange-500 text-sm">Oleh: {{ $act->causer->name }} ({{ $act->causer->jabatan }})</p>
                   @endif
