@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
@@ -33,12 +34,12 @@ class UserController extends Controller
             'name'         => 'required|string|max:255',
             'username'     => 'required|string|max:255|unique:users,username',
             'email'        => 'required|email|unique:users,email',
-            'password'     => 'required|string|min:6|confirmed',
+            'password'     => 'nullable|string|min:6|confirmed',
             'jabatan'      => 'required|string|max:255',
-            'tgl_lahir'    => 'nullable|date',
-            'tgl_masuk'    => 'nullable|date',
-            'tempat_lahir' => 'nullable|string|max:100',
-            'no_telp'      => 'nullable|string|max:20',
+            'tgl_lahir'    => 'required|date',
+            'tgl_masuk'    => 'required|date',
+            'tempat_lahir' => 'required|string|max:100',
+            'no_telp'      => 'required|string|max:20',
         ]);
 
         try {
@@ -65,38 +66,34 @@ class UserController extends Controller
 
    public function update(Request $request, $id)
     {
-        // Validasi data input
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'username' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'password' => 'nullable|string|max:255',
-            'jabatan' => 'required|string|max:255',
-            'tgl_lahir' => 'required|date',
-            'tgl_masuk' => 'required|date',
-            'tempat_lahir' => 'required|string|max:100',
-            'no_telp' => 'required|string|max:100',
-        ]);
+    $data = $request->validate([
+        'name'         => 'required|string|max:255',
+        'username'     => 'required|string|max:255',
+        'email'        => 'required|email|max:255',
+        'password'     => 'nullable|string|min:6|confirmed',
+        'jabatan'      => 'required|string|max:255',
+        'tgl_lahir'    => 'required|date',
+        'tgl_masuk'    => 'required|date',
+        'tempat_lahir' => 'required|string|max:100',
+        'no_telp'      => 'required|string|max:100',
+    ]);
 
-        // Cari user berdasarkan ID
-        $user = User::findOrFail($id);
-        
-        // Update data di database
-        $user->update([
-            'name' => $request->name,
-            'username' => $request->username,
-            'email' => $request->email,
-            'password' => $request->password,
-            'jabatan' => $request->jabatan,
-            'tgl_lahir' => $request->tgl_lahir,
-            'tgl_masuk' => $request->tgl_masuk,
-            'tempat_lahir' => $request->tempat_lahir,
-            'no_telp' => $request->no_telp,
-            
-        ]);
+    $user = User::findOrFail($id);
 
+    // Build the payload:
+    $payload = Arr::only($data, [
+        'name','username','email','jabatan',
+        'tgl_lahir','tgl_masuk','tempat_lahir','no_telp',
+    ]);
 
-        return redirect()->route('user.index')->with('success', 'Data pengguna berhasil diperbarui');
+    // if (filled($data['password'])) {
+    //     $payload['password'] = Hash::make($data['password']);
+    // }
+
+    $user->update($payload);
+
+    return redirect()->route('user.index')
+                    ->with('success','Data pengguna berhasil diperbarui');
     }
 
     public function edit(User $user)

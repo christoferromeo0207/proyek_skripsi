@@ -14,8 +14,10 @@ class Post extends Model
     use HasFactory;
     use LogsActivity;
 
-    protected $fillable = ['title', 'pic_mitra', 'slug', 'body','phone', 'email', 'alamat', 'keterangan_bpjs', 'pembayaran', 
-    'tanggal_awal', 'tanggal_akhir', 'file_path', 'PIC', 'parent_id', 'commission_percentage', 'commission_amount'];
+    protected $fillable = ['title', 'pic_mitra', 'category_id', 'slug', 'body',
+    'phone', 'email', 'alamat', 'keterangan_bpjs', 'pembayaran', 
+    'tanggal_awal', 'tanggal_akhir', 'file_path', 'PIC', 'parent_id', 
+    'commission_percentage', 'commission_amount', 'transaction_value',];
    
     protected $with = ['category', 'picUser'];
 
@@ -25,6 +27,12 @@ class Post extends Model
     public function category(): BelongsTo {
         return $this->belongsTo(Category::class, 'category_id');
     }
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
     
 
     public function scopeFilter(Builder $query, array $filters): void

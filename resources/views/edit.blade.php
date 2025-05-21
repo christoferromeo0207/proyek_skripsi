@@ -48,8 +48,8 @@
                         <select name="category_id"
                                 class="w-full border rounded px-3 py-2 @error('category_id') border-red-500 @enderror">
                             @foreach($categories as $cat)
-                                <option value="{{ $cat->slug }}"
-                                  @selected(old('category_id', $post->category->slug) == $cat->slug)
+                                <option value="{{ $cat->id }}"
+                                  @selected(old('category_id', $post->category->id) == $cat->id)
                                 >{{ $cat->name }}</option>
                             @endforeach
                         </select>

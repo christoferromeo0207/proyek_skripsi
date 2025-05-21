@@ -48,6 +48,8 @@ return new class extends Migration
 
             $table->decimal('commission_amount', 15, 2)
                 ->nullable();
+            $table->decimal('transaction_value', 15, 2)
+                ->default(0);
 
             // Timestamps
             $table->timestamps();
