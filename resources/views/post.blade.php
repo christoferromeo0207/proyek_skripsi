@@ -79,28 +79,71 @@
             </div>
           </div>
   
-          <!-- Box 2 -->
+         <!-- Box 2 -->
           <div class="flex flex-col items-center justify-center space-y-3 p-6">
             <h3 class="text-xl font-bold text-orange-500">Perjanjian Kerjasama</h3>
-            <p class="text-3xl font-extrabold text-white">2 Kerjasama</p>
-            <button class="bg-orange-400 text-white font-bold px-6 py-2 rounded-md hover:bg-orange-500 transition">
-              See Details
-            </button>
+            {{-- hitung berapa transaksi (kerjasama) aktif untuk post ini --}}
+            <p class="text-3xl font-extrabold text-white">
+              {{ $post->transactions->count() }} Kerjasama Aktif
+            </p>
+
+            {{-- dropdown See Details --}}
+            <div x-data="{ open: false }" class="relative">
+              <button @click="open = !open"
+                      class="bg-orange-400 text-white font-bold px-6 py-2 rounded-md hover:bg-orange-500 transition">
+                See Details
+              </button>
+
+              <div x-show="open"
+                  @click.away="open = false"
+                  x-transition
+                  class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50 overflow-hidden">
+                @forelse($post->transactions as $transaction)
+                  <a href="{{ route('posts.transactions.show', [$post, $transaction]) }}"
+                    class="block px-4 py-2 text-gray-800 hover:bg-gray-100 no-underline">
+                    {{ $transaction->nama_produk }}
+                  </a>
+                @empty
+                  <div class="px-4 py-2 text-sm text-gray-500">Tidak ada produk kerjasama.</div>
+                @endforelse
+              </div>
+            </div>
           </div>
+
   
           <!-- Box 3 -->
+          @php
+              $today = \Carbon\Carbon::today();
+              $start = \Carbon\Carbon::parse($post->tanggal_awal);
+              $end   = \Carbon\Carbon::parse($post->tanggal_akhir);
+
+              if ($today->lt($start)) {
+                  $status = 'Proses';
+                  $color  = 'bg-yellow-500';
+              } elseif ($today->between($start, $end)) {
+                  $status = 'Aktif';
+                  $color  = 'bg-green-500';
+              } else {
+                  $status = 'Berakhir';
+                  $color  = 'bg-red-500';
+              }
+          @endphp
+
           <div class="flex flex-col items-center justify-center space-y-3 p-6">
             <div class="flex items-center space-x-2">
               <h3 class="text-2xl md:text-3xl font-extrabold text-orange-500">Periode:</h3>
-              <span class="bg-green-500 text-white font-bold px-3 py-1 rounded-lg text-lg">Aktif</span>
+              <span class="{{ $color }} text-white font-bold px-3 py-1 rounded-lg text-lg">
+                {{ $status }}
+              </span>
             </div>
             <p class="text-white font-extrabold text-lg mt-2 font-mono">
               {{ \Carbon\Carbon::parse($post->tanggal_awal)->format('d M Y') }}
-              -
+              – 
               {{ \Carbon\Carbon::parse($post->tanggal_akhir)->format('d M Y') }}
             </p>
           </div>
-  
+
+            
           <!-- Box 4 -->
           <div class="flex flex-col items-center justify-center space-y-3 p-6">
             <h3 class="text-xl font-bold text-orange-500">Maps</h3>
@@ -279,7 +322,7 @@
                 <th class="px-4 py-2">No</th>
                 <th class="px-4 py-2">Item</th>
                 <th class="px-4 py-2">Nominal</th>
-                <th class="px-4 py-2">Keterangan</th>
+                <th class="px-4 py-2">Anak Perusahaan</th>
                 <th class="px-4 py-2">#</th>
               </tr>
             </thead>
@@ -292,8 +335,6 @@
         </div>
       </div>
 
-
-      
   
       <!-- Produk Kerjasama Hasil Transaksi -->
       <div class="w-11/12 md:w-4/5 lg:w-3/4 bg-white/60 rounded-xl shadow-lg p-6 mt-8">
