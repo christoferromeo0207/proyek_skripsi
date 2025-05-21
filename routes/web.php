@@ -56,17 +56,32 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifications');
 
     // Posts Resource
+    // Route::prefix('posts')->controller(PostController::class)->group(function () {
+    //     Route::get('/',               'index')->name('posts.index');
+    //     Route::get('/create',         'create')->name('posts.create');
+    //     Route::post('/',              'store')->name('posts.store');
+    //     Route::get('/{post:slug}',    'show')->name('posts.show');
+    //     Route::get('/{post:slug}/edit','edit')->name('posts.edit');
+    //     Route::put('/{post:slug}',     'update')->name('posts.update');
+    //     Route::delete('/posts/{post}',       'destroy')->name('posts.destroy'); 
+    //     Route::post('/{id}/changePIC','changePIC')->name('posts.changePIC');
+    //     Route::get('/category/{category:slug}', 'index')->name('posts.category');
+    // });
+
+    // Posts Resource
     Route::prefix('posts')->controller(PostController::class)->group(function () {
-        Route::get('/',               'index')->name('posts.index');
-        Route::get('/create',         'create')->name('posts.create');
-        Route::post('/',              'store')->name('posts.store');
-        Route::get('/{post:slug}',    'show')->name('posts.show');
-        Route::get('/{post:slug}/edit','edit')->name('posts.edit');
-        Route::put('/{post:slug}',     'update')->name('posts.update');
-        Route::delete('/posts/{post}',       'destroy')->name('posts.destroy'); 
-        Route::post('/{id}/changePIC','changePIC')->name('posts.changePIC');
+        Route::get('/',                'index'      )->name('posts.index');
+        //Route::get('/create',          'create'     )->name('posts.create');
+        Route::post('/',               'store'      )->name('posts.store');
+        Route::get('/{post:slug}',     'show'       )->name('posts.show');
+        Route::get('/{post:slug}/edit','edit'       )->name('posts.edit');
+        Route::put('/{post:slug}',     'update'     )->name('posts.update');
+        // perbaikan di sini:
+        Route::delete('/{post:slug}',  'destroy'    )->name('posts.destroy');
+        Route::post('/{post:slug}/changePIC','changePIC')->name('posts.changePIC');
         Route::get('/category/{category:slug}', 'index')->name('posts.category');
     });
+
 
     // Messages
     Route::prefix('posts/{post}/messages')->name('posts.messages.')->controller(PostMessageController::class)->group(function(){

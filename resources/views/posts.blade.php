@@ -3,8 +3,8 @@
   <x-slot:title>{{ $title }}</x-slot:title>
 
   <div class="w-full bg-gradient-to-br from-orange-200 to-orange-400 text-white flex flex-col">
-
     <div class="py-4 px-4 mx-auto max-w-screen-xl lg:px-6">
+
       {{-- Search & Category Filters --}}
       <form action="{{ route('posts.index') }}" method="GET" class="space-y-4">
         {{-- Search bar --}}
@@ -18,19 +18,27 @@
 
         {{-- Category pills --}}
         <div class="flex flex-wrap justify-center gap-2">
-          {{-- “All” pill --}}
-          <a href="{{ route('posts.index', array_merge(request()->except('category','page'), ['category'=>null])) }}"
-             class="px-3 py-1 rounded-full text-sm font-semibold
-                    {{ request('category') ? 'bg-white bg-opacity-20 text-white' : 'bg-white text-orange-600' }}
-                    hover:bg-white hover:text-orange-600 transition">
+          {{-- “All” --}}
+          <a
+            href="{{ route('posts.index', request()->except(['category','page'])) }}"
+            class="px-3 py-1 rounded-full text-sm font-semibold
+                   {{ ! request()->filled('category') 
+                       ? 'bg-white text-orange-600' 
+                       : 'bg-white bg-opacity-20 text-orange-600 no-underline ' }}
+                   hover:bg-white hover:text-orange-600 transition no-underline"
+          >
             Semua Kategori
           </a>
 
           @foreach($categories as $cat)
-            <a href="{{ route('index', array_merge(request()->except('page'), ['category'=>$cat->slug])) }}"
-               class="px-3 py-1 rounded-full text-sm font-semibold
-                      {{ request('category') === $cat->slug ? 'bg-white text-orange-600' : 'bg-white bg-opacity-20 text-white' }}
-                      hover:bg-white hover:text-orange-600 transition">
+            <a
+              href="{{ route('posts.index', array_merge(request()->except('page'), ['category' => $cat->id])) }}"
+              class="px-3 py-1 rounded-full text-sm font-semibold
+                     {{ request('category') == $cat->id 
+                         ? 'bg-white text-orange-600' 
+                         : 'bg-white bg-opacity-30 text-orange-600 no-underline' }}
+                     hover:bg-orange-200 hover:text-orange-600 transition"
+            >
               {{ $cat->name }}
             </a>
           @endforeach
@@ -38,12 +46,15 @@
       </form>
     </div>
 
-    {{-- Add Button --}}
+    {{-- Add Data Button --}}
     <div class="mt-4 ml-4 md:ml-48 font-bold">
-      <a href="{{ route('posts.create') }}"
-         class="inline-block bg-orange-500 text-white px-4 py-2 rounded shadow hover:bg-orange-600 transition no-underline">
+      <a
+        href="{{ route('categories.index') }}"
+        class="inline-block bg-orange-500 text-white px-4 py-2 rounded shadow hover:bg-orange-600 transition no-underline"
+      >
         Add Data
       </a>
+
     </div>
 
     {{-- Grid of Posts --}}
@@ -53,10 +64,11 @@
           <article class="p-6 bg-white rounded-lg shadow-md">
             <div class="flex justify-between items-center mb-5">
               @if($post->category)
-                <a href="{{ route('posts.index', ['category'=>$post->category->slug] + request()->except('page')) }}">
+                <a href="{{ route('posts.index', ['category' => $post->category->id] + request()->except('page')) }}">
                   <span
                     class="text-sm font-bold inline-flex items-center px-2.5 py-0.5 rounded"
-                    style="background-color: {{ $post->category->color }}30; color: {{ $post->category->color }};">
+                    style="background-color: {{ $post->category->color }}30; color: {{ $post->category->color }};"
+                  >
                     {{ $post->category->name }}
                   </span>
                 </a>
@@ -69,17 +81,13 @@
             <a href="{{ route('posts.show', $post->slug) }}" class="no-underline hover:underline">
               <h2 class="mb-2 text-xl font-bold text-gray-900">{{ $post->title }}</h2>
             </a>
-
             <p class="mb-5 text-gray-600">{{ Str::limit($post->body, 100) }}</p>
 
             <div class="flex justify-between items-center">
               <span class="text-sm text-orange-600 font-medium">
                 {{ $post->pic_mitra ?? '-' }}
               </span>
-              <a href="{{ route('posts.show', $post->slug) }}"
-                 class="text-sm font-medium text-orange-600 hover:underline">
-                Read More &raquo;
-              </a>
+
             </div>
           </article>
         @empty
@@ -94,6 +102,5 @@
     <div class="px-4 pb-8 mx-auto max-w-screen-xl">
       {{ $posts->withQueryString()->links() }}
     </div>
-
   </div>
 </x-layout>

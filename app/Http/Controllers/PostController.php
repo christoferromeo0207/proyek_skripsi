@@ -34,9 +34,7 @@ class PostController extends Controller
         -> with('title', 'Daftar Perusahaan');
     }
 
-    /**
-     * Tampilkan form create perusahaan.
-     */
+
     public function create()
     {
         $categories = Category::all(); 

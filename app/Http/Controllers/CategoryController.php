@@ -15,10 +15,21 @@ use Illuminate\Support\Facades\Storage;
 class CategoryController extends Controller
 {
     /**
+     * Add a new post to a specific category
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $categoryId
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    /**
      * Display a listing of categories
      *
      * @return \Illuminate\View\View
      */
+
+
+
+
     public function index()
     {
         Log::info('Accessing categories index page', [
@@ -36,6 +47,8 @@ class CategoryController extends Controller
             ]);
 
             return view('categories', compact('categories', 'users'));
+
+            
         } catch (\Exception $e) {
             Log::error('Error loading categories index page', [
                 'error' => $e->getMessage(),
@@ -48,13 +61,6 @@ class CategoryController extends Controller
         }
     }
 
-    /**
-     * Add a new post to a specific category
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $categoryId
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function addData(Request $request, $categoryId)
     {
         Log::info('Attempting to add a new post', [
@@ -195,6 +201,11 @@ class CategoryController extends Controller
                 ->with('error', 'An error occurred while adding the post. Please try again.');
         }
     }
+
+
+
+
+    
     
     /**
      * Log when a post is viewed
@@ -202,6 +213,7 @@ class CategoryController extends Controller
      * @param  int  $postId
      * @return void
      */
+    
     private function logPostView($postId)
     {
         try {

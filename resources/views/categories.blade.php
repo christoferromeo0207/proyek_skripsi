@@ -12,7 +12,7 @@
         </div>
     @endif
 
-    <div class="min-h-screen w-full bg-gradient-to-br from-orange-200 to-orange-400 text-white p-0 m-0">
+    <div class="min-h-screen w-full bg-gradient-to-br from-orange-200 to-orange-400 text-orange-500 p-0 m-0">
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
         @foreach ($categories as $category)
