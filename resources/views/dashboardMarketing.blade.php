@@ -61,49 +61,42 @@
 
 
         {{-- Heading --}}
-        <div class="text-center py-8 md:py-12">
+            <div class="text-center py-8 md:py-12">
             <h1 class="text-3xl md:text-4xl font-extrabold tracking-wide">SISTEM KELOLA AGENSI MITRA</h1>
             <p class="text-xl md:text-2xl font-bold mt-2">MARKETING</p>
-        </div>
+            </div>
 
+            {{-- Statistik Utama --}}
+            <div class="mx-auto w-[90%] md:w-[60%] bg-white/30 rounded-2xl shadow-lg backdrop-blur-md p-6 
+                        flex flex-col md:flex-row items-center divide-y md:divide-y-0 md:divide-x 
+                        divide-white/50 space-y-6 md:space-y-0">
 
-
-
-
-        {{-- Statistik Utama --}}
-        <div class="mx-auto w-[90%] md:w-[60%] bg-white/30 rounded-2xl shadow-lg backdrop-blur-md p-6 flex flex-col md:flex-row
-                    items-center divide-y md:divide-y-0 md:divide-x divide-white/50 space-y-6 md:space-y-0">
-
-            {{-- Jumlah Kerjasama --}}
+            {{-- Jumlah Mitra --}}
             <div class="flex-1 flex flex-col items-center">
                 <i class="fas fa-users text-4xl mb-2"></i>
-                <div class="font-semibold text-lg">Jumlah Kerjasama</div>
-                <div class="text-5xl font-extrabold mt-1">{{ $total }}</div>
-                <div class="uppercase text-sm tracking-wide mt-1">kerjasama</div>
+                <div class="font-semibold text-lg">Jumlah Mitra</div>
+                <div class="text-5xl font-extrabold mt-1">{{ $mitraCount }}</div>
+                <div class="uppercase text-sm tracking-wide mt-1">Perusahaan</div>
             </div>
 
-            {{-- Update Informasi --}}
+            {{-- Kategori Perusahaan --}}
             <div class="flex-1 flex flex-col items-center">
-                <i class="fas fa-comment-alt text-4xl mb-2"></i>
-                <div class="font-semibold text-lg">Update Informasi</div>
-                @if($newMessagesCount > 0)
-                    <div class="text-3xl font-extrabold mt-1">{{ $newMessagesCount }}</div>
-                    <div class="uppercase text-sm tracking-wide mt-1">pesan baru</div>
-                @else
-                    <div class="mt-2 text-sm">Tidak ada pesan baru</div>
-                @endif
+                <i class="fas fa-th-list text-4xl mb-2"></i>
+                <div class="font-semibold text-lg">Kategori Perusahaan</div>
+                <div class="text-5xl font-extrabold mt-1">{{ $kategoriCount }}</div>
+                <div class="uppercase text-sm tracking-wide mt-1">Kategori</div>
             </div>
 
-            {{-- Kerjasama Proses --}}
+            {{-- Mitra dalam Proses --}}
             <div class="flex-1 flex flex-col items-center">
-                <i class="fas fa-calendar-alt text-4xl mb-2"></i>
-                <div class="font-semibold text-lg">Kerjasama Dalam Proses</div>
+                <i class="fas fa-spinner text-4xl mb-2"></i>
+                <div class="font-semibold text-lg">Mitra dalam Proses</div>
                 <span class="bg-green-500 text-white font-bold px-4 py-2 rounded-lg text-lg mt-2">
-                    {{ $activeCount }} Proses
+                {{ $mitraProsesCount }} Mitra
                 </span>
             </div>
 
-        </div>
+            </div>
 
         {{-- Footer --}}
         <footer class="bg-orange-300 bg-opacity-10 text-white text-center text-sm py-4 mt-auto">

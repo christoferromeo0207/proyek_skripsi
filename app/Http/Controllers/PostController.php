@@ -62,7 +62,6 @@ class PostController extends Controller
             'tanggal_awal'      => 'nullable|date',
             'tanggal_akhir'     => 'nullable|date',
             'file_path'         => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
-            // tambahan
             'parent_id'         => 'nullable|exists:posts,id',
             'transaction_value' => 'required|numeric|min:0',
         ]);
@@ -145,11 +144,12 @@ class PostController extends Controller
             'pembayaran'        => 'nullable|string|max:100',
             'tanggal_awal'      => 'nullable|date',
             'tanggal_akhir'     => 'nullable|date',
-            'file_path'         => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'file_path[]'         => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
             // tambahan
             'parent_id'         => 'nullable|exists:posts,id',
             'transaction_value' => 'sometimes|numeric|min:0',
         ]);
+        Log::info('JANCOK', [$data]);
 
         // 2) Upload file baru jika ada
         if ($request->hasFile('file_path')) {
