@@ -6,8 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Transaction;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
-class MitraDashboardController extends Controller
+class MarketingDashboardController extends Controller
 {
     public function __construct()
     {
@@ -20,13 +21,11 @@ class MitraDashboardController extends Controller
         $user = Auth::user();
 
         // hanya untuk mitra
-        if ($user->role !== 'mitra') {
+        if ($user->role !== 'marketing') {
             abort(403, 'Unauthorized.');
         }
 
-        // ambil transaksi yang ditugaskan ke mitra ini
-        // asumsikan `pic_mitra` berisi `username` user
-        $transactions = Transaction::where('pic_mitra', $user->username)
+        $transactions = Transaction::where('pic_rs', $user->username)
                                    ->orderBy('created_at', 'desc')
                                    ->get();
 
@@ -35,8 +34,8 @@ class MitraDashboardController extends Controller
         $newMessagesCount = 0; // jika belum ada tabel pesan
         // Anggap aktif = status 'proses'
         $activeCount     = $transactions->where('status', 'proses')->count();
-
-        return view('mitra.dashboardMitra', compact(
+        Log::info("MEMEMEK");
+        return view('dashboardMarketing', compact(
             'transactions',
             'total',
             'newMessagesCount',

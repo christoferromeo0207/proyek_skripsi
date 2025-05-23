@@ -50,7 +50,7 @@
       @scroll.window="onScroll"
 >
 
-    @if (!request()->routeIs('dashboard')) <!--jika route==dashboard, tidak menampilkan header-->
+    @if (!request()->routeIs('dashboard', 'marketing.dashboard', 'mitra.dashboard')) 
     <div x-show="showHeader"
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0 -translate-y-3"
@@ -109,7 +109,7 @@
     </div>
 
     
-    @if (!request()->routeIs('dashboard')) <!--jika route==dashboard, tidak menampilkan footer-->
+    @if (!request()->routeIs(['dashboard','marketing.dashboard','mitra.dashboard'])) 
     <footer class="w-full bg-orange-300 bg-opacity-70 text-white text-sm py-3 text-center">
         <div class="mx-auto max-w-screen-xl">
             <div class="sm:flex sm:items-center sm:justify-between">

@@ -16,6 +16,7 @@ use App\Http\Controllers\{
     PostMessageController,
     NotificationController,
     MitraDashboardController,
+    MarketingDashboardController,
 };
 use App\Http\Controllers\Auth\{
     LoginController,
@@ -55,9 +56,18 @@ use App\Mail\NewMessageMail;
 // });
 
 Route::get('/dashboard-mitra', [MitraDashboardController::class, 'index'])
-     ->middleware(['auth', 'role:mitra'])
+     ->middleware('auth')
      ->name('mitra.dashboard');
 
+
+Route::get('/dashboardMarketing', [MarketingDashboardController::class, 'index'])
+     ->middleware('auth')
+     ->name('marketing.dashboard');
+
+
+Route::get('/dashboard', [DashboardController::class, 'index'])
+     ->middleware('auth')
+     ->name('dashboard');
 
 // Authentication Routes
 Route::middleware('guest')->group(function () {

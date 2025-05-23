@@ -2,38 +2,57 @@
 
 namespace App\Http\Controllers\Auth;
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use App\Models\User;
-use Illuminate\Support\Facades\Log;
 
 class LoginController extends Controller
 {
+    /**
+     * Show the login form.
+     */
     public function showLoginForm()
     {
         return view('auth.login');
     }
 
+    /**
+     * Handle an authentication attempt.
+     */
     public function login(Request $request)
     {
-        Log::info("xxxx");
-        $request->validate([
+        // 1) Validate input
+        $data = $request->validate([
             'username' => 'required|string',
             'password' => 'required|string',
         ]);
 
-        Log::info($request['username']);
-        $user = User::where('username', $request->username)->first();
+        // 2) Fetch user by username
+        $user = User::where('username', $data['username'])->first();
 
-        // Check if the password matches exactly without hashing
-        if ($user && $user->password === $request->password) {
-
+        // 3) Verify password
+        if ($user && $user->password === $data['password']) {
+            // 4) Log them in
             Auth::login($user, $request->filled('remember'));
-            return redirect('/dashboard')->with('success', 'Login successful!');
+
+           
+            switch ($user->role) {
+                case 'mitra':
+                    return redirect()->route('mitra.dashboard');
+                case 'marketing':
+                    return redirect()->route('marketing.dashboard');
+                case 'admin':
+                    return redirect()->route('dashboard');
+                default:
+                    return redirect('/');
+            }
         }
-        Log::info("Gagal Login");
-        return redirect()->back()->with('error', 'Invalid username or password.');
+
+        // 6) On failure
+        return redirect()->back()
+                         ->withInput($request->only('username'))
+                         ->with('error', 'Invalid username or password.');
     }
 }
