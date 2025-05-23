@@ -1,7 +1,8 @@
 <x-layout>
     <x-slot:title>{{ $post->title }}</x-slot:title>
   
-    <div class="w-full min-h-screen bg-gradient-to-br from-orange-200 to-orange-400 flex flex-col items-center py-10 space-y-8">
+    <div x-data="{ fileModal: false, fileUrl: '', isImage: false }"
+    class="w-full min-h-screen bg-gradient-to-br from-orange-200 to-orange-400 flex flex-col items-center py-10 space-y-8">
   
       <!-- Main Card -->
       <div class="w-11/12 md:w-4/5 lg:w-3/4 bg-white/30 rounded-2xl shadow-2xl backdrop-blur-md p-8 relative">
@@ -241,74 +242,64 @@
           </div>
         </div>
   
-        <!-- Dokumentasi: Read-only list dari $post->file_path -->
-        <div class="self-start flex justify-end">
-          <div class="bg-white/30 rounded-xl shadow-lg backdrop-blur-md p-4 w-full max-w-xs flex flex-col space-y-3">
-            <div class="flex items-center justify-between">
-              <h3 class="text-orange-500 font-bold text-lg">Dokumentasi</h3>
-            </div>
-
-            <div id="file-list" name="file_path" class="space-y-2 text-sm text-gray-800">
+          <!-- Dokumentasi -->
+          <div class="w-11/12 md:w-4/5 lg:w-3/4 bg-white/30 rounded-2xl shadow-lg p-6">
+            <h3 class="text-orange-500 font-bold text-lg mb-4">Dokumentasi</h3>
+            <div class="space-y-3">
               @php
-                // Ambil string file_path, lalu decode JSON menjadi array.
-                $raw = $post->file_path;
-                $files = [];
-                if ($raw) {
-                    // jika JSON valid, decode; kalau tidak, coba explode koma
-                    $decoded = json_decode($raw, true);
-                    $files   = is_array($decoded) ? $decoded : explode(',', $raw);
-                }
+                $raw   = $post->file_path;
+                $files = $raw ? (json_decode($raw, true) ?: explode(',', $raw)) : [];
               @endphp
 
-              @forelse($files as $path)
+              @forelse($files as $idx => $path)
                 @php
-                  $name = basename($path);
-                  $url  = Storage::url($path);
+                  $name        = basename($path);
+                  $publicUrl   = Storage::disk('public')->url($path);
+                  $downloadUrl = route('posts.files.download', [$post, $idx]);
                 @endphp
 
-                <div class="flex items-center justify-between p-2 bg-white rounded-lg border border-gray-200">
-                  <div class="truncate">
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                        class="inline-block h-5 w-5 text-gray-500 mr-2"
-                        fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M19 2H5a2 2 0 00-2 2v16a2 2 0 002 2h14a2 2 0 002-2V4a2 2 0 00-2-2zm-7 16h-4v-2h4v2zm0-4h-4v-2h4v2zm6 4h-4v-2h4v2zm0-4h-4v-2h4v2z"/>
-                    </svg>
-                    <span class="align-middle">{{ $name }}</span>
-                  </div>
-
+                <div class="flex items-center justify-between p-3 bg-white rounded-lg border">
+                  <div class="truncate max-w-xs">{{ $name }}</div>
                   <div class="flex space-x-2">
-                    <a href="{{ $url }}" target="_blank" class="text-blue-500 hover:text-blue-700" title="Buka">
-                      <!-- eye icon -->
-                      <svg xmlns="http://www.w3.org/2000/svg"
-                          class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
-                        <path fill-rule="evenodd"
-                              d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 
-                                9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 
-                                14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                              clip-rule="evenodd"/>
-                      </svg>
+                    {{-- Rename --}}
+                    <button type="button"
+                            onclick="
+                              if (newName = prompt('Rename file to:', '{{ $name }}')) {
+                                document.getElementById('rename-name-{{ $loop->index }}').value = newName;
+                                document.getElementById('rename-form-{{ $loop->index }}').submit();
+                              }
+                            "
+                            title="Rename">✏️
+                    </button>
+                    <form id="rename-form-{{ $loop->index }}"
+                          action="{{ route('posts.files.rename', [$post, $loop->index]) }}"
+                          method="POST" class="hidden">
+                      @csrf
+                      <input type="hidden" name="new_name" id="rename-name-{{ $loop->index }}">
+                    </form>
+
+
+                    {{-- Download --}}
+                    <a href="{{ $downloadUrl }}"
+                      class="text-green-500 hover:text-green-700"
+                      title="Download">
+                      ⬇️
                     </a>
-                    <a href="{{ $url }}" download class="text-green-500 hover:text-green-700" title="Download">
-                      <!-- download icon -->
-                      <svg xmlns="http://www.w3.org/2000/svg"
-                          class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M4 16v2a2 2 0 002 2h12a2 2 
-                                0 002-2v-2m-4-4l-4 4m0 
-                                0l-4-4m4 4V4"/>
-                      </svg>
-                    </a>
+                    
+                    <form action="{{ route('posts.files.destroy', [$post, $loop->index]) }}"
+                          method="POST"
+                          onsubmit="return confirm('Hapus file {{ $name }}?');">
+                      @csrf
+                      @method('DELETE')
+                      <button type="submit" title="Delete">🗑️</button>
+                    </form>
                   </div>
                 </div>
               @empty
-                <p class="text-gray-500">Belum ada file dokumentasi.</p>
+                <p class="text-gray-500">Belum ada dokumentasi.</p>
               @endforelse
             </div>
           </div>
-        </div>
-
-
 
       </div>
   
@@ -426,7 +417,43 @@
 
     </div>
 
+    <!-- Modal Preview/Download -->
+    <div x-show="fileModal" x-cloak
+         class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-lg overflow-auto max-w-4xl w-full max-h-[90vh]" @click.away="fileModal = false">
+        <!-- Header -->
+        <div class="flex justify-between items-center p-4 border-b">
+          <h3 class="text-lg font-medium">Preview File</h3>
+          <button @click="fileModal = false"
+                  class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+        </div>
+        <!-- Content -->
+        <div class="p-4">
+          <template x-if="isImage">
+            <img :src="fileUrl" class="max-w-full h-auto mx-auto" alt="Preview">
+          </template>
+          <template x-if="!isImage">
+            <iframe :src="fileUrl" class="w-full h-96 border-0"></iframe>
+          </template>
+        </div>
+        <!-- Footer -->
+        <div class="p-4 border-t flex justify-end space-x-2">
+          <!-- Download via controller route -->
+          <a :href="`/posts/${slug}/files/${fileId}/download`"
+             download
+             class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md">
+            Download
+          </a>
+          <button @click="fileModal = false"
+                  class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md">
+            Tutup
+          </button>
+        </div>
+      </div>
+    </div>
+
     <script>
+      
         const uploadBtn = document.getElementById('upload-btn');
         const fileInput = document.getElementById('file-input');
         const fileList  = document.getElementById('file-list');
@@ -540,5 +567,46 @@
                .addEventListener('click', () => modal.remove());
         }
       </script>
-  </x-layout>
+  
+
+    <script>
+      function openFile(fileId) {
+        const fileEl = document.querySelector(`[data-file-id="${fileId}"]`);
+        if (!fileEl) return;
+        const url = fileEl.dataset.fileUrl;
+        const isImage = /\.(jpe?g|png|gif|webp)$/i.test(url);
+
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4';
+        modal.innerHTML = `
+          <div role="dialog" class="bg-white rounded-lg max-w-4xl w-full max-h-screen overflow-auto">
+            <div class="flex justify-between items-center p-4 border-b">
+              <h3 class="text-lg font-medium">Preview File</h3>
+              <button onclick="this.closest('[role=dialog]').parentElement.remove()" class="text-gray-500 hover:text-gray-700">
+                &times;
+              </button>
+            </div>
+            <div class="p-4">
+              ${ isImage
+                  ? `<img src="${url}" class="max-w-full h-auto mx-auto" alt="Preview">`
+                  : `<iframe src="${url}" class="w-full h-96 border-0"></iframe>` }
+            </div>
+            <div class="p-4 border-t flex justify-end">
+              <a href="${url}" download class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md mr-2">
+                Download
+              </a>
+              <button onclick="this.closest('[role=dialog]').parentElement.remove()"
+                      class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md">
+                Tutup
+              </button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(modal);
+      }
+    </script>
+
+    
+
+</x-layout>
   

@@ -110,6 +110,27 @@ Route::middleware('auth')->group(function () {
         Route::get('/category/{category:slug}', 'index')->name('posts.category');
     });
 
+    Route::prefix('posts/{post}')->name('posts.')->group(function(){
+        // Rename a file by its array index
+        Route::post('files/{index}/rename', [PostController::class, 'renameFile'])
+            ->name('files.rename');
+
+        // Delete a file by its array index
+        Route::delete('files/{index}', [PostController::class, 'deleteFile'])
+            ->name('files.destroy');
+    }); 
+
+    Route::prefix('posts')->group(function(){
+        // ... resource routes you already have
+
+        // VIEW (inline display)
+        Route::get('{post}/files/{index}', [PostController::class, 'viewFile'])
+            ->name('posts.files.view');
+
+        // DOWNLOAD
+        Route::get('{post}/files/{index}/download', [PostController::class, 'downloadFile'])
+            ->name('posts.files.download');
+    });
 
     // Messages
     Route::prefix('posts/{post}/messages')->name('posts.messages.')->controller(PostMessageController::class)->group(function(){

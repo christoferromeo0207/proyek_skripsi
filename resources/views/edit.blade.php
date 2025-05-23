@@ -371,7 +371,7 @@
                               `<iframe src="${fileUrl}" class="w-full h-96 border-0"></iframe>`}
                         </div>
                         <div class="p-4 border-t flex justify-end">
-                            <a href="${fileUrl}" download class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md mr-2">
+                            <a href="${fileUrl}" download class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md mr-2 no-underline">
                                 Download
                             </a>
                             <button onclick="this.parentElement.parentElement.parentElement.remove()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md">
