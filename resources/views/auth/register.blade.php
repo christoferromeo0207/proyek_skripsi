@@ -93,6 +93,18 @@
           @error('no_telp') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
         </div>
 
+        <div>
+          <label class="block text-sm font-medium text-orange-700">Role</label>
+          <select name="role" required
+                  class="mt-1 block w-full px-3 py-2 border border-orange-300 rounded focus:outline-none focus:ring focus:ring-orange-200">
+            <option value="marketing" {{ old('role')=='marketing' ? 'selected' : '' }}>Marketing</option>
+            <option value="mitra"     {{ old('role')=='mitra'     ? 'selected' : '' }}>Mitra</option>
+            <option value="admin" {{ old('role')=='admin' ? 'selected' : '' }}>Admin</option>
+          </select>
+          @error('role') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
+        </div>
+
+
         <button type="submit"
                 class="w-full py-2 px-4 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition">
           Register

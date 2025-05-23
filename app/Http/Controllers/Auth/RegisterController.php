@@ -33,6 +33,7 @@ class RegisterController extends Controller
                 'tgl_masuk'         => 'nullable|date',
                 'tempat_lahir'      => 'nullable|string|max:100',
                 'no_telp'           => 'nullable|string|max:20',
+                'role'              => 'required|in:marketing,mitra,admin',
             ]);
 
             // 2) Create (password mutator will hash automatically)

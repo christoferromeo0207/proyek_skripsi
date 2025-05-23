@@ -26,6 +26,7 @@ class User extends Authenticatable
         'tgl_masuk',
         'tempat_lahir',
         'no_telp',
+        'role',
     ];
 
     /**

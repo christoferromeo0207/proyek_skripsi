@@ -15,6 +15,7 @@ use App\Http\Controllers\{
     TestingUpload,
     PostMessageController,
     NotificationController,
+    MitraDashboardController,
 };
 use App\Http\Controllers\Auth\{
     LoginController,
@@ -26,6 +27,36 @@ use App\Mail\NewMessageMail;
 
 
 
+
+
+
+// //routes untuk mitra
+// Route::middleware(['auth','role:mitra'])
+// ->prefix('mitra')->name('mitra.')->group(function(){
+//     Route::get('dashboard', [MitraDashboardController::class, 'index'])->name('dashboard');
+// });
+
+
+// // Routes untuk admin & marketing
+// Route::middleware(['auth','role:admin,marketing'])
+//      ->group(function(){
+//          Route::get('/dashboard', [DashboardController::class, 'index'])
+//               ->name('dashboard');
+//          Route::resource('posts', PostController::class)
+//               ->except(['create','edit']); // contoh
+//          Route::resource('categories', CategoryController::class)
+//               ->only(['index','store']);
+//      });
+
+
+// // Routes untuk admin
+// Route::middleware(['auth','role:admin'])->prefix('admin')->name('admin.')->group(function(){
+//     // route admin eksklusif
+// });
+
+Route::get('/dashboard-mitra', [MitraDashboardController::class, 'index'])
+     ->middleware(['auth', 'role:mitra'])
+     ->name('mitra.dashboard');
 
 
 // Authentication Routes
@@ -54,19 +85,6 @@ Route::middleware('auth')->group(function () {
     Route::put('/users/{user}',          [UserController::class, 'update'])->name('user.update');
     Route::delete('/users/{user}',       [UserController::class, 'destroy'])->name('user.destroy');
     Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifications');
-
-    // Posts Resource
-    // Route::prefix('posts')->controller(PostController::class)->group(function () {
-    //     Route::get('/',               'index')->name('posts.index');
-    //     Route::get('/create',         'create')->name('posts.create');
-    //     Route::post('/',              'store')->name('posts.store');
-    //     Route::get('/{post:slug}',    'show')->name('posts.show');
-    //     Route::get('/{post:slug}/edit','edit')->name('posts.edit');
-    //     Route::put('/{post:slug}',     'update')->name('posts.update');
-    //     Route::delete('/posts/{post}',       'destroy')->name('posts.destroy'); 
-    //     Route::post('/{id}/changePIC','changePIC')->name('posts.changePIC');
-    //     Route::get('/category/{category:slug}', 'index')->name('posts.category');
-    // });
 
     // Posts Resource
     Route::prefix('posts')->controller(PostController::class)->group(function () {
@@ -109,19 +127,6 @@ Route::middleware('auth')->group(function () {
         Route::put('/users/{id}', [UserController::class, 'update'])->name('updateUser');
     });
     
-    //Transactions
-    // Route::controller(TransactionController::class)->prefix('transactions')->group(function () {
-    //     Route::get('transactions',          [TransactionController::class, 'index'])  ->name('transactions.index');
-    //     Route::get('/posts/{post}/transactions/{transaction}', [TransactionController::class, 'show'])->name('transactions.show');
-    //     Route::get('/posts/create/{post}',   [TransactionController::class, 'create']) ->name('transactions.create');
-    //     Route::post('/posts/store/{post}/', [TransactionController::class, 'store'])->name('transactions.store');
-    //     Route::get('transactions/{transaction}/edit',   [TransactionController::class, 'edit'])   ->name('transactions.edit');
-    //     Route::put('posts/{post}/transactions/{transaction}',[TransactionController::class, 'update'])->name('posts.transactions.update');
-    //     Route::delete('transactions/{transaction}',     [TransactionController::class, 'destroy'])->name('transactions.destroy');
-    //     //Detail Transaction
-    //     Route::get('posts/{post}/transactions/{transaction}', [TransactionController::class, 'show'])->name('transactions.show');
-    //     Route::delete('posts/{post}/transactions/{transaction}/file/{filename}',[TransactionController::class, 'destroyFile'])->name('posts.transactions.file.destroy');
-    // });
     
     Route::prefix('posts/{post}/transactions')->name('posts.transactions.')->controller(TransactionController::class)->group(function(){
          Route::get('/',                 'index')->name('index');

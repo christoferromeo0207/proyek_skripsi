@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
@@ -22,7 +19,8 @@ return new class extends Migration
             $table->date('tgl_masuk')->nullable()->default(null);
             $table->string('tempat_lahir', 100)->nullable()->default(null); 
             $table->string('no_telp')->nullable()->default(null); 
-            $table->timestamps(); //created_at dan updated_at
+            $table->string('role')->default('marketing'); 
+            $table->timestamps(); 
             $table->primary('id');
         });
 
