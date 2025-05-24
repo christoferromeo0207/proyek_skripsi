@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;  
 
 class PostMessageController extends Controller
 {
@@ -102,5 +103,52 @@ class PostMessageController extends Controller
         $message->update(['is_read' => true]);
         return back();
     }
+
+    public function renameAttachment(Request $request, Post $post, Message $message, string $filename)
+    {
+        $request->validate([
+            'new_name' => 'required|string|max:255',
+        ]);
+
+        // Build new filename
+        $ext = pathinfo($filename, PATHINFO_EXTENSION);
+        $base = Str::slug($request->input('new_name'));
+        $newFilename = time() . '_' . $base . '.' . $ext;
+
+        // Move file on disk
+        Storage::disk('public')->move("messages/{$filename}", "messages/{$newFilename}");
+
+        // Update JSON array in DB
+        $attachments = collect($message->attachments)
+            ->map(fn($att) => $att === $filename ? $newFilename : $att)
+            ->toArray();
+
+        $message->update(['attachments' => $attachments]);
+
+        return back()->with('success', 'Nama lampiran berhasil diperbarui.');
+    }
+
+    /**
+     * Delete a single attachment from disk and JSON array.
+     */
+    public function deleteAttachment(Post $post, Message $message, string $filename)
+    {
+        // Delete from storage
+        Storage::disk('public')->delete("messages/{$filename}");
+
+        // Remove from JSON array
+        $attachments = array_values(
+            array_filter(
+                $message->attachments,
+                fn($att) => $att !== $filename
+            )
+        );
+
+        $message->update(['attachments' => $attachments]);
+
+        return back()->with('success', 'Lampiran berhasil dihapus.');
+    }
+
+
 
 }

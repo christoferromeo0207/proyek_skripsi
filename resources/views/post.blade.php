@@ -242,7 +242,7 @@
           </div>
         </div>
   
-        <!-- Dokumentasi -->
+      <!-- Dokumentasi -->
         <div class="w-11/12 md:w-4/5 lg:w-3/4 bg-white/30 rounded-2xl shadow-lg p-6">
           <h3 class="text-orange-500 font-bold text-lg mb-4">Dokumentasi</h3>
           <div class="space-y-3">
@@ -254,7 +254,9 @@
             @forelse($files as $idx => $path)
               @php
                 $name        = basename($path);
-                $publicUrl = asset('storage/' . ltrim($path, '/'));
+                // Public URL (storage/app/public/…)
+                $publicUrl   = asset('storage/' . ltrim($path, '/'));
+                // Your download route
                 $downloadUrl = route('posts.files.download', [$post, $idx]);
                 $fileId      = "file-{$idx}";
               @endphp
@@ -272,42 +274,27 @@
                     onclick="openFile('{{ $fileId }}')"
                     class="text-blue-500 hover:text-blue-700"
                     title="Preview"
-                  >
-                    👁️
-                  </button>
+                  >👁️</button>
 
-                  <!-- Rename -->
-                  <button
-                    type="button"
-                    onclick="
-                      if (newName = prompt('Rename file to:', '{{ $name }}')) {
-                        document.getElementById('rename-name-{{ $idx }}').value = newName;
-                        document.getElementById('rename-form-{{ $idx }}').submit();
-                      }
-                    "
-                    title="Rename"
-                    class="text-gray-500 hover:text-gray-700"
-                  >✏️</button>
-                  <form id="rename-form-{{ $idx }}"
-                        action="{{ route('posts.files.rename', [$post, $idx]) }}"
-                        method="POST"
-                        class="hidden">
-                    @csrf
-                    <input type="hidden" name="new_name" id="rename-name-{{ $idx }}">
-                  </form>
-
-                  {{-- <!-- Download -->
-                  <a href="{{ $downloadUrl }}"
+                  <!-- Download -->
+                  <a
+                    href="{{ $downloadUrl }}"
                     class="text-green-500 hover:text-green-700"
-                    title="Download">⬇️</a> --}}
+                    title="Download"
+                  >⬇️</a>
 
                   <!-- Delete -->
-                  <form action="{{ route('posts.files.destroy', [$post, $idx]) }}"
-                        method="POST"
-                        onsubmit="return confirm('Hapus file {{ $name }}?');">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="text-red-500 hover:text-red-700" title="Delete">🗑️</button>
+                  <form
+                    action="{{ route('posts.files.destroy', [$post, $idx]) }}"
+                    method="POST"
+                    onsubmit="return confirm('Hapus file {{ $name }}?');"
+                  >
+                    @csrf @method('DELETE')
+                    <button
+                      type="submit"
+                      class="text-red-500 hover:text-red-700"
+                      title="Delete"
+                    >🗑️</button>
                   </form>
                 </div>
               </div>
@@ -316,7 +303,6 @@
             @endforelse
           </div>
         </div>
-
       </div>
   
       <!-- Section: Komisi Table -->
@@ -585,7 +571,7 @@
       </script>
   
 
-    <script>
+    {{-- <script>
       function openFile(fileId) {
         const fileEl = document.querySelector(`[data-file-id="${fileId}"]`);
         if (!fileEl) return;
@@ -620,38 +606,44 @@
         `;
         document.body.appendChild(modal);
       }
-    </script>
+    </script> --}}
 
-    <script>
-      function openFile(fileId) {
-        const fileEl = document.querySelector(`[data-file-id="${fileId}"]`);
-        if (!fileEl) return;
-        const url = fileEl.dataset.fileUrl;
-        const isImage = /\.(jpe?g|png|gif|webp)$/i.test(url);
+   <script>
+    function openFile(fileId) {
+      const fileEl = document.querySelector(`[data-file-id="${fileId}"]`);
+      if (!fileEl) return;
+      const url = fileEl.dataset.fileUrl;
+      const isImage = /\.(jpe?g|png|gif|webp)$/i.test(url);
 
-        const modal = document.createElement('div');
-        modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4';
-        modal.innerHTML = `
-          <div role="dialog" class="bg-white rounded-lg max-w-4xl w-full max-h-screen overflow-auto">
-            <div class="flex justify-between items-center p-4 border-b">
-              <h3 class="text-lg font-medium">Preview File</h3>
-              <button onclick="this.closest('[role=dialog]').parentElement.remove()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
-            </div>
-            <div class="p-4">
-              ${ isImage
-                  ? `<img src="${url}" class="max-w-full h-auto mx-auto" alt="Preview">`
-                  : `<iframe src="${url}" class="w-full h-96 border-0"></iframe>` }
-            </div>
-            <div class="p-4 border-t flex justify-end space-x-2">
-              <a href="${url}" download class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md">Download</a>
-              <button onclick="this.closest('[role=dialog]').parentElement.remove()"
-                      class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md">Tutup</button>
-            </div>
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4';
+      modal.innerHTML = `
+        <div role="dialog" class="bg-white rounded-lg max-w-4xl w-full max-h-screen overflow-auto">
+          <div class="flex justify-between items-center p-4 border-b">
+            <h3 class="text-lg font-medium">Preview File</h3>
+            <button onclick="this.closest('[role=dialog]').parentElement.remove()" 
+                    class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
           </div>
-        `;
-        document.body.appendChild(modal);
-      }
-    </script>
+          <div class="p-4">
+            ${ isImage
+                ? `<img src="${url}" class="max-w-full h-auto mx-auto" alt="Preview">`
+                : `<iframe src="${url}" class="w-full h-96 border-0"></iframe>` }
+          </div>
+          <div class="p-4 border-t flex justify-end space-x-2">
+            <a href="${url}" download
+               class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md">
+              Download
+            </a>
+            <button onclick="this.closest('[role=dialog]').parentElement.remove()"
+                    class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md">
+              Tutup
+            </button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+  </script>
 
 </x-layout>
   

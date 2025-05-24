@@ -15,6 +15,7 @@
           class="space-y-6">
       @csrf
 
+      {{-- From --}}
       <div>
         <label class="block text-orange-600 font-semibold mb-1">From</label>
         <input type="text"
@@ -23,6 +24,7 @@
                class="w-full border border-orange-300 rounded-lg p-2 bg-gray-100">
       </div>
 
+      {{-- To --}}
       <div>
         <label class="block text-orange-600 font-semibold mb-1">To</label>
         <input type="text"
@@ -31,6 +33,7 @@
                class="w-full border border-orange-300 rounded-lg p-2 bg-gray-100">
       </div>
 
+      {{-- Subject --}}
       <div>
         <label for="subject" class="block text-orange-600 font-semibold mb-1">Judul Pesan</label>
         <input type="text"
@@ -43,6 +46,7 @@
         @enderror
       </div>
 
+      {{-- Body --}}
       <div>
         <label for="body" class="block text-orange-600 font-semibold mb-1">Deskripsi</label>
         <textarea id="body"
@@ -54,20 +58,28 @@
         @enderror
       </div>
 
+      {{-- Attachments --}}
       <div>
         <label class="block text-orange-600 font-semibold mb-1">Upload File (opsional)</label>
         <input type="file"
                name="attachments[]"
                multiple
+               accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"
                class="w-full border border-orange-300 rounded-lg p-2">
+        {{-- Validasi array-level --}}
+        @error('attachments')
+          <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+        @enderror
+        {{-- Validasi per-file --}}
         @error('attachments.*')
           <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
         @enderror
       </div>
 
+      {{-- Actions --}}
       <div class="flex justify-end gap-3">
         <a href="{{ route('posts.messages.index', $post) }}"
-           class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition no-underline ">
+           class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition no-underline">
           Batal
         </a>
         <button type="submit"

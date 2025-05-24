@@ -38,7 +38,7 @@ class TransactionController extends Controller
         return view('detailTransaction', compact('post','transaction','users'));
     }
 
-    // Simpan transaksi baru
+       // Simpan transaksi baru
     public function store(Post $post, Request $request)
     {
         $data = $request->validate([
@@ -59,17 +59,17 @@ class TransactionController extends Controller
 
         $data['total_harga'] = $data['jumlah'] * $data['harga_satuan'];
 
-        // Proses upload
+       // Proses upload
         $paths = [];
         foreach ($request->file('bukti_pembayaran', []) as $file) {
             if ($file instanceof UploadedFile && $file->isValid()) {
-                $paths[] = $file->store('public/bukti_pembayaran');
+                // Simpan ke storage/app/public/bukti_pembayaran
+                $paths[] = $file->store('bukti_pembayaran', 'public');
             }
         }
-        if (!empty($paths)) {
-            $data['bukti_pembayaran'] = $paths; // Casting will handle JSON encoding
+        if (count($paths)) {
+            $data['bukti_pembayaran'] = $paths;
         }
-
 
        $post->transactions()->create($data);
 
@@ -86,42 +86,85 @@ class TransactionController extends Controller
     }
 
     // Update transaksi
+
     public function update(Request $request, Post $post, Transaction $transaction)
     {
+        // 1) Handle aksi rename / delete
+        if ($request->filled('action_type')) {
+            $files = $transaction->bukti_pembayaran ?: [];
+
+            if ($request->action_type === 'delete') {
+                $idx = (int) $request->file_index;
+                if (isset($files[$idx])) {
+                    Storage::disk('public')->delete($files[$idx]);
+                    array_splice($files, $idx, 1);
+                }
+                $transaction->bukti_pembayaran = $files;
+                $transaction->save();
+
+                return back()->with('success','File berhasil dihapus');
+            }
+
+            if ($request->action_type === 'rename') {
+                $idx     = (int) $request->file_index;
+                $newName = trim($request->new_name);
+                if (isset($files[$idx]) && $newName !== '') {
+                    $oldPath = $files[$idx];
+                    $ext     = pathinfo($oldPath, PATHINFO_EXTENSION);
+                    $dir     = dirname($oldPath);
+                    $newPath = $dir.'/'.$newName.'.'.$ext;
+
+                    // rename fisik
+                    Storage::disk('public')->move($oldPath, $newPath);
+
+                    // update array
+                    $files[$idx] = $newPath;
+                    $transaction->bukti_pembayaran = $files;
+                    $transaction->save();
+                }
+
+                return back()->with('success','File berhasil di-rename');
+            }
+        }
+
+        // 2) Jika bukan rename/delete, maka ini normal form-update transaksi
         $data = $request->validate([
-            'nama_produk'         => 'required|string|max:255',
-            'jumlah'              => 'required|integer|min:1',
-            'merk'                => 'required|string|max:255',
-            'harga_satuan'        => 'required|numeric|min:0',
-            'tipe_pembayaran'     => 'required|string|max:255',
-            'pic_rs'              => 'required|exists:users,id',
-            'approval_rs'         => 'required|boolean',
-            'pic_mitra'           => 'required|string|max:255',
-            'approval_mitra'      => 'required|boolean',
-            'status'              => 'required|string|max:100',
-            'bukti_pembayaran'    => 'nullable|array',
-            'bukti_pembayaran.*'  => 'file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'nama_produk'        => 'required|string|max:255',
+            'jumlah'             => 'required|integer|min:1',
+            'merk'               => 'required|string|max:255',
+            'harga_satuan'       => 'required|numeric|min:0',
+            'tipe_pembayaran'    => 'required|string|max:255',
+            'pic_rs'             => 'required|exists:users,id',
+            'approval_rs'        => 'required|boolean',
+            'pic_mitra'          => 'required|string|max:255',
+            'approval_mitra'     => 'required|boolean',
+            'status'             => 'required|string|max:100',
+            'bukti_pembayaran'   => 'nullable|array',
+            'bukti_pembayaran.*' => 'file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
 
+        // hitung total
         $data['total_harga'] = $data['jumlah'] * $data['harga_satuan'];
 
-        // Upload tambahan
-        $newPaths = [];
+        // ambil list file lama
+        $existing = $transaction->bukti_pembayaran ?: [];
+
+        // Proses upload
+        $paths = [];
         foreach ($request->file('bukti_pembayaran', []) as $file) {
             if ($file instanceof UploadedFile && $file->isValid()) {
-                $newPaths[] = $file->store('bukti_pembayaran', 'public');
-            }   
+                // Simpan ke storage/app/public/bukti_pembayaran
+                $paths[] = $file->store('bukti_pembayaran', 'public');
+            }
+        }
+        if (!empty($paths)) {
+            // Akan disimpan sebagai JSON array ["bukti_pembayaran/xxx.png", …]
+            $data['bukti_pembayaran'] = $paths;
         }
 
-        $existingFiles=$transaction->bukti_pembayaran ?: [];
 
-        if (!empty($newPaths)) {
-            $existingFiles = $transaction->bukti_pembayaran ?? [];
-            $data['bukti_pembayaran'] = array_merge($existingFiles, $newPaths);
-        }
-
+        // update model
         $transaction->update($data);
-        Log::info("Update Transaksi: {$transaction->id}", $newPaths);
 
         return redirect()
             ->route('posts.show', $post->slug)
