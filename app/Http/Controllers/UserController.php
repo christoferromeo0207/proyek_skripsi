@@ -12,17 +12,19 @@ class UserController extends Controller
 {
     public function index(Request $request)
         {
-            $query = User::query();
+            $query = User::query()->where('role', '!=', 'mitra');
+
 
             // Jika ada fungsi filter / pencarian:
             if ($request->filled('search')) {
                 $query->where('name', 'like', '%'.$request->search.'%');
             }
 
-            // Tambahkan withCount untuk men‐generate properti posts_count
+
+            // untuk paginate
             $users = $query
-                ->withCount('posts')   // <-- ini yang bikin $user->posts_count
-                ->paginate(10);
+                ->withCount('posts')  
+                ->paginate(5);
 
             return view('user', compact('users'));
         }
