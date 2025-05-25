@@ -44,7 +44,7 @@
   <div class="w-full min-h-screen bg-gradient-to-br from-orange-200 to-orange-400 py-10 px-4">
     <div class="max-w-screen-xl mx-auto">
       <form
-        action="{{ route('posts.transactions.update', [$post, $transaction]) }}"
+        action="{{ route('mitra.transactions.update', [$post, $transaction]) }}"
         method="POST"
         enctype="multipart/form-data"
         class="bg-white p-8 rounded-2xl shadow-lg"
@@ -70,7 +70,7 @@
               'Jumlah'           => $transaction->jumlah,
               'Harga/Satuan'     => number_format($transaction->harga_satuan, 2),
               'Tipe Pembayaran'  => $transaction->tipe_pembayaran,
-              'PIC RS'           => optional($transaction->pic_rs)->name,
+              'PIC RS'           => optional($transaction->rsUser)->name,
               'Approval RS'      => $transaction->approval_rs ? 'Ya' : 'Tidak',
               'Status'           => $computedStatus,
             ] as $label => $value)

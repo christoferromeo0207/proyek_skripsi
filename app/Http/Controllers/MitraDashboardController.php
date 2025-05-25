@@ -10,6 +10,8 @@ use App\Models\User;
 use App\Models\Category;
 use App\Models\Transaction;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage; 
+use Illuminate\Support\Str; 
 
 class MitraDashboardController extends Controller
 {
@@ -28,7 +30,7 @@ class MitraDashboardController extends Controller
 
         $today = Carbon::today();
 
-        $total             = Post::where('pic_mitra', $user->username)->count();
+        $total             = Post::where('pic_mitra', $user->name)->count();
         $newMessagesCount  = Message::where('user_id', $user->id)
                                     ->where('is_read', 0)
                                     ->count();
@@ -39,7 +41,7 @@ class MitraDashboardController extends Controller
         $companyTitle      = Post::where('pic_mitra', $user->name)
                                  ->value('title')
                              ?? 'Mitra';
-        $post = Post::where('pic_mitra', $user->username)->first();
+        $post = Post::where('pic_mitra', $user->name)->first();
         return view('mitra.dashboardMitra', compact(
             'total',
             'newMessagesCount',
@@ -145,6 +147,77 @@ class MitraDashboardController extends Controller
                      ->get();
 
         return view('mitra.detailTransactionMitra', compact('post','transaction','users'));
+    }
+
+     public function updateTransaction(Request $request, Post $post, Transaction $transaction)
+    {
+        // 1) hanya Mitra yang boleh
+        $user = Auth::user();
+        abort_if($user->role !== 'mitra' || $post->pic_mitra !== $user->username, 403);
+
+        // 2) validasi hanya PIC Mitra, Approval Mitra, dan file actions
+        $data = $request->validate([
+            'pic_mitra'          => 'required|string|max:255',
+            'approval_mitra'     => 'required|boolean',
+            'bukti_pembayaran.*' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx,xls,xlsx|max:2048',
+            'action_type'        => 'sometimes|in:rename,delete',
+            'file_index'         => 'sometimes|integer|min:0',
+            'new_name'           => 'sometimes|string|max:255',
+        ]);
+
+        // 3) tangani rename/delete seperti sebelumnya…
+        if ($request->filled('action_type')) {
+            $files = $transaction->bukti_pembayaran_json;
+            $idx   = $data['file_index'];
+
+            if ($data['action_type'] === 'delete' && isset($files[$idx])) {
+                Storage::disk('public')->delete($files[$idx]);
+                array_splice($files, $idx, 1);
+            }
+
+            if ($data['action_type'] === 'rename' && isset($files[$idx])) {
+                $old = $files[$idx];
+                $ext = pathinfo($old, PATHINFO_EXTENSION);
+                $new = Str::slug($data['new_name']) . '.' . $ext;
+                $newPath = dirname($old).'/'.$new;
+                Storage::disk('public')->move($old, $newPath);
+                $files[$idx] = $newPath;
+            }
+
+            $transaction->bukti_pembayaran_json = $files;
+            $transaction->save();
+            return back()->with('success','File berhasil diperbarui.');
+        }
+
+        // 4) update PIC Mitra & Approval Mitra
+        $transaction->pic_mitra      = $data['pic_mitra'];
+        $transaction->approval_mitra = $data['approval_mitra'];
+
+        // 5) recompute status
+        if ($transaction->approval_rs && $transaction->approval_mitra) {
+            $transaction->status = 'Selesai';
+        } elseif (! $transaction->approval_rs && ! $transaction->approval_mitra) {
+            $transaction->status = 'Dibatalkan';
+        } else {
+            $transaction->status = 'Proses';
+        }
+
+        // 6) simpan upload baru
+        if ($request->hasFile('bukti_pembayaran')) {
+            $newFiles = [];
+            foreach ($request->file('bukti_pembayaran') as $f) {
+                $newFiles[] = $f->store("transactions/{$transaction->id}", 'public');
+            }
+            $transaction->bukti_pembayaran_json =
+                array_merge($transaction->bukti_pembayaran_json, $newFiles);
+        }
+
+        $transaction->save();
+
+        // 7) kembali ke postMitra
+        return redirect()
+            ->route('mitra.informasi.show', $post)
+            ->with('success','Transaksi berhasil diperbarui.');
     }
 
  

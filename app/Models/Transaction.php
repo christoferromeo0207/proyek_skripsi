@@ -24,5 +24,10 @@ class Transaction extends Model
     {
         return $this->belongsTo(Post::class);
     }
+
+    public function rsUser()
+    {
+        return $this->belongsTo(User::class, 'pic_rs');
+    }
     
 }

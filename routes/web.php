@@ -17,6 +17,7 @@ use App\Http\Controllers\{
     NotificationController,
     MitraDashboardController,
     MarketingDashboardController,
+    MitraTransactionController,
 };
 use App\Http\Controllers\Auth\{
     LoginController,
@@ -68,7 +69,13 @@ Route::middleware(['auth'])->prefix('dashboard-mitra')->name('mitra.')->group(fu
              ->name('updateMitra');
         Route::get('informasi/{post:slug}/transaksi/{transaction}',[MitraDashboardController::class, 'showTransaction'])
              ->name('transactions.show');
+        Route::get('informasi/{post:slug}/transaksi/{transaction}',[MitraDashboardController::class, 'showTransaction'])
+             ->name('transactions.show');
+        Route::put('informasi/{post:slug}/transaksi/{transaction}',[MitraDashboardController::class, 'updateTransaction'])
+             ->name('transactions.update');
 });  
+
+
 
 // Route::get('/postMitra', [MitraDashboardController::class, 'show'])
 //      ->middleware('auth')

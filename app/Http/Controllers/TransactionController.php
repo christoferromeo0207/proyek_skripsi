@@ -82,6 +82,7 @@ class TransactionController extends Controller
     public function edit(Post $post, Transaction $transaction)
     {
         $users = User::all();
+        $transaction->load('rsUser'); 
         return view('detailTransaction', compact('post','transaction','users'));
     }
 
