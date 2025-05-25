@@ -64,11 +64,8 @@ Route::get('/postMitra', [MitraDashboardController::class, 'show'])
      ->middleware('auth')
      ->name('mitra.postMitra');
 
-Route::get('/dashboardMarketing', [MarketingDashboardController::class, 'index'])
-     ->middleware('auth')
-     ->name('marketing.dashboard');
 
-
+// marketing
 Route::get('/dashboardMarketing', [MarketingDashboardController::class, 'index'])
      ->middleware('auth')
      ->name('marketing.dashboard');
