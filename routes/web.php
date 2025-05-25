@@ -66,6 +66,8 @@ Route::middleware(['auth'])->prefix('dashboard-mitra')->name('mitra.')->group(fu
              ->name('editMitra');
         Route::put('informasi/{post:slug}', [MitraDashboardController::class, 'update'])
              ->name('updateMitra');
+        Route::get('informasi/{post:slug}/transaksi/{transaction}',[MitraDashboardController::class, 'showTransaction'])
+             ->name('transactions.show');
 });  
 
 // Route::get('/postMitra', [MitraDashboardController::class, 'show'])

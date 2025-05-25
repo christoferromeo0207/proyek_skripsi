@@ -89,6 +89,7 @@ class TransactionController extends Controller
 
     public function update(Request $request, Post $post, Transaction $transaction)
     {
+
         // 1) Handle aksi rename / delete
         if ($request->filled('action_type')) {
             $files = $transaction->bukti_pembayaran ?: [];
@@ -145,6 +146,17 @@ class TransactionController extends Controller
 
         // hitung total
         $data['total_harga'] = $data['jumlah'] * $data['harga_satuan'];
+
+        $transaction->pic_mitra      = $data['pic_mitra'];
+        $transaction->approval_mitra = $data['approval_mitra'];
+
+        if ($transaction->approval_rs && $transaction->approval_mitra) {
+            $transaction->status = 'Selesai';
+        } elseif (! $transaction->approval_rs && ! $transaction->approval_mitra) {
+            $transaction->status = 'Dibatalkan';
+        } else {
+            $transaction->status = 'Proses';
+        }
 
         // ambil list file lama
         $existing = $transaction->bukti_pembayaran ?: [];

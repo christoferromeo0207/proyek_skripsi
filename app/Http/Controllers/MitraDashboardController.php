@@ -128,11 +128,24 @@ class MitraDashboardController extends Controller
             $post->save();
         }
 
-        return redirect()->route('mitra.informasi.edit', $post)
+        return redirect()->route('mitra.informasi.show', $post)
                         ->with('success', 'Detail mitra berhasil diperbarui.');
     }
 
+    public function showTransaction(Post $post, Transaction $transaction)
+    {
+        $user = Auth::user();
+        if ($user->role !== 'mitra' || $post->pic_mitra !== $user->username) {
+            abort(403);
+        }
 
+        // Ambil daftar PIC RS untuk dropdown
+        $users = User::where('role', 'rs')
+                     ->orderBy('name')
+                     ->get();
 
-    
+        return view('mitra.detailTransactionMitra', compact('post','transaction','users'));
+    }
+
+ 
 }

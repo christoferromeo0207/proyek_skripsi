@@ -226,7 +226,7 @@
             <!-- Action -->
             <td class="px-4 py-2 flex gap-2">
               <!-- Detail: popup atau ke halaman edit -->
-              <a href="{{ route('posts.transactions.show', [$post, $transaction]) }}"
+              <a href="{{ route('mitra.transactions.show', [$post, $transaction]) }}"
                 class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-lg text-xs font-bold no-underline">
                 Detail
               </a>
