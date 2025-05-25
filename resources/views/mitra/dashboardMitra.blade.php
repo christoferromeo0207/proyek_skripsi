@@ -18,7 +18,7 @@
         <div class="flex flex-wrap justify-center space-x-4 md:space-x-6 font-semibold text-white text-[14px] md:text-[16px] tracking-wide">
             <a href="{{ route('mitra.dashboard') }}"
                  class="text-white font-bold hover:text-orange-100 transition no-underline">Home</a>
-            <a href="{{ route('mitra.postMitra') }}"
+            <a href="{{ route('mitra.informasi.show', $post) }}"
                 class="text-white font-bold hover:text-orange-100 transition no-underline text-center leading-tight">
                 Informasi<br>Mitra
             </a>

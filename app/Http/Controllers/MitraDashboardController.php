@@ -49,18 +49,33 @@ class MitraDashboardController extends Controller
         ));
     }
 
-    public function show(Post $post) 
+    public function show(Post $post)
     {
         $user = Auth::user();
+
+        // 1) Cek role
         if ($user->role !== 'mitra') {
             abort(403, 'Unauthorized.');
         }
 
-        // Judul mitra sama dengan title dari Post yang di–show
+        // 2) Cek ownership: hanya Post dengan pic_mitra = username user ini
+        if ($post->pic_mitra !== $user->username) {
+            abort(403, 'Unauthorized.');
+        }
+
+        // 3) Judul halaman
         $companyTitle = $post->title;
 
-        return view('mitra.postMitra', compact('post', 'companyTitle'));
+        // 4) Eager load relasi yang dipakai di view
+        $post->load(['category', 'transactions', 'picUser']);
+
+        // 5) Render view dengan data lengkap
+        return view('mitra.postMitra', [
+            'post'         => $post,
+            'companyTitle' => $companyTitle,
+        ]);
     }
+
 
     public function edit(Post $post)
     {

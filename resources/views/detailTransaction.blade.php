@@ -18,6 +18,12 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   @php
+    $role = auth()->user()->role;
+    $isMitra = $role === 'mitra';
+    $isMarketing = $role === 'marketing';
+  @endphp
+
+  @php
     // Decode JSON field bukti_pembayaran
     $raw = $transaction->getRawOriginal('bukti_pembayaran');
     if (is_string($raw)) {
@@ -102,8 +108,13 @@
               </select>
             </div>
             <div>
+              {{-- PIC RS --}}
               <label class="block text-orange-500 font-semibold">PIC Rumah Sakit</label>
-              <select name="pic_rs" class="w-full border rounded px-3 py-2" required>
+              <select name="pic_rs" class="w-full border rounded px-3 py-2" 
+                @if ($isMitra)
+                  disabled
+                @endif
+              required>
                 <option value="">— Pilih PIC RS —</option>
                 @foreach($users as $user)
                   <option value="{{ $user->id }}"
@@ -113,22 +124,37 @@
                 @endforeach
               </select>
             </div>
+            {{-- Approval RS --}}
             <div>
               <label class="block text-orange-500 font-semibold">Approval RS</label>
-              <select name="approval_rs" class="w-full border rounded px-3 py-2" required>
+              <select name="approval_rs" class="w-full border rounded px-3 py-2" 
+                @if ($isMitra)
+                  disabled
+                @endif
+              required>
                 <option value="1" {{ old('approval_rs', $transaction->approval_rs)==1?'selected':'' }}>Ya</option>
                 <option value="0" {{ old('approval_rs', $transaction->approval_rs)==0?'selected':'' }}>Tidak</option>
               </select>
             </div>
+            {{-- PIC Mitra --}}
             <div>
               <label class="block text-orange-500 font-semibold">PIC Mitra</label>
               <input type="text" name="pic_mitra"
                      value="{{ old('pic_mitra', $transaction->pic_mitra) }}"
-                     class="w-full border rounded px-3 py-2" required>
+                     class="w-full border rounded px-3 py-2" 
+                     @if ($isMarketing)
+                       disabled
+                     @endif
+                     required>
             </div>
+            {{-- Approval Mitra --}}
             <div>
               <label class="block text-orange-500 font-semibold">Approval Mitra</label>
-              <select name="approval_mitra" class="w-full border rounded px-3 py-2" required>
+              <select name="approval_mitra" class="w-full border rounded px-3 py-2"
+                @if ($isMarketing)
+                    disabled
+                @endif
+              required>
                 <option value="1" {{ old('approval_mitra', $transaction->approval_mitra)==1?'selected':'' }}>Ya</option>
                 <option value="0" {{ old('approval_mitra', $transaction->approval_mitra)==0?'selected':'' }}>Tidak</option>
               </select>

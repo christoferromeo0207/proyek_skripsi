@@ -58,11 +58,19 @@ use App\Mail\NewMessageMail;
 Route::middleware(['auth'])->prefix('dashboard-mitra')->name('mitra.')->group(function() {
         Route::get('/', [MitraDashboardController::class, 'index'])
               ->name('dashboard');
+
+        Route::get('informasi/{post:slug}', [MitraDashboardController::class,'show'])
+             ->name('informasi.show');
+        // edit
+        Route::get('informasi/{post:slug}/edit', [MitraDashboardController::class,'edit'])
+             ->name('editMitra');
+        Route::put('informasi/{post:slug}', [MitraDashboardController::class, 'update'])
+             ->name('updateMitra');
 });  
 
-Route::get('/postMitra', [MitraDashboardController::class, 'show'])
-     ->middleware('auth')
-     ->name('mitra.postMitra');
+// Route::get('/postMitra', [MitraDashboardController::class, 'show'])
+//      ->middleware('auth')
+//      ->name('mitra.postMitra');
 
 
 // marketing

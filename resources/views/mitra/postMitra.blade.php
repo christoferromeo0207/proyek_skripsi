@@ -19,7 +19,7 @@
         <div x-show="openAction" x-transition
              class="absolute right-0 mt-2 w-48 bg-orange-100 border border-orange-300 rounded-lg shadow-xl z-50 overflow-hidden">
           <!-- Edit Link -->
-          <a href=""
+          <a href="{{ route('mitra.editMitra', $post) }}"
              class="flex items-center gap-2 w-full px-4 py-2 text-md font-bold text-orange-400 hover:bg-orange-300 hover:text-orange-700 transition no-underline">
             <i class="fas fa-edit"></i> Edit
           </a>
@@ -33,7 +33,8 @@
 
         <!-- Box 1: Title & Location -->
         <div class="flex flex-col items-center justify-center space-y-3 p-6">
-        <h2 class="text-2xl …">{{ $post->title }}</h2>
+        <h2 class="text-2xl md:text-3xl font-bold text-white text-center bg-gradient-to-br from-orange-400 to-orange-500 px-6 py-2 rounded-md shadow-md">
+            {{ $post->title }}</h2>
 
         @if($post->category)
             <span
@@ -62,7 +63,8 @@
             <div x-show="open" @click.away="open = false" x-transition
                  class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50 overflow-hidden">
               @forelse($post->transactions as $trx)
-                <a href="#" class="block px-4 py-2 text-gray-800 hover:bg-gray-100 no-underline">
+                <a href="{{ route('posts.transactions.show', [$post, $trx]) }}" 
+                class="block px-4 py-2 text-gray-800 hover:bg-gray-100 no-underline">
                   {{ $trx->nama_produk }}
                 </a>
               @empty
@@ -170,6 +172,94 @@
         @endforelse
       </div>
     </div>
+
+
+    <!-- Produk Kerjasama Hasil Transaksi -->
+      <div class="w-11/12 md:w-4/5 lg:w-3/4 bg-white/60 rounded-xl shadow-lg p-6 mt-8">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-orange-500 font-bold text-lg">Produk Kerjasama</h2>
+          <a href="{{ route('posts.transactions.create', $post) }}"
+            class="bg-orange-400 hover:bg-orange-500 text-white font-bold px-4 py-2 rounded-lg no-underline">
+            Tambah
+          </a>
+
+        </div>
+        <table class="w-full text-sm text-left text-gray-700">
+          <thead class="text-xs text-gray-700 uppercase bg-orange-300">
+            <tr>
+              <th class="px-4 py-2">Produk-Jumlah</th>
+              <th class="px-4 py-2">Merk-Harga</th>
+              <th class="px-4 py-2">Status</th>
+              <th class="px-4 py-2">Approval RS</th>
+              <th class="px-4 py-2">Approval Mitra</th>
+              <th class="px-4 py-2">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+        @forelse($post->transactions as $transaction)
+          <tr class="bg-white/50 hover:bg-white/70 transition">
+            <!-- Produk – Jumlah -->
+            <td class="px-4 py-2">
+              {{ $transaction->nama_produk }} - {{ $transaction->jumlah }}
+            </td>
+
+            <!-- Merk – Total Harga -->
+            <td class="px-4 py-2">
+              {{ $transaction->merk }} - {{ number_format($transaction->total_harga, 2) }}
+            </td>
+
+            <!-- Status -->
+            <td class="px-4 py-2">
+              {{ ucfirst($transaction->status) }}
+            </td>
+
+            <!-- Approval RS -->
+            <td class="px-4 py-2">
+              {{ $transaction->approval_rs ? 'Ya' : 'Tidak' }}
+            </td>
+
+            <!-- Approval Mitra -->
+            <td class="px-4 py-2">
+              {{ $transaction->approval_mitra ? 'Ya' : 'Tidak' }}
+            </td>
+
+            <!-- Action -->
+            <td class="px-4 py-2 flex gap-2">
+              <!-- Detail: popup atau ke halaman edit -->
+              <a href="{{ route('posts.transactions.show', [$post, $transaction]) }}"
+                class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-lg text-xs font-bold no-underline">
+                Detail
+              </a>
+
+              <!-- Hapus -->
+             <form
+                action="{{ route('posts.transactions.destroy', [$post, $transaction]) }}"
+                method="POST"
+                onsubmit="return confirm('Yakin ingin menghapus transaksi ini?');"
+                class="inline">
+                  @csrf
+                  @method('DELETE')
+                  <button
+                    type="submit"
+                    class="bg-red-400 hover:bg-red-500 text-white px-3 py-1 rounded-lg text-xs font-bold"
+                  >
+                    Hapus
+                  </button>
+              </form>
+
+            </td>
+          </tr>
+        @empty
+          <tr>
+            <td colspan="6" class="px-4 py-2 text-center text-gray-600">
+              Belum ada transaksi.
+            </td>
+          </tr>
+        @endforelse
+      </tbody>
+
+        </table>
+      </div>
 
 
   </div>

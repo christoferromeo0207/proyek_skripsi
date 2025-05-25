@@ -146,7 +146,7 @@
 
                     {{-- PIC Rumah Sakit --}}
                     <div class="bg-gray-100 p-4 rounded space-y-3">
-                        <h2 class="font-semibold text-orange-500">Informasi PIC Marketing RS</h2>
+                        <h2 class="font-semibold text-orange-500">PIC Marketing dan Mitra</h2>
 
                         <label for="PIC" class="block">Pilih PIC Rumah Sakit</label>
                         <select name="PIC"
