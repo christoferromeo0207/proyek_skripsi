@@ -58,38 +58,15 @@ use App\Mail\NewMessageMail;
 Route::middleware(['auth'])->prefix('dashboard-mitra')->name('mitra.')->group(function() {
         Route::get('/', [MitraDashboardController::class, 'index'])
               ->name('dashboard');
-        Route::get('/info', [MitraDashboardController::class, 'information'])
-              ->name('informationMitra');
-        Route::put('/kerjasama/{post}', [MitraDashboardController::class, 'update'])
-              ->name('kerjasama.update');
-
-        Route::prefix('info/{post}/transactions')->name('kerjasama.transactions.')->controller(TransactionController::class)->group(function() {
-            // SHOW form tambah
-            Route::get('create', 'create')
-                ->name('create');
-
-            // STORE baru
-            Route::post('/', 'store')
-                ->name('store');
-
-            // EDIT
-            Route::get('{transaction}/edit', 'edit')
-                ->name('edit');
-
-            // UPDATE
-            Route::put('{transaction}', 'update')
-                ->name('update');
-
-            // DELETE (opsional)
-            Route::delete('{transaction}', 'destroy')
-                ->name('destroy');
-
-            // Approve oleh Mitra
-            Route::post('{transaction}/approval', 'approvalMitra')
-                ->name('approval');
-        });
 });  
 
+Route::get('/postMitra', [MitraDashboardController::class, 'show'])
+     ->middleware('auth')
+     ->name('mitra.postMitra');
+
+Route::get('/dashboardMarketing', [MarketingDashboardController::class, 'index'])
+     ->middleware('auth')
+     ->name('marketing.dashboard');
 
 
 Route::get('/dashboardMarketing', [MarketingDashboardController::class, 'index'])

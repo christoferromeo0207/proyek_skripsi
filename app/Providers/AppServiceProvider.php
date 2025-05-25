@@ -25,4 +25,5 @@ class AppServiceProvider extends ServiceProvider
         // turn off strict lazy‐loading in non‐production
         Model::preventLazyLoading(app()->isProduction());
     }
+
 }
