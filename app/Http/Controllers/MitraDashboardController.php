@@ -61,7 +61,7 @@ class MitraDashboardController extends Controller
         }
 
         // 2) Cek ownership: hanya Post dengan pic_mitra = username user ini
-        if ($post->pic_mitra !== $user->username) {
+        if ($post->pic_mitra !== $user->name) {
             abort(403, 'Unauthorized.');
         }
 
@@ -137,7 +137,7 @@ class MitraDashboardController extends Controller
     public function showTransaction(Post $post, Transaction $transaction)
     {
         $user = Auth::user();
-        if ($user->role !== 'mitra' || $post->pic_mitra !== $user->username) {
+        if ($user->role !== 'mitra' || $post->pic_mitra !== $user->name) {
             abort(403);
         }
 
@@ -153,7 +153,7 @@ class MitraDashboardController extends Controller
     {
         // 1) hanya Mitra yang boleh
         $user = Auth::user();
-        abort_if($user->role !== 'mitra' || $post->pic_mitra !== $user->username, 403);
+        abort_if($user->role !== 'mitra' || $post->pic_mitra !== $user->name, 403);
 
         // 2) validasi hanya PIC Mitra, Approval Mitra, dan file actions
         $data = $request->validate([
