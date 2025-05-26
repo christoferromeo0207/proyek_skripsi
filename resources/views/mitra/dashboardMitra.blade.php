@@ -22,14 +22,17 @@
                 class="text-white font-bold hover:text-orange-100 transition no-underline text-center leading-tight">
                 Informasi<br>Mitra
             </a>
-          <a href="{{ route('notifications') }}"
-             class="text-white font-bold hover:text-orange-100 transition no-underline">
-            Notifikasi
-          </a>
-          <a href="{{ url('/schedule') }}"
-             class="text-white font-bold hover:text-orange-100 transition no-underline text-center leading-tight">
-            Pengajuan<br>Kerjasama
-          </a>
+           
+            <a
+              href="{{ route('mitra.informasi.notifications', $post) }}"
+              class="text-white font-bold hover:text-orange-100 transition no-underline">
+              Notifikasi
+            </a>
+
+            <a href="{{ url('/schedule') }}"
+              class="text-white font-bold hover:text-orange-100 transition no-underline text-center leading-tight">
+              Pengajuan<br>Kerjasama
+            </a>
         </div>
 
         {{-- User Dropdown --}}
@@ -97,7 +100,7 @@
       </a>
 
       {{-- Card: Update Informasi --}}
-      <a href="{{ route('notifications') }}"
+      <a href="{{ route('mitra.informasi.notifications', $post) }}"
          class="block bg-orange-200 bg-opacity-50 rounded-2xl p-6 shadow-lg
                 transform transition hover:shadow-xl hover:scale-105 hover:bg-orange-400
                 no-underline">

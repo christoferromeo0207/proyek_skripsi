@@ -1,4 +1,4 @@
-<x-layout>
+  <x-layout>
   <x-slot:title>Pesan – {{ $post->title }}</x-slot:title>
 
   <div class="container mx-auto py-8">

@@ -59,6 +59,11 @@ class Post extends Model
     {
         return $this->belongsTo(User::class, 'PIC');
     }
+
+    public function mitraUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'pic_mitra', 'name');
+    }
     
     public function transactions()
     {

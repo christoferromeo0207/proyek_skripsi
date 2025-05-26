@@ -17,7 +17,7 @@ use App\Http\Controllers\{
     NotificationController,
     MitraDashboardController,
     MarketingDashboardController,
-    MitraTransactionController,
+    MitraMessageController,
 };
 use App\Http\Controllers\Auth\{
     LoginController,
@@ -73,7 +73,34 @@ Route::middleware(['auth'])->prefix('dashboard-mitra')->name('mitra.')->group(fu
              ->name('transactions.show');
         Route::put('informasi/{post:slug}/transaksi/{transaction}',[MitraDashboardController::class, 'updateTransaction'])
              ->name('transactions.update');
+        
+        // Message+Notification
+        Route::prefix('informasi/{post:slug}')->name('informasi.')->group(function() {
+            Route::get('notifications', [MitraDashboardController::class, 'notifications'])
+                ->name('notifications');  
+            Route::get('messages', [MitraMessageController::class,'index'])
+                ->name('messages.index');
+            Route::get('messages/create', [MitraMessageController::class,'create'])
+                ->name('messages.create');
+            Route::post('messages', [MitraMessageController::class,'store'])
+                ->name('messages.store');
+            Route::put('messages/{message}/read', [MitraMessageController::class,'markRead'])
+                ->name('messages.markRead');
+            Route::put('messages/{message}/{filename}/rename',
+                [MitraMessageController::class,'renameAttachment'])
+                ->name('messages.renameAttachment');
+            Route::delete('messages/{message}/{filename}',
+                [MitraMessageController::class,'deleteAttachment'])
+                ->name('messages.deleteAttachment');
+        });
 });  
+
+
+
+// Route::middleware(['auth'])->group(function () {
+//     Route::get('/mitra/informasi/notifications/{post}', [MitraDashboardController::class, 'notifications'])
+//          ->name('mitra.informasi.notifications');
+// });
 
 
 

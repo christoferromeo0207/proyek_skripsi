@@ -23,6 +23,19 @@
              class="flex items-center gap-2 w-full px-4 py-2 text-md font-bold text-orange-400 hover:bg-orange-300 hover:text-orange-700 transition no-underline">
             <i class="fas fa-edit"></i> Edit
           </a>
+          <!--Lihat Pesan -->
+          <a href="{{ route('mitra.editMitra', $post) }}"
+            class="flex items-center gap-2 w-full px-4 py-2 text-md font-bold text-orange-400 hover:bg-orange-300 hover:text-orange-700 transition no-underline">
+            <i class="fas fa-envelope"></i>
+            Lihat Pesan
+          </a>
+          <!--Kirim Pesan -->
+          <a href="{{ route('mitra.editMitra', $post) }}"
+            class="flex items-center gap-2 w-full px-4 py-2 text-md font-bold text-orange-400 hover:bg-orange-300 hover:text-orange-700 transition no-underline">
+            <i class="fas fa-paper-plane"></i>
+            Kirim Pesan
+          </a>
+
         </div>
       </div>
 
@@ -178,10 +191,7 @@
       <div class="w-11/12 md:w-4/5 lg:w-3/4 bg-white/60 rounded-xl shadow-lg p-6 mt-8">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-orange-500 font-bold text-lg">Produk Kerjasama</h2>
-          <a href="{{ route('posts.transactions.create', $post) }}"
-            class="bg-orange-400 hover:bg-orange-500 text-white font-bold px-4 py-2 rounded-lg no-underline">
-            Tambah
-          </a>
+
 
         </div>
         <table class="w-full text-sm text-left text-gray-700">
@@ -241,8 +251,7 @@
                   @method('DELETE')
                   <button
                     type="submit"
-                    class="bg-red-400 hover:bg-red-500 text-white px-3 py-1 rounded-lg text-xs font-bold"
-                  >
+                    class="bg-red-400 hover:bg-red-500 text-white px-3 py-1 rounded-lg text-xs font-bold">
                     Hapus
                   </button>
               </form>

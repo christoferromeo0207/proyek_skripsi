@@ -12,6 +12,7 @@ use App\Models\Transaction;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage; 
 use Illuminate\Support\Str; 
+use Spatie\Activitylog\Models\Activity;
 
 class MitraDashboardController extends Controller
 {
@@ -218,6 +219,50 @@ class MitraDashboardController extends Controller
         return redirect()
             ->route('mitra.informasi.show', $post)
             ->with('success','Transaksi berhasil diperbarui.');
+    }
+
+    public function notifications(Request $request, Post $post)
+    {
+        $user = Auth::user();
+        abort_if($user->role !== 'mitra', 403);
+
+        // 1) Semua Post yang ditugaskan ke Mitra ini
+        $posts = Post::where('pic_mitra', $user->username)->get();
+
+        // If no posts, just render the view with empty data
+        if ($posts->isEmpty()) {
+            return view('mitra.notifications', [
+                'posts'        => $posts,
+                'selectedPost' => null,
+                'q'            => $request->get('q', ''),
+                'messages'     => collect(),
+                'activities'   => collect(),
+            ]);
+        }
+
+        // 2) Pilih satu Post (default yang pertama)
+        $selectedId   = $request->get('post', $posts->first()->id);
+        $selectedPost = $posts->firstWhere('id', $selectedId) ?? $posts->first();
+
+        // 3) Pesan untuk Mitra
+        $q = $request->get('q');
+        $messages = $selectedPost->messages()
+            ->with('sender')
+            ->when($q, fn($qb) =>
+                $qb->where('subject','like', "%{$q}%")
+                ->orWhere('body','like',    "%{$q}%")
+            )
+            ->latest()
+            ->get();
+
+        // 4) Activity Log untuk Post ini
+        $activities = Activity::forSubject($selectedPost)
+                            ->latest()
+                            ->get();
+
+        return view('mitra.notifications', compact(
+            'posts','selectedPost','q','messages','activities'
+        ));
     }
 
  

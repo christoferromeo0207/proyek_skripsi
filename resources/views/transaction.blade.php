@@ -107,14 +107,14 @@
           <input type="text" name="pic_mitra"
                  class="w-full rounded-lg border-gray-300 focus:ring-orange-400 focus:border-orange-400 @error('pic_mitra') border-red-500 @enderror"
                  placeholder="Masukkan nama PIC Mitra…"
-                 value="{{ old('pic_mitra') }}">
+                 value="{{ old('pic_mitra') }}" readonly>
           @error('pic_mitra')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
         </div>
 
         {{-- Approval Mitra --}}
         <div>
           <label class="block text-orange-500 font-semibold mb-1">Approval Mitra:</label>
-          <select name="approval_mitra"
+          <select name="approval_mitra" disabled
                   class="w-full rounded-lg border-gray-300 focus:ring-orange-400 focus:border-orange-400"
                   required>
             <option value="1">Ya</option>
@@ -125,13 +125,13 @@
         {{-- Status --}}
         <div>
           <label class="block text-orange-500 font-semibold mb-1">Status:</label>
-          <select name="status"
-                  class="w-full rounded-lg border-gray-300 focus:ring-orange-400 focus:border-orange-400"
-                  required>
-            <option value="Proses">Proses</option>
-            <option value="Selesai">Selesai</option>
-            <option value="Dibatalkan">Dibatalkan</option>
-          </select>
+          <input
+            type="text"
+            name="status"
+            value="{{ old('status','Proses') }}"
+            readonly
+            class="w-full rounded-lg border-gray-300 bg-gray-100 cursor-not-allowed"
+          >
         </div>
 
         {{-- Submit --}}
