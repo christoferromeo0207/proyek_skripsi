@@ -95,7 +95,7 @@ class MitraDashboardController extends Controller
     public function update(Request $request, Post $post)
     {
         $user = Auth::user();
-        if ($user->role !== 'mitra' || $post->pic_mitra !== $user->username) {
+        if ($user->role !== 'mitra' || $post->pic_mitra !== $user->name) {
             abort(403, 'Unauthorized.');
         }
 

@@ -24,13 +24,13 @@
             <i class="fas fa-edit"></i> Edit
           </a>
           <!--Lihat Pesan -->
-          <a href="{{ route('mitra.editMitra', $post) }}"
+          <a href="{{ route('mitra.informasi.messages.index', $post) }}"
             class="flex items-center gap-2 w-full px-4 py-2 text-md font-bold text-orange-400 hover:bg-orange-300 hover:text-orange-700 transition no-underline">
             <i class="fas fa-envelope"></i>
             Lihat Pesan
           </a>
           <!--Kirim Pesan -->
-          <a href="{{ route('mitra.editMitra', $post) }}"
+          <a href="{{ route('mitra.informasi.messages.create', $post) }}"
             class="flex items-center gap-2 w-full px-4 py-2 text-md font-bold text-orange-400 hover:bg-orange-300 hover:text-orange-700 transition no-underline">
             <i class="fas fa-paper-plane"></i>
             Kirim Pesan
@@ -149,42 +149,108 @@
             <div class="text-gray-800">{{ $post->alamat }}</div>
           </div>
         </div>
-      </div>
-
-      <div class="bg-white/30 rounded-2xl shadow-lg backdrop-blur-md p-6 space-y-4 text-center">
-        <h3 class="text-orange-500 font-bold">PIC RS</h3>
-        <p class="font-semibold text-gray-800">{{ $post->picUser?->name ?? '-' }}</p>
-      </div>
-
-      <div class="bg-white/30 rounded-2xl shadow-lg backdrop-blur-md p-6 space-y-4 text-center">
-        <h3 class="text-orange-500 font-bold">PIC Mitra</h3>
-        <p class="font-semibold text-gray-800">{{ $post->pic_mitra }}</p>
-      </div>
-    </div>
-
-    <!-- Dokumentasi -->
-    <div class="w-11/12 md:w-4/5 lg:w-3/4 bg-white/30 rounded-2xl shadow-lg p-6">
-      <h3 class="text-orange-500 font-bold text-lg mb-4">Dokumentasi</h3>
-      <div class="space-y-3">
-        @php
-          $files = json_decode($post->file_path, true) ?: [];
-        @endphp
-        @forelse($files as $idx => $path)
-          @php
-            $name = basename($path);
-            $url  = asset('storage'.ltrim($path, '/'));
-          @endphp
-          <div class="flex items-center justify-between p-3 bg-white rounded-lg border cursor-pointer">
-            <span class="truncate max-w-xs" @click="fileUrl='{{ $url }}'; isImage=/(png|jpe?g|gif)$/i.test('{{ $url }}'); fileModal=true">
-              {{ $name }}
-            </span>
-            <a href="{{ $url }}" download class="text-green-500 hover:text-green-700">⬇️</a>
+         <div class="flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-orange-500" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/>
+              <path d="M12 11c-2 0-2-.63-2-1s.7-1 2-1 1.39.64 1.4 1h2A3 3 0 0 0 13 7.12V6h-2v1.09C9 7.42 8 8.71 8 10c0 1.12.52 3 4 3 2 0 2 .68 2 1s-.62 1-2 1c-1.84 0-2-.86-2-1H8c0 .92.66 2.55 3 2.92V18h2v-1.08c2-.34 3-1.63 3-2.92 0-1.12-.52-3-4-3z"/>
+            </svg>
+            <div>
+              <div class="text-orange-500 font-bold">Pembayaran</div>
+              <div class="text-gray-800">{{ $post->pembayaran }}</div>
+            </div>
           </div>
-        @empty
-          <p class="text-gray-500">Belum ada dokumentasi.</p>
-        @endforelse
+          <!-- Keterangan BPJS -->
+          <div class="flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-orange-500" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M11.63 21.91A.9.9 0 0 0 12 22a1 1 0 0 0 .41-.09C22 17.67 21 7 21 6.9a1 1 0 0 0-.55-.79l-8-4a1 1 0 0 0-.9 0l-8 4A1 1 0 0 0 3 6.9c0 .1-.92 10.77 8.63 15.01zM5 7.63l7-3.51 7 3.51c.05 2-.27 9-7 12.27C5.26 16.63 4.94 9.64 5 7.63z"/>
+              <path d="M11.06 16h2v-3h3.01v-2h-3.01V8h-2v3h-3v2h3v3z"/>
+            </svg>
+            <div>
+              <div class="text-orange-500 font-bold">Keterangan BPJS</div>
+              <div>
+                <span class="inline-block bg-green-400 text-white text-sm font-bold px-3 py-1 rounded-full">
+                  {{ $post->keterangan_bpjs === 'yes' ? 'Ya' : 'Tidak' }}
+                </span>
+              </div>
+            </div>
+          </div>
       </div>
+        <!-- Kolom 2: PIC & PIC Mitra -->
+        <div class="space-y-6">
+          <!-- CARD PIC -->
+          <div class="bg-white/30 rounded-2xl shadow-lg backdrop-blur-md p-6 flex flex-col items-center space-y-4">
+            <h3 class="text-orange-500 font-bold text-xl">PIC Rumah Sakit</h3>
+            <p class="text-gray-800 font-semibold text-center">{{ $post->picUser?->name ?? 'Tidak ada PIC' }}</p>
+          </div>
+          <!-- CARD PIC MITRA -->
+          <div class="bg-white/30 rounded-2xl shadow-lg backdrop-blur-md p-6 flex flex-col items-center space-y-4">
+            <h3 class="text-orange-500 font-bold text-xl">PIC Mitra</h3>
+            <p class="text-gray-800 font-semibold text-center">{{ $post->pic_mitra ?? 'Tidak ada PIC Mitra' }}</p>
+          </div>
+        </div>
     </div>
+
+       <!-- Dokumentasi -->
+        <div class="w-11/12 md:w-4/5 lg:w-3/4 bg-white/30 rounded-2xl shadow-lg p-6">
+          <h3 class="text-orange-500 font-bold text-lg mb-4">Dokumentasi</h3>
+          <div class="space-y-3">
+            @php
+              $raw   = $post->file_path;
+              $files = $raw ? (json_decode($raw, true) ?: explode(',', $raw)) : [];
+            @endphp
+
+            @forelse($files as $idx => $path)
+              @php
+                $name        = basename($path);
+                // Public URL (storage/app/public/…)
+                $publicUrl   = asset('storage/' . ltrim($path, '/'));
+                // Your download route
+                $downloadUrl = route('posts.files.download', [$post, $idx]);
+                $fileId      = "file-{$idx}";
+              @endphp
+
+              <div
+                class="flex items-center justify-between p-3 bg-white rounded-lg border"
+                data-file-id="{{ $fileId }}"
+                data-file-url="{{ $publicUrl }}"
+              >
+                <div class="truncate max-w-xs">{{ $name }}</div>
+                <div class="flex space-x-2">
+                  <!-- Preview -->
+                  <button
+                    type="button"
+                    onclick="openFile('{{ $fileId }}')"
+                    class="text-blue-500 hover:text-blue-700"
+                    title="Preview"
+                  >👁️</button>
+
+                  <!-- Download -->
+                  <a
+                    href="{{ $downloadUrl }}"
+                    class="text-green-500 hover:text-green-700"
+                    title="Download"
+                  >⬇️</a>
+
+                  <!-- Delete -->
+                  <form
+                    action="{{ route('posts.files.destroy', [$post, $idx]) }}"
+                    method="POST"
+                    onsubmit="return confirm('Hapus file {{ $name }}?');"
+                  >
+                    @csrf @method('DELETE')
+                    <button
+                      type="submit"
+                      class="text-red-500 hover:text-red-700"
+                      title="Delete"
+                    >🗑️</button>
+                  </form>
+                </div>
+              </div>
+            @empty
+              <p class="text-gray-500">Belum ada dokumentasi.</p>
+            @endforelse
+          </div>
+        </div>
 
 
     <!-- Produk Kerjasama Hasil Transaksi -->
@@ -269,7 +335,159 @@
 
         </table>
       </div>
-
-
   </div>
+
+
+   <script>
+    function openFile(fileId) {
+      const fileEl = document.querySelector(`[data-file-id="${fileId}"]`);
+      if (!fileEl) return;
+      const url = fileEl.dataset.fileUrl;
+      const isImage = /\.(jpe?g|png|gif|webp)$/i.test(url);
+
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4';
+      modal.innerHTML = `
+        <div role="dialog" class="bg-white rounded-lg max-w-4xl w-full max-h-screen overflow-auto">
+          <div class="flex justify-between items-center p-4 border-b">
+            <h3 class="text-lg font-medium">Preview File</h3>
+            <button onclick="this.closest('[role=dialog]').parentElement.remove()" 
+                    class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+          </div>
+          <div class="p-4">
+            ${ isImage
+                ? `<img src="${url}" class="max-w-full h-auto mx-auto" alt="Preview">`
+                : `<iframe src="${url}" class="w-full h-96 border-0"></iframe>` }
+          </div>
+          <div class="p-4 border-t flex justify-end space-x-2">
+            <a href="${url}" download
+               class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md">
+              Download
+            </a>
+            <button onclick="this.closest('[role=dialog]').parentElement.remove()"
+                    class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md">
+              Tutup
+            </button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+  </script>
+
+  <script>
+    
+      const uploadBtn = document.getElementById('upload-btn');
+      const fileInput = document.getElementById('file-input');
+      const fileList  = document.getElementById('file-list');
+    
+      // DataTransfer persist untuk menyimpan semua file
+      const dt = new DataTransfer();
+    
+      // Buka dialog file
+      uploadBtn.addEventListener('click', () => fileInput.click());
+    
+      // Saat user memilih file
+      fileInput.addEventListener('change', e => {
+        // Tambahkan setiap file baru ke DataTransfer
+        for (const file of e.target.files) {
+          dt.items.add(file);
+        }
+        // Set kembali fileInput.files
+        fileInput.files = dt.files;
+        // Render ulang daftar
+        renderFileList();
+        // Clear supaya bisa pilih file yang sama lagi
+        fileInput.value = '';
+      });
+    
+      function renderFileList() {
+        fileList.innerHTML = '';  // kosongkan dulu
+    
+        Array.from(dt.files).forEach((file, idx) => {
+          // baris container
+          const row = document.createElement('div');
+          row.className = 'flex justify-between items-center bg-gray-100 rounded px-3 py-2';
+          row.dataset.index = idx;
+    
+          // nama file
+          const name = document.createElement('span');
+          name.textContent = file.name;
+          name.className = 'truncate';
+    
+          // tombol preview
+          const previewBtn = document.createElement('button');
+          previewBtn.type = 'button';
+          previewBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg"
+                  class="w-5 h-5 text-blue-500 hover:text-blue-700"
+                  viewBox="0 0 20 20"
+                  fill="currentColor">
+              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+              <path fill-rule="evenodd"
+                    d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943
+                        9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732
+                        14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                    clip-rule="evenodd"/>
+            </svg>`;
+          previewBtn.title = 'Preview';
+          previewBtn.addEventListener('click', () => openPreview(idx));
+    
+          // tombol delete
+          const deleteBtn = document.createElement('button');
+          deleteBtn.type = 'button';
+          deleteBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg"
+                  class="w-5 h-5 text-red-500 hover:text-red-700"
+                  viewBox="0 0 20 20"
+                  fill="currentColor">
+              <path fill-rule="evenodd"
+                    d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000
+                        2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1
+                        0 100-2h-3.382l-.724-1.447A1 1 0
+                        0011 2H9zM7 8a1 1 0 012 0v6a1 1 0
+                        11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1
+                        0 102 0V8a1 1 0 00-1-1z"
+                    clip-rule="evenodd"/>
+            </svg>`;
+          deleteBtn.title = 'Hapus';
+          deleteBtn.addEventListener('click', () => {
+            dt.items.remove(idx);
+            fileInput.files = dt.files;
+            renderFileList();
+          });
+    
+          row.append(name, previewBtn, deleteBtn);
+          fileList.append(row);
+        });
+      }
+    
+      function openPreview(index) {
+        const file = dt.files[index];
+        if (!file) return;
+    
+        const url = URL.createObjectURL(file);
+        const isImage = file.type.startsWith('image/');
+    
+        const modal = document.createElement('div');
+        modal.className = 
+          'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4';
+        modal.innerHTML = `
+          <div class="bg-white rounded-lg overflow-auto max-h-full">
+            <div class="flex justify-end p-2">
+              <button id="close-modal" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <div class="p-4">
+              ${ isImage 
+                  ? `<img src="${url}" class="max-w-full h-auto mx-auto" alt="Preview">`
+                  : `<iframe src="${url}" class="w-full h-96 border-0"></iframe>`
+              }
+            </div>
+          </div>
+        `;
+        document.body.append(modal);
+        modal.querySelector('#close-modal')
+              .addEventListener('click', () => modal.remove());
+      }
+    </script>
 </x-layout>

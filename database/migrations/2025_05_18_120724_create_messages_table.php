@@ -19,6 +19,7 @@ return new class extends Migration
 
             $table->unsignedInteger("user_id");
             $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
+            $table->foreignId('receiver_id')->constrained('users');
             
             $table->string('subject');
             $table->text('body');

@@ -14,31 +14,38 @@ class MitraMessageController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth','role:mitra']);
+        $this->middleware('auth');
     }
 
-    public function index(Post $post, Request $req)
+   public function index(Post $post, Request $req)
     {
-        abort_if($post->pic_mitra !== Auth::user()->username, 403);
+        abort_if($post->pic_mitra !== Auth::user()->name, 403);
+
         $q = $req->get('q');
+
         $msgs = $post->messages()
-                     ->with('sender')
-                     ->where('user_id', Auth::id())
-                     ->when($q, fn($b)=> $b->where('subject','like',"%{$q}%"))
-                     ->latest()
-                     ->get();
+            ->with(['sender','receiver'])
+            ->where(function($query) {
+                $query->where('user_id', Auth::id())
+                    ->orWhere('receiver_id', Auth::id());
+            })
+            ->with(['sender','receiver'])
+            ->when($q, fn($b) => $b->where('subject','like', "%{$q}%"))
+            ->latest()
+            ->get();
+
         return view('mitra.messages.index', compact('post','msgs','q'));
     }
 
     public function create(Post $post)
     {
-        abort_if($post->pic_mitra !== Auth::user()->username, 403);
+        abort_if($post->pic_mitra !== Auth::user()->name, 403);
         return view('mitra.messages.create', compact('post'));
     }
 
     public function store(Post $post, Request $req)
     {
-        abort_if($post->pic_mitra !== Auth::user()->username, 403);
+        abort_if($post->pic_mitra !== Auth::user()->name, 403);
 
         $data = $req->validate([
             'subject'=>'required|string',
@@ -52,33 +59,31 @@ class MitraMessageController extends Controller
         }
 
         $msg = $post->messages()->create([
+            
+            'post_id'=>$post->id,
             'user_id'=>Auth::id(),
+            'receiver_id'  => $post->picUser->id,
             'subject'=>$data['subject'],
             'body'   =>$data['body'],
             'attachments'=>$files,
             'is_read'=>false,
         ]);
 
-        // notify Marketing PIC
-        if ($post->picUser) {
-            $post->picUser->notify(new MitraSentMessageNotification($msg));
-        }
-
         return redirect()
-            ->route('mitra.messages.index',$post)
+            ->route('mitra.informasi.messages.index',$post)
             ->with('success','Pesan berhasil dikirim.');
     }
 
     public function markRead(Post $post, Message $msg)
     {
-        abort_if($post->pic_mitra !== Auth::user()->username, 403);
+        abort_if($post->pic_mitra !== Auth::user()->name, 403);
         $msg->update(['is_read'=>true]);
         return back();
     }
 
     public function renameAttachment(Request $req, Post $post, Message $msg, $fn)
     {
-        abort_if($post->pic_mitra !== Auth::user()->username, 403);
+        abort_if($post->pic_mitra !== Auth::user()->name, 403);
         $req->validate(['new_name'=>'required|string']);
         $ext = pathinfo($fn, PATHINFO_EXTENSION);
         $new = time().'_'. Str::slug($req->new_name).'.'.$ext;
@@ -90,7 +95,7 @@ class MitraMessageController extends Controller
 
     public function deleteAttachment(Post $post, Message $msg, $fn)
     {
-        abort_if($post->pic_mitra !== Auth::user()->username, 403);
+        abort_if($post->pic_mitra !== Auth::user()->name, 403);
         Storage::disk('public')->delete("messages/$fn");
         $atts = array_filter($msg->attachments, fn($a)=> $a!==$fn);
         $msg->update(['attachments'=>array_values($atts)]);

@@ -8,7 +8,6 @@ use App\Http\Controllers\{
     AuthorsController,
     UserController,
     PostController,
-    //NotulenController,
     TransactionController,
     ScheduleController,
     PasswordController,
@@ -76,12 +75,14 @@ Route::middleware(['auth'])->prefix('dashboard-mitra')->name('mitra.')->group(fu
         
         // Message+Notification
         Route::prefix('informasi/{post:slug}')->name('informasi.')->group(function() {
-            Route::get('notifications', [MitraDashboardController::class, 'notifications'])
-                ->name('notifications');  
-            Route::get('messages', [MitraMessageController::class,'index'])
+            Route::get('notifications', [NotificationController::class, 'mitraIndex'])
+                ->name('notifications');
+
+            Route::get('messages',            [MitraMessageController::class,'index'])
                 ->name('messages.index');
-            Route::get('messages/create', [MitraMessageController::class,'create'])
+            Route::get('messages/create',     [MitraMessageController::class,'create'])
                 ->name('messages.create');
+
             Route::post('messages', [MitraMessageController::class,'store'])
                 ->name('messages.store');
             Route::put('messages/{message}/read', [MitraMessageController::class,'markRead'])

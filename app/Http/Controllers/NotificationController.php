@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Spatie\Activitylog\Models\Activity;
+use Illuminate\Support\Facades\Auth;
+
+
 
 
 class NotificationController extends Controller
@@ -45,6 +48,34 @@ class NotificationController extends Controller
         // 5) render view
         return view('notifications.index', compact(
             'posts','selectedPost','messages','q','activities'
+        ));
+    }
+
+
+     // untuk mitra: langsung pakai Post milik user yang login
+    public function mitraIndex(Request $request)
+    {
+        $user = Auth::user();
+
+        // 1) cari Post milik user (asumsi ada kolom user_id di tabel posts)
+        $selectedPost = Post::where('pic_mitra', $user->name)->firstOrFail();
+
+        // 2) pesan + filter sama seperti index
+        $q = $request->get('q');
+        $messages = $selectedPost->messages()
+            ->with('sender')
+            ->when($q, fn($b) =>
+                $b->where('subject','like',"%{$q}%")
+                  ->orWhere('body','like',   "%{$q}%")
+            )
+            ->latest()
+            ->get();
+
+        // 3) activity log milik Post ini
+        $activities = Activity::forSubject($selectedPost)->latest()->get();
+
+        return view('mitra.notifications', compact(
+            'selectedPost','messages','q','activities'
         ));
     }
 
