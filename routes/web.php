@@ -87,6 +87,7 @@ Route::middleware(['auth'])->prefix('dashboard-mitra')->name('mitra.')->group(fu
                 ->name('messages.store');
             Route::put('messages/{message}/read', [MitraMessageController::class,'markRead'])
                 ->name('messages.markRead');
+                
             Route::put('messages/{message}/{filename}/rename',
                 [MitraMessageController::class,'renameAttachment'])
                 ->name('messages.renameAttachment');

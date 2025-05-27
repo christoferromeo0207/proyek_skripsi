@@ -29,10 +29,30 @@
               Notifikasi
             </a>
 
-            <a href="{{ url('/schedule') }}"
-              class="text-white font-bold hover:text-orange-100 transition no-underline text-center leading-tight">
-              Pengajuan<br>Kerjasama
+        {{-- Pengajuan Kerjasama dropdown --}}
+          <div class="relative" x-data="{ open: false }">
+            <a href="#"
+              @click.prevent="open = !open"
+              class="text-white font-bold hover:text-orange-100 transition no-underline text-center leading-tight flex items-center space-x-1">
+              <span>Pengajuan<br>Kerjasama</span>
+              <i class="fas fa-caret-down text-sm"></i>
             </a>
+
+            <div x-show="open"
+                @click.outside="open = false"
+                x-cloak
+                class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50">
+              <a href=""
+                class="block px-4 py-2 hover:bg-gray-100 text-gray-800">
+                Pengajuan Transaksi Baru
+              </a>
+              <a href=""
+                class="block px-4 py-2 hover:bg-gray-100 text-gray-800">
+                Pengajuan Mitra Baru
+              </a>
+            </div>
+          </div>
+          
         </div>
 
         {{-- User Dropdown --}}
@@ -96,31 +116,28 @@
         <div class="text-3xl font-extrabold text-white text-center mb-1">
           {{ $total }}
         </div>
-        <p class="text-sm text-white/90 text-center">Perusahaan</p>
+        <p class="text-sm text-white/90 text-center">Transaksi</p>
       </a>
 
-      {{-- Card: Update Informasi --}}
+      {{-- Card: Jumlah Pesan --}}
       <a href="{{ route('mitra.informasi.notifications', $post) }}"
-         class="block bg-orange-200 bg-opacity-50 rounded-2xl p-6 shadow-lg
+        class="block bg-orange-200 bg-opacity-50 rounded-2xl p-6 shadow-lg
                 transform transition hover:shadow-xl hover:scale-105 hover:bg-orange-400
                 no-underline">
         <div class="flex justify-center mb-4">
           <i class="fas fa-comment-alt text-white text-4xl"></i>
         </div>
         <h3 class="text-lg font-semibold text-white text-center mb-2">
-          Update Informasi
+          Jumlah Pesan
         </h3>
         <div class="text-3xl font-extrabold text-white text-center mb-1">
-          {{ $newMessagesCount }}
+          {{ $messageCount }}
         </div>
         <p class="text-sm text-white/90 text-center">
-          @if($newMessagesCount > 0)
-            Pesan Baru
-          @else
-            Tidak ada pesan
-          @endif
+          Pesan total untuk perusahaan ini
         </p>
       </a>
+
 
       {{-- Card: Status Kerjasama --}}
       <a href="{{ url('/schedule') }}"

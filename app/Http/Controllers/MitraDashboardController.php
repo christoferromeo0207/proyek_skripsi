@@ -32,9 +32,11 @@ class MitraDashboardController extends Controller
         $today = Carbon::today();
 
         $total             = Post::where('pic_mitra', $user->name)->count();
-        $newMessagesCount  = Message::where('user_id', $user->id)
-                                    ->where('is_read', 0)
-                                    ->count();
+        // $newMessagesCount  = Message::where('user_id', $user->id)
+        //                             ->where('is_read', 0)
+        //                             ->count();
+        $post = Post::where('pic_mitra', $user->name)->first();
+        $messageCount = Message::where('post_id', $post->id)->count();
         $activeCount       = Post::where('pic_mitra', $user->username)
                                  ->whereDate('tanggal_awal', '<=', $today)
                                  ->whereDate('tanggal_akhir', '>=', $today)
@@ -45,7 +47,7 @@ class MitraDashboardController extends Controller
         $post = Post::where('pic_mitra', $user->name)->first();
         return view('mitra.dashboardMitra', compact(
             'total',
-            'newMessagesCount',
+            'messageCount',
             'activeCount',
             'companyTitle',
             'post',
@@ -56,23 +58,18 @@ class MitraDashboardController extends Controller
     {
         $user = Auth::user();
 
-        // 1) Cek role
+    
         if ($user->role !== 'mitra') {
             abort(403, 'Unauthorized.');
         }
-
-        // 2) Cek ownership: hanya Post dengan pic_mitra = username user ini
+    
         if ($post->pic_mitra !== $user->name) {
             abort(403, 'Unauthorized.');
         }
 
-        // 3) Judul halaman
         $companyTitle = $post->title;
-
-        // 4) Eager load relasi yang dipakai di view
         $post->load(['category', 'transactions', 'picUser']);
 
-        // 5) Render view dengan data lengkap
         return view('mitra.postMitra', [
             'post'         => $post,
             'companyTitle' => $companyTitle,
