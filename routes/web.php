@@ -17,6 +17,7 @@ use App\Http\Controllers\{
     MitraDashboardController,
     MarketingDashboardController,
     MitraMessageController,
+    MitraTransactionController,
 };
 use App\Http\Controllers\Auth\{
     LoginController,
@@ -61,7 +62,7 @@ Route::middleware(['auth'])->prefix('dashboard-mitra')->name('mitra.')->group(fu
 
         Route::get('informasi/{post:slug}', [MitraDashboardController::class,'show'])
              ->name('informasi.show');
-        // edit
+
         Route::get('informasi/{post:slug}/edit', [MitraDashboardController::class,'edit'])
              ->name('editMitra');
         Route::put('informasi/{post:slug}', [MitraDashboardController::class, 'update'])
@@ -94,6 +95,11 @@ Route::middleware(['auth'])->prefix('dashboard-mitra')->name('mitra.')->group(fu
             Route::delete('messages/{message}/{filename}',
                 [MitraMessageController::class,'deleteAttachment'])
                 ->name('messages.deleteAttachment');
+
+            // Transaksi  
+            Route::get('transaksi/create', [MitraTransactionController::class,'create'])
+                ->name('transactions.create');
+
         });
 });  
 

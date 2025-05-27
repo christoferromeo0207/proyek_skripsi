@@ -1,12 +1,14 @@
 <?php
 
-namespace App\Http\Controllers\Mitra;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Transaction;
+use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 class MitraTransactionController extends Controller
 {
@@ -16,9 +18,15 @@ class MitraTransactionController extends Controller
         $this->middleware(['auth', 'role:mitra']);
     }
 
-    /**
-     * Show the form for editing only PIC Mitra, Approval Mitra, and Bukti Pembayaran.
-     */
+    public function create(Post $post)
+    {
+        // Pastikan hanya Mitra pemilik post yang boleh
+        abort_if($post->pic_mitra !== Auth::user()->name, 403);
+
+        return view('mitra.transactions.create', compact('post'));
+    }
+
+
     public function edit(Transaction $transaction)
     {
         // eager‐load relasi untuk menampilkan nama PIC RS
@@ -26,10 +34,40 @@ class MitraTransactionController extends Controller
         return view('mitra.transactions.edit', compact('transaction'));
     }
 
-    /**
-     * Process the mitra‐only updates: pic_mitra, approval_mitra,
-     * file‐actions (rename/delete), recompute status, and new uploads.
-     */
+     public function store(Request $req, Post $post)
+    {
+        abort_if($post->pic_mitra !== Auth::user()->name, 403);
+
+        // 1) Validasi input user
+        $data = $req->validate([
+            'nama_produk'     => 'required|string|max:255',
+            'jumlah'          => 'required|integer|min:1',
+            'merk'            => 'required|string|max:255',
+            'harga_satuan'    => 'required|numeric|min:0',
+            'tipe_pembayaran' => 'required|string|max:255',
+            'pic_mitra'       => 'required|string|max:255',
+        ]);
+
+        // 2) Hitung total
+        $data['total_harga']    = $data['jumlah'] * $data['harga_satuan'];
+
+        // 3) Set nilai yang tidak di‐input oleh user
+        $data['post_id']        = $post->id;
+        $data['bukti_pembayaran']= null;
+        $data['pic_rs']         = null;
+        $data['approval_rs']    = 0;
+        $data['approval_mitra'] = 0;
+        $data['status']         = 'Proses';
+
+        // 4) Simpan ke DB
+        Transaction::create($data);
+
+        return redirect()
+            ->route('mitra.informasi.show', $post)
+            ->with('success','Transaksi berhasil dibuat.');
+    }
+
+  
     public function update(Request $request, Transaction $transaction)
     {
         // 1) validasi hanya untuk mitra‐editable
@@ -98,4 +136,6 @@ class MitraTransactionController extends Controller
 
         return back()->with('success', 'Data transaksi berhasil diperbarui.');
     }
+
+
 }

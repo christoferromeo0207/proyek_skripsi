@@ -29,5 +29,10 @@ class Transaction extends Model
     {
         return $this->belongsTo(User::class, 'pic_rs');
     }
+
+    public function mitra()
+    {
+        return $this->belongsTo(User::class, 'pic_mitra');
+    }
     
 }
