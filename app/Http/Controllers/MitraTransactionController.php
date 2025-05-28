@@ -5,17 +5,21 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Transaction;
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class MitraTransactionController extends Controller
 {
+
+
     public function __construct()
     {
         // pastikan hanya mitra yang bisa mengakses
-        $this->middleware(['auth', 'role:mitra']);
+        $this->middleware('auth');
     }
 
     public function create(Post $post)
@@ -23,7 +27,9 @@ class MitraTransactionController extends Controller
         // Pastikan hanya Mitra pemilik post yang boleh
         abort_if($post->pic_mitra !== Auth::user()->name, 403);
 
-        return view('mitra.transactions.create', compact('post'));
+        $marketingUsers = User::where('role', 'marketing')->orderBy('name')->get();
+
+        return view('mitra.transactions.create', compact('post', 'marketingUsers'));
     }
 
 
@@ -34,38 +40,48 @@ class MitraTransactionController extends Controller
         return view('mitra.transactions.edit', compact('transaction'));
     }
 
-     public function store(Request $req, Post $post)
+    public function store(Request $req, Post $post)
     {
+        // 1) Cek ownership
         abort_if($post->pic_mitra !== Auth::user()->name, 403);
 
-        // 1) Validasi input user
-        $data = $req->validate([
-            'nama_produk'     => 'required|string|max:255',
-            'jumlah'          => 'required|integer|min:1',
-            'merk'            => 'required|string|max:255',
-            'harga_satuan'    => 'required|numeric|min:0',
-            'tipe_pembayaran' => 'required|string|max:255',
-            'pic_mitra'       => 'required|string|max:255',
+        // 2) Validasi input user
+        $validated = $req->validate([
+            'nama_produk'      => 'required|string|max:255',
+            'jumlah'           => 'required|integer|min:1',
+            'merk'             => 'required|string|max:255',
+            'harga_satuan'     => 'required|numeric|min:0',
+            'tipe_pembayaran'  => 'required|string|max:255',
+            'pic_rs'           => 'required|exists:users,id',
+            'approval_mitra'   => 'required|boolean',
         ]);
 
-        // 2) Hitung total
-        $data['total_harga']    = $data['jumlah'] * $data['harga_satuan'];
+        // 3) Hitung total_harga
+        $totalHarga = $validated['jumlah'] * $validated['harga_satuan'];
 
-        // 3) Set nilai yang tidak di‐input oleh user
-        $data['post_id']        = $post->id;
-        $data['bukti_pembayaran']= null;
-        $data['pic_rs']         = null;
-        $data['approval_rs']    = 0;
-        $data['approval_mitra'] = 0;
-        $data['status']         = 'Proses';
+        // 4) Buat transaksi
+        $transaction = Transaction::create([
+            'post_id'          => $post->id,
+            'nama_produk'      => $validated['nama_produk'],
+            'jumlah'           => $validated['jumlah'],
+            'merk'             => $validated['merk'],
+            'harga_satuan'     => $validated['harga_satuan'],
+            'total_harga'      => $totalHarga,
+            'tipe_pembayaran'  => $validated['tipe_pembayaran'],
+            'bukti_pembayaran' => null,
+            'pic_rs'           => $validated['pic_rs'],
+            'approval_rs'      => 0,                     // otomatis “Tidak”
+            'pic_mitra'        => Auth::id(),
+            'approval_mitra'   => $validated['approval_mitra'],
+            'status'           => 'Proses',              // selalu Proses di awal
+        ]);
 
-        // 4) Simpan ke DB
-        Transaction::create($data);
-
+        // 5) Redirect kembali ke detail post
         return redirect()
             ->route('mitra.informasi.show', $post)
             ->with('success','Transaksi berhasil dibuat.');
     }
+
 
   
     public function update(Request $request, Transaction $transaction)

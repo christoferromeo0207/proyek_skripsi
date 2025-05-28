@@ -21,7 +21,11 @@ class Post extends Model
    
     protected $with = ['category', 'picUser'];
 
-
+    protected static $recordEvents = [
+        'created',
+        'updated',
+        'deleted',
+    ];
 
 
     public function category(): BelongsTo {

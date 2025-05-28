@@ -23,7 +23,7 @@ class CheckRole
             return redirect()->route('login');
         }
         if (Auth::user()->role !== $role) {
-            Log::info("PEPEK, ". [Auth::user()->role]);
+            Log::info("Testing Middleware, ". [Auth::user()->role]);
             abort(403);
         }
         return $next($request);

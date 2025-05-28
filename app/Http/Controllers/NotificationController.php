@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Spatie\Activitylog\Models\Activity;
 use Illuminate\Support\Facades\Auth;
@@ -17,9 +18,8 @@ class NotificationController extends Controller
         $this->middleware('auth');
     }
 
-    public function index(Request $request)
+   public function index(Request $request)
     {
-        
         // 1) semua mitra untuk dropdown
         $posts = Post::orderBy('title')->get();
 
@@ -38,45 +38,88 @@ class NotificationController extends Controller
             ->latest()
             ->get();
 
-        // 4) activity log untuk mitra ini
-        $activities = Activity::query()
-            ->where('subject_type', Post::class)
-            ->where('subject_id',   $selectedPost->id)
+        // 4) activity log untuk Post
+        $postActivities = Activity::forSubject($selectedPost)
+            ->when($q, fn($b) =>
+                $b->where('description','like',"%{$q}%")
+            )
             ->latest()
             ->get();
-// dd($posts, $messages,$selectedPost, $activities);
-        // 5) render view
+
+        // 5) ambil semua ID Transaction milik Post ini
+        $txIds = $selectedPost->transactions()->pluck('id');
+
+        // 6) activity log untuk Transaction
+        $txActivities = Activity::query()
+            ->where('subject_type', Transaction::class)
+            ->whereIn('subject_id', $txIds)
+            ->when($q, fn($b) =>
+                $b->where('description','like',"%{$q}%")
+            )
+            ->latest()
+            ->get();
+
+        // 7) gabungkan dan urutkan descending
+        $activities = $postActivities
+            ->concat($txActivities)
+            ->sortByDesc('created_at')
+            ->values();
+
+        // 8) render view
         return view('notifications.index', compact(
             'posts','selectedPost','messages','q','activities'
         ));
     }
 
 
-     // untuk mitra: langsung pakai Post milik user yang login
+     // untuk mitra
     public function mitraIndex(Request $request)
     {
         $user = Auth::user();
 
-        // 1) cari Post milik user (asumsi ada kolom user_id di tabel posts)
+       
         $selectedPost = Post::where('pic_mitra', $user->name)->firstOrFail();
 
-        // 2) pesan + filter sama seperti index
+    
         $q = $request->get('q');
         $messages = $selectedPost->messages()
             ->with('sender')
             ->when($q, fn($b) =>
-                $b->where('subject','like',"%{$q}%")
-                  ->orWhere('body','like',   "%{$q}%")
+                $b->where('subject', 'like', "%{$q}%")
+                ->orWhere('body',    'like', "%{$q}%")
             )
             ->latest()
             ->get();
 
-        // 3) activity log milik Post ini
-        $activities = Activity::forSubject($selectedPost)->latest()->get();
+        $postActivities = Activity::forSubject($selectedPost)
+            ->when($q, fn($b) =>
+                $b->where('description', 'like', "%{$q}%")
+            )
+            ->latest()
+            ->get();
+
+
+        $txIds = $selectedPost->transactions()->pluck('id');
+
+      
+        $txActivities = Activity::query()
+            ->where('subject_type', Transaction::class)
+            ->whereIn('subject_id', $txIds)
+            ->when($q, fn($b) =>
+                $b->where('description', 'like', "%{$q}%")
+            )
+            ->latest()
+            ->get();
+
+        $activities = $postActivities
+            ->concat($txActivities)
+            ->sortByDesc('created_at')
+            ->values();
 
         return view('mitra.notifications', compact(
-            'selectedPost','messages','q','activities'
+            'selectedPost', 'messages', 'q', 'activities'
         ));
     }
+
 
 }

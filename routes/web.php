@@ -67,12 +67,10 @@ Route::middleware(['auth'])->prefix('dashboard-mitra')->name('mitra.')->group(fu
              ->name('editMitra');
         Route::put('informasi/{post:slug}', [MitraDashboardController::class, 'update'])
              ->name('updateMitra');
-        Route::get('informasi/{post:slug}/transaksi/{transaction}',[MitraDashboardController::class, 'showTransaction'])
-             ->name('transactions.show');
-        Route::get('informasi/{post:slug}/transaksi/{transaction}',[MitraDashboardController::class, 'showTransaction'])
-             ->name('transactions.show');
-        Route::put('informasi/{post:slug}/transaksi/{transaction}',[MitraDashboardController::class, 'updateTransaction'])
-             ->name('transactions.update');
+        // Route::get('informasi/{post:slug}/transaksi/{transaction}',[MitraDashboardController::class, 'showTransaction'])
+        //      ->name('transactions.show');
+        // Route::put('informasi/{post:slug}/transaksi/{transaction}',[MitraDashboardController::class, 'updateTransaction'])
+        //      ->name('transactions.update');
         
         // Message+Notification
         Route::prefix('informasi/{post:slug}')->name('informasi.')->group(function() {
@@ -97,8 +95,20 @@ Route::middleware(['auth'])->prefix('dashboard-mitra')->name('mitra.')->group(fu
                 ->name('messages.deleteAttachment');
 
             // Transaksi  
-            Route::get('transaksi/create', [MitraTransactionController::class,'create'])
+            Route::get('transaksi', [MitraTransactionController::class,'index'])
+                ->name('transactions.index');
+            Route::get('transaksi/create',    [MitraTransactionController::class,'create'])
                 ->name('transactions.create');
+            Route::post('transaksi',          [MitraTransactionController::class,'store'])
+                ->name('transactions.store');
+
+            // 2) Wildcard detail & update
+            Route::get('transaksi/{transaction}', [MitraDashboardController::class,'showTransaction'])
+                ->name('transactions.show')
+                ->whereNumber('transaction');    // mencegah “create” tertangkap di sini
+            Route::put('transaksi/{transaction}', [MitraDashboardController::class,'updateTransaction'])
+                ->name('transactions.update')
+                ->whereNumber('transaction');
 
         });
 });  
