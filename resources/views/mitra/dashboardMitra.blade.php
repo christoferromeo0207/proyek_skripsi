@@ -1,4 +1,4 @@
-{{-- resources/views/mitra/dashboardMitra.blade.php --}}
+
 <x-layout>
   <x-slot:title>Dashboard Mitra</x-slot:title>
 
@@ -42,11 +42,13 @@
                 @click.outside="open = false"
                 x-cloak
                 class="absolute right-0 mt-2 w-48 bg-orange-200 rounded-lg shadow-lg z-50">
-              <a href="{{ route('mitra.informasi.transactions.create', $post) }}"
+              {{-- Pengajuan Transaksi baru --}}
+                <a href="{{ route('mitra.informasi.transactions.create', $post) }}"
                 class="block px-4 py-2 hover:bg-gray-100 text-orange-500 no-underline">
                 Pengajuan Transaksi Baru
               </a>
-              <a href=""
+              {{-- Pengajuan Perusahaan baru --}}
+              <a href="{{ route('mitra.create') }}"
                 class="block px-4 py-2 hover:bg-gray-100 text-orange-500 no-underline">
                 Pengajuan Mitra Baru
               </a>

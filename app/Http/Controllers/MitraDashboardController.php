@@ -262,5 +262,49 @@ class MitraDashboardController extends Controller
         ));
     }
 
+    public function createPartner()
+    {
+        // 1) Ambil kategori untuk dropdown
+        $categories = Category::orderBy('name')->get();
+
+        // 2) Ambil semua user dengan role = marketing
+        $marketingUsers = User::where('role','marketing')
+                              ->orderBy('name')
+                              ->get();
+
+        // 3) Kirim ke view
+        return view('mitra.partners.create', compact('categories','marketingUsers'));
+    }
+
+    public function storePartner(Request $request)
+    {
+        $user = Auth::user();
+        // Validasi input
+        $data = $request->validate([
+            'title'           => 'required|string|max:255',
+            'category_id'     => 'required|exists:categories,id',
+            'body'            => 'required|string',
+            'phone'           => 'nullable|string|max:20',
+            'email'           => 'nullable|email|max:255',
+            'alamat'          => 'nullable|string|max:255',
+            'keterangan_bpjs' => 'required|in:yes,no',
+            'pembayaran'      => 'required|string|max:100',
+            'PIC'             => 'required|exists:users,id',
+            'tanggal_awal'    => 'required|date',
+            'tanggal_akhir'   => 'required|date|after_or_equal:tanggal_awal',
+        ]);
+
+        $data['PIC']        = $data['PIC'];
+        $data['slug']       = Str::slug($data['title']);
+        $data['pic_mitra']  = $user->name;
+
+        Post::create($data);
+
+        return redirect()
+            ->route('mitra.dashboard')
+            ->with('success','Pengajuan Mitra baru berhasil dikirim.');
+    }
+
+
  
 }

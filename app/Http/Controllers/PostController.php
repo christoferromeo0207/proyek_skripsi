@@ -119,7 +119,9 @@ class PostController extends Controller
     public function edit(Post $post)
     {
         $categories = Category::orderBy('name')->get();
-        $users      = User::orderBy('name')->get();
+        $users = User::where('role','marketing')
+                ->orderBy('name')
+                ->get();
         // Pilihan induk kecuali dirinya sendiri
         $parents    = Post::whereNull('parent_id')
                           ->where('id', '!=', $post->id)

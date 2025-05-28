@@ -67,11 +67,13 @@ Route::middleware(['auth'])->prefix('dashboard-mitra')->name('mitra.')->group(fu
              ->name('editMitra');
         Route::put('informasi/{post:slug}', [MitraDashboardController::class, 'update'])
              ->name('updateMitra');
-        // Route::get('informasi/{post:slug}/transaksi/{transaction}',[MitraDashboardController::class, 'showTransaction'])
-        //      ->name('transactions.show');
-        // Route::put('informasi/{post:slug}/transaksi/{transaction}',[MitraDashboardController::class, 'updateTransaction'])
-        //      ->name('transactions.update');
-        
+
+        // Mitra baru
+        Route::get('mitra/create', [MitraDashboardController::class, 'createPartner'])
+             ->name('create');
+        Route::post('mitra',      [MitraDashboardController::class, 'storePartner'])
+             ->name('store');
+ 
         // Message+Notification
         Route::prefix('informasi/{post:slug}')->name('informasi.')->group(function() {
             Route::get('notifications', [NotificationController::class, 'mitraIndex'])
@@ -102,7 +104,6 @@ Route::middleware(['auth'])->prefix('dashboard-mitra')->name('mitra.')->group(fu
             Route::post('transaksi',          [MitraTransactionController::class,'store'])
                 ->name('transactions.store');
 
-            // 2) Wildcard detail & update
             Route::get('transaksi/{transaction}', [MitraDashboardController::class,'showTransaction'])
                 ->name('transactions.show')
                 ->whereNumber('transaction');    // mencegah “create” tertangkap di sini
