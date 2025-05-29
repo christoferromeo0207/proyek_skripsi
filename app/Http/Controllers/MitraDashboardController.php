@@ -26,33 +26,36 @@ class MitraDashboardController extends Controller
     {
         $user = Auth::user();
         if ($user->role !== 'mitra') {
-            abort(403, 'Unauthorized.');
+            abort(403);
         }
 
-        $today = Carbon::today();
+        // grab exactly *one* Post for this mitra (or fail if none)
+        $post = Post::withCount('transactions')
+                    ->where('pic_mitra', $user->name)
+                    ->firstOrFail();
 
-        $total             = Post::where('pic_mitra', $user->name)->count();
-        // $newMessagesCount  = Message::where('user_id', $user->id)
-        //                             ->where('is_read', 0)
-        //                             ->count();
-        $post = Post::where('pic_mitra', $user->name)->first();
-        $messageCount = Message::where('post_id', $post->id)->count();
-        $activeCount       = Post::where('pic_mitra', $user->username)
-                                 ->whereDate('tanggal_awal', '<=', $today)
-                                 ->whereDate('tanggal_akhir', '>=', $today)
-                                 ->count();
-        $companyTitle      = Post::where('pic_mitra', $user->name)
-                                 ->value('title')
-                             ?? 'Mitra';
-        $post = Post::where('pic_mitra', $user->name)->first();
+        // now you have:
+        //  - $post->transactions_count  (an integer)
+        //  - $post->transactions        (a Collection if you need the rows)
+
+        $total         = $post->transactions_count;
+        $messageCount  = Message::where('post_id', $post->id)->count();
+        $today         = Carbon::today();
+        $activeCount   = Post::where('pic_mitra', $user->name)
+                            ->whereDate('tanggal_awal','<=',$today)
+                            ->whereDate('tanggal_akhir','>=',$today)
+                            ->count();
+        $companyTitle  = $post->title;
+
         return view('mitra.dashboardMitra', compact(
+            'post',
             'total',
             'messageCount',
             'activeCount',
-            'companyTitle',
-            'post',
+            'companyTitle'
         ));
     }
+
 
     public function show(Post $post)
     {

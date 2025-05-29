@@ -105,7 +105,7 @@
     <div class="px-6 md:px-12 grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
 
       {{-- Card: Jumlah Kerjasama --}}
-      <a href="{{ url('/schedule') }}"
+      <a href="{{ route('mitra.informasi.show', $post) }} #produkKerjasama"
          class="block bg-orange-200 bg-opacity-50 rounded-2xl p-6 shadow-lg
                 transform transition hover:shadow-xl hover:scale-105 hover:bg-orange-400
                 no-underline">
@@ -113,7 +113,7 @@
           <i class="fas fa-handshake text-white text-4xl"></i>
         </div>
         <h3 class="text-lg font-semibold text-white text-center mb-2">
-          Jumlah Kerjasama
+          Kerjasama dengan Rumah Sakit
         </h3>
         <div class="text-3xl font-extrabold text-white text-center mb-1">
           {{ $total }}
@@ -142,7 +142,23 @@
 
 
       {{-- Card: Status Kerjasama --}}
-      <a href="{{ url('/schedule') }}"
+      @php
+            $today = \Carbon\Carbon::today();
+            $start = \Carbon\Carbon::parse($post->tanggal_awal);
+            $end   = \Carbon\Carbon::parse($post->tanggal_akhir);
+
+            if ($today->lt($start)) {
+                $status = 'Proses';
+                $color  = 'bg-yellow-500';
+            } elseif ($today->between($start, $end)) {
+                $status = 'Aktif';
+                $color  = 'bg-green-500';
+            } else {
+                $status = 'Berakhir';
+                $color  = 'bg-red-500';
+            }
+        @endphp
+      <a href="{{ route('mitra.informasi.show', $post) }}"
          class="block bg-orange-200 bg-opacity-50 rounded-2xl p-6 shadow-lg
                 transform transition hover:shadow-xl hover:scale-105 hover:bg-orange-400
                 no-underline">
@@ -150,12 +166,16 @@
           <i class="fas fa-calendar-alt text-white text-4xl"></i>
         </div>
         <h3 class="text-lg font-semibold text-white text-center mb-2">
-          Status Kerjasama
+          Periode Kerjasama
         </h3>
-        <div class="text-3xl font-extrabold text-white text-center mb-1">
-          {{ $activeCount }}
+        <div class="text-2xl font-extrabold text-white text-center mb-1">
+           {{ $start->format('d M Y') }} &ndash; {{ $end->format('d M Y') }}
         </div>
-        <p class="text-sm text-white/90 text-center">Aktif</p>
+        <div class="flex justify-center">
+          <span class="{{ $color }} text-white font-bold px-3 py-1 rounded-lg text-sm">
+            {{ $status }}
+          </span>
+        </div>
       </a>
 
     </div>

@@ -71,7 +71,7 @@ class Post extends Model
     
     public function transactions()
     {
-        return $this->hasMany(Transaction::class);
+        return $this->hasMany(Transaction::class, 'post_id');
     }
 
     public function messages()

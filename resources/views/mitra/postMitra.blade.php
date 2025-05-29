@@ -254,7 +254,7 @@
 
 
     <!-- Produk Kerjasama Hasil Transaksi -->
-      <div class="w-11/12 md:w-4/5 lg:w-3/4 bg-white/60 rounded-xl shadow-lg p-6 mt-8">
+      <div id="produkKerjasama" class="w-11/12 md:w-4/5 lg:w-3/4 bg-white/60 rounded-xl shadow-lg p-6 mt-8">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-orange-500 font-bold text-lg">Produk Kerjasama</h2>
 
