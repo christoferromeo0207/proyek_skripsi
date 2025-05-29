@@ -227,18 +227,15 @@ class PostController extends Controller
             abort(404, 'File not found.');
         }
 
-        $oldPath = $files[$index];                              // e.g. "file_path/foo.jpg"
-        $ext     = pathinfo($oldPath, PATHINFO_EXTENSION);      // "jpg"
+        $oldPath = $files[$index];                              
+        $ext     = pathinfo($oldPath, PATHINFO_EXTENSION);      
         $base    = Str::slug(pathinfo($oldPath, PATHINFO_FILENAME)); 
-        $newName = Str::slug($request->new_name) . '.' . $ext;   // slugified new name
+        $newName = Str::slug($request->new_name) . '.' . $ext;  
+        
+        $newPath = dirname($oldPath) . '/' . $newName;          
 
-        // 3) Build the new path in the same folder
-        $newPath = dirname($oldPath) . '/' . $newName;          // e.g. "file_path/bar.jpg"
-
-        // 4) Move on the public disk
         Storage::disk('public')->move($oldPath, $newPath);
 
-        // 5) Update our array & save back to the model
         $files[$index]    = $newPath;
         $post->file_path  = json_encode(array_values($files));
         $post->save();

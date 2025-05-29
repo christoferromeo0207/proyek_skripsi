@@ -10,13 +10,16 @@
       <form method="POST" action="{{ route('mitra.store') }}" class="space-y-6">
         @csrf
 
-        {{-- Judul Perusahaan --}}
+       {{-- Judul Perusahaan --}}
         <div>
           <label class="block text-orange-600 font-semibold">Nama Perusahaan</label>
-          <input name="title"
-                 value="{{ old('title') }}"
-                 class="w-full border rounded p-2"
-                 required>
+          <input
+            name="title"
+            value="{{ old('title') }}"
+            placeholder="Masukkan nama perusahaan"
+            class="w-full border rounded p-2"
+            required
+          >
           @error('title')<p class="text-red-600">{{ $message }}</p>@enderror
         </div>
 
@@ -26,8 +29,10 @@
           <select name="category_id" class="w-full border rounded p-2" required>
             <option value="">— Pilih Kategori —</option>
             @foreach($categories as $cat)
-              <option value="{{ $cat->id }}"
-                      {{ old('category_id') == $cat->id ? 'selected' : '' }}>
+              <option
+                value="{{ $cat->id }}"
+                {{ old('category_id') == $cat->id ? 'selected' : '' }}
+              >
                 {{ $cat->name }}
               </option>
             @endforeach
@@ -38,30 +43,47 @@
         {{-- Deskripsi --}}
         <div>
           <label class="block text-orange-600 font-semibold">Deskripsi</label>
-          <textarea name="body"
-                    rows="4"
-                    class="w-full border rounded p-2"
-                    required>{{ old('body') }}</textarea>
+          <textarea
+            name="body"
+            rows="4"
+            placeholder="Tuliskan deskripsi perusahaan"
+            class="w-full border rounded p-2"
+            required
+          >{{ old('body') }}</textarea>
           @error('body')<p class="text-red-600">{{ $message }}</p>@enderror
         </div>
 
         {{-- Kontak --}}
         <div>
           <label class="block text-orange-600 font-semibold">Telepon</label>
-          <input name="phone" value="{{ old('phone') }}"
-                 class="w-full border rounded p-2">
+          <input
+            name="phone"
+            value="{{ old('phone') }}"
+            placeholder="08xxxxxxxxxx"
+            class="w-full border rounded p-2"
+          >
           @error('phone')<p class="text-red-600">{{ $message }}</p>@enderror
         </div>
+
         <div>
           <label class="block text-orange-600 font-semibold">Email</label>
-          <input name="email" value="{{ old('email') }}"
-                 class="w-full border rounded p-2">
+          <input
+            name="email"
+            value="{{ old('email') }}"
+            placeholder="email@gmail.com"
+            class="w-full border rounded p-2"
+          >
           @error('email')<p class="text-red-600">{{ $message }}</p>@enderror
         </div>
+
         <div>
           <label class="block text-orange-600 font-semibold">Alamat</label>
-          <input name="alamat" value="{{ old('alamat') }}"
-                 class="w-full border rounded p-2">
+          <input
+            name="alamat"
+            value="{{ old('alamat') }}"
+            placeholder="Masukkan alamat lengkap"
+            class="w-full border rounded p-2"
+          >
           @error('alamat')<p class="text-red-600">{{ $message }}</p>@enderror
         </div>
 
