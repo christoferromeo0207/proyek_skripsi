@@ -42,7 +42,7 @@ class LoginController extends Controller
                 case 'mitra':
                     return redirect()->route('mitra.dashboard');
                 case 'marketing':
-                    return redirect()->route('marketing.dashboard');
+                    return redirect()->route('dashboardMarketing');
                 case 'admin':
                     return redirect()->route('dashboard');
                 default:

@@ -17,34 +17,58 @@ class MarketingDashboardController extends Controller
 
     public function index()
     {
-        // hanya untuk marketing
         if (Auth::user()->role !== 'marketing') {
             abort(403);
         }
 
         $myId = Auth::id();
 
-        // 1) jumlah mitra di bawah PIC ini
-        $mitraCount = Transaction::where('pic_rs', $myId)
-                        ->distinct()
-                        ->count('pic_mitra');
+        $mitraCount       = Transaction::where('pic_rs', $myId)
+                                ->distinct()
+                                ->count('pic_rs');
 
-        // 2) kategori perusahaan (sesuaikan model Anda)
-        $kategoriCount = Category::count();
+        $kategoriCount    = Category::count();
 
-        // 3) berapa banyak dari mitra-mitra itu masih “proses”
-        $mitraProsesCount = Transaction::where('pic_rs', $myId)
-            ->where(fn($q) => $q
-                ->where('approval_rs', 0)
-                ->orWhere('approval_mitra', 0)
-            )
+        $mitraStatusCount = Transaction::where('pic_rs', $myId)
+            ->where(function($q) {
+                $q->where(function($q1) {
+                        $q1->where('approval_rs', 0)
+                        ->where('approval_mitra', 1);
+                    })
+                ->orWhere(function($q2) {
+                        $q2->where('approval_rs', 1)
+                        ->where('approval_mitra', 0);
+                    });
+            })
             ->distinct()
             ->count('pic_mitra');
 
-        return view('dashboardMarketing', compact(
-            'mitraCount',
-            'kategoriCount',
-            'mitraProsesCount'
-        ));
+
+        $stats = [
+            [
+                'Total Mitra', 
+                $mitraCount, 
+                'Mitra di bawah PIC Anda', 
+                'fas fa-users', 
+                route('posts.index')    
+            ],
+            [
+                'Kategori',
+                $kategoriCount,
+                'Jumlah kategori perusahaan',
+                'fas fa-list',
+                route('categories.index')
+            ],
+            [
+                'Proses Mitra',
+                $mitraStatusCount,
+                'Mitra yang masih proses',
+                'fas fa-hourglass-half',
+                route('dashboardMarketing') 
+            ],
+        ];
+
+        return view('dashboardMarketing', compact('stats'));
     }
+
 }

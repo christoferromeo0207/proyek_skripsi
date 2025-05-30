@@ -46,7 +46,11 @@ class UserController extends Controller
 
         try {
             // $data['password'] = bcrypt($data['password']);
+            
+            $data['role'] = 'marketing';
+
             $user = User::create($data);
+            
 
             Log::info('User created successfully', ['id' => $user->id]);
 

@@ -90,10 +90,19 @@ Route::middleware(['auth'])->prefix('dashboard-mitra')->name('mitra.')->group(fu
 });  
 
 
-// marketing
-Route::get('/dashboardMarketing', [MarketingDashboardController::class, 'index'])
-     ->middleware('auth')
-     ->name('marketing.dashboard');
+// Route::middleware(['auth','role:admin'])->group(function() {
+
+// });
+
+
+
+
+
+Route::middleware(['auth','role:marketing'])
+     ->get('/dashboardMarketing', [MarketingDashboardController::class, 'index'])
+     ->name('dashboardMarketing');
+
+
 
 
 //role: admin
@@ -118,11 +127,10 @@ Route::controller(PasswordController::class)->group(function () {
 });
 
 // Authenticated Routes
-//role: admin,marketing
+//role: admin
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/logout', function () {Auth::logout();return redirect()->route('login');})->name('logout');
-    //role: admin
     Route::get('/users', [UserController::class, 'index'])->name('user.index');
     Route::get('/users/create', [UserController::class, 'create'])->name('user.create');
     Route::post('/users', [UserController::class, 'store'])->name('user.store');

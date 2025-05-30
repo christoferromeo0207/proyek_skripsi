@@ -37,7 +37,7 @@
       @scroll.window="onScroll"
 >
   {{-- Header --}}
-  @if (! request()->routeIs(['dashboard','marketing.dashboard','mitra.dashboard']))
+  @if (! request()->routeIs(['dashboard','dashboardMarketing','mitra.dashboard']))
     @php
       // choose home route by role
       $homeRoute = auth()->user()->role === 'mitra'
@@ -116,7 +116,7 @@
   </div>
 
   {{-- Footer --}}
-  @if (! request()->routeIs(['dashboard','marketing.dashboard','mitra.dashboard']))
+  @if (! request()->routeIs(['dashboard','dashboardMarketing','mitra.dashboard']))
     <footer class="w-full bg-orange-300 bg-opacity-70 text-white text-sm py-3 text-center">
       <div class="mx-auto max-w-screen-xl">
         <div class="sm:flex sm:items-center sm:justify-between">
