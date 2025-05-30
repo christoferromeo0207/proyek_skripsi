@@ -30,27 +30,6 @@ use App\Mail\NewMessageMail;
 
 
 
-
-
-
-// // Routes untuk admin & marketing
-// Route::middleware(['auth','role:admin,marketing'])
-//      ->group(function(){
-//          Route::get('/dashboard', [DashboardController::class, 'index'])
-//               ->name('dashboard');
-//          Route::resource('posts', PostController::class)
-//               ->except(['create','edit']); // contoh
-//          Route::resource('categories', CategoryController::class)
-//               ->only(['index','store']);
-//      });
-
-
-// // Routes untuk admin
-// Route::middleware(['auth','role:admin'])->prefix('admin')->name('admin.')->group(function(){
-//     // route admin eksklusif
-// });
-
-
 // Grup Routes Milik Mitra
 Route::middleware(['auth'])->prefix('dashboard-mitra')->name('mitra.')->group(function() {
         Route::get('/', [MitraDashboardController::class, 'index'])
