@@ -6,11 +6,16 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   @vite(['resources/css/app.css','resources/js/app.js'])
 
+  {{-- Fonts & icons --}}
   <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+  {{-- Bootstrap --}}
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
 
+  {{-- Alpine & Bootstrap JS --}}
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
@@ -28,7 +33,7 @@
 </head>
 
 <body class="h-full w-full m-0 p-0 overflow-x-hidden"
-      x-data="{ sidebarOpen: false, scrollY: window.scrollY, showHeader: true,
+      x-data="{ scrollY: window.scrollY, showHeader: true,
                 onScroll() {
                   this.showHeader = window.scrollY < this.scrollY;
                   this.scrollY  = window.scrollY;
@@ -36,13 +41,21 @@
               }"
       @scroll.window="onScroll"
 >
-  {{-- Header --}}
+  {{-- Header: only on non-dashboard routes --}}
   @if (! request()->routeIs(['dashboard','dashboardMarketing','mitra.dashboard']))
     @php
-      // choose home route by role
-      $homeRoute = auth()->user()->role === 'mitra'
-                 ? route('mitra.dashboard')
-                 : route('dashboard');
+      // pick home route by user role
+      switch(auth()->user()->role) {
+        case 'mitra':
+          $homeRoute = route('mitra.dashboard');
+          break;
+        case 'marketing':
+          $homeRoute = route('dashboardMarketing');
+          break;
+        case 'admin':
+        default:
+          $homeRoute = route('dashboard');
+      }
     @endphp
 
     <div x-show="showHeader"
@@ -54,19 +67,16 @@
          x-transition:leave-end="opacity-0 -translate-y-3"
          class="sticky top-0 z-50 bg-orange-200 px-6 pt-3 pb-1 shadow-md"
     >
-      <div class="flex justify-between items-start">
-
+      <div class="flex justify-between items-center">
         {{-- Logo / Title --}}
         <a href="{{ $homeRoute }}"
            class="flex items-center space-x-3 hover:opacity-90 transition duration-200 no-underline">
           <img src="{{ asset('img/logo_rs.png') }}"
                alt="Logo"
                class="w-12 h-12 rounded-full object-cover">
-          <div class="leading-5">
-            <span class="font-bold text-xl text-[rgb(255,138,43)]">
-              Sistem Kelola Agensi Mitra
-            </span>
-          </div>
+          <span class="font-bold text-xl text-[rgb(255,138,43)]">
+            Sistem Kelola Agensi Mitra
+          </span>
         </a>
 
         {{-- User dropdown --}}
@@ -74,14 +84,9 @@
              @mouseenter="open = true" @mouseleave="open = false"
         >
           <button @click="open = !open"
-                  class="flex items-center space-x-2 mt-1 pt-1 hover:opacity-80 transition-opacity duration-300 focus:outline-none">
-            <svg xmlns="http://www.w3.org/2000/svg"
-                 class="w-7 h-7"
-                 fill="rgb(255, 138, 43)"
-                 viewBox="0 0 24 24">
-              <path d="…"/>
-            </svg>
-            <span class="font-bold text-lg" style="color: rgb(255, 138, 43);">
+                  class="flex items-center space-x-2 hover:opacity-80 transition-opacity duration-300 focus:outline-none">
+            <i class="fas fa-user-circle text-[rgb(255,138,43)] text-2xl"></i>
+            <span class="font-bold text-lg text-[rgb(255,138,43)]">
               {{ Auth::user()->name }}
             </span>
           </button>
@@ -105,7 +110,6 @@
             </form>
           </div>
         </div>
-
       </div>
     </div>
   @endif
@@ -115,7 +119,7 @@
     {{ $slot }}
   </div>
 
-  {{-- Footer --}}
+  {{-- Footer: only on non-dashboard routes --}}
   @if (! request()->routeIs(['dashboard','dashboardMarketing','mitra.dashboard']))
     <footer class="w-full bg-orange-300 bg-opacity-70 text-white text-sm py-3 text-center">
       <div class="mx-auto max-w-screen-xl">

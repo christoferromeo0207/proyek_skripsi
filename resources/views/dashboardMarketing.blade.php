@@ -5,7 +5,7 @@
 
 
         <!-- Top Container -->
-        <div class="relative top-10 md:top-16">
+        <div class="relative top-10 md:top-16"> 
 
             <!-- Menu Bar -->
             <div class="mx-auto mb-6 w-[90%] md:w-[60%] rounded-2xl shadow-lg"

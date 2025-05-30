@@ -37,7 +37,6 @@ class LoginController extends Controller
             // 4) Log them in
             Auth::login($user, $request->filled('remember'));
 
-           
             switch ($user->role) {
                 case 'mitra':
                     return redirect()->route('mitra.dashboard');

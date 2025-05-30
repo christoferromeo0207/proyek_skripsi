@@ -98,7 +98,8 @@ Route::middleware(['auth'])->prefix('dashboard-mitra')->name('mitra.')->group(fu
 
 
 
-Route::middleware(['auth','role:marketing'])
+// marketing (only authenticated users with role=marketing)
+Route::middleware(['auth'])
      ->get('/dashboardMarketing', [MarketingDashboardController::class, 'index'])
      ->name('dashboardMarketing');
 

@@ -82,10 +82,10 @@ class Kernel extends HttpKernel
      * @var array<string, class-string|string>
      */
     protected $middlewareAliases = [
-        'auth' => \Illuminate\Auth\Middleware\Authenticate::class,
-        'guest' => \Illuminate\Auth\Middleware\RedirectIfAuthenticated::class,
+        'auth'     => \Illuminate\Auth\Middleware\Authenticate::class,
+        'guest'    => \Illuminate\Auth\Middleware\RedirectIfAuthenticated::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-        'role' => \App\Http\Middleware\CheckRole::class,
+        'role'     => \App\Http\Middleware\CheckRole::class,
     ];
 
     /**
