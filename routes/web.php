@@ -103,6 +103,10 @@ Route::middleware(['auth'])
      ->get('/dashboardMarketing', [MarketingDashboardController::class, 'index'])
      ->name('dashboardMarketing');
 
+Route::get('/posts-pic', [MarketingDashboardController::class, 'postsPIC'])
+->middleware(['auth'])
+->name('posts.pic');
+
 
 
 

@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Category;
+use App\Models\Post;
 use App\Models\Transaction;
 
 class MarketingDashboardController extends Controller
@@ -50,7 +51,7 @@ class MarketingDashboardController extends Controller
                 $mitraCount, 
                 'Mitra di bawah PIC Anda', 
                 'fas fa-users', 
-                route('posts.index')    
+                route('posts.pic')    
             ],
             [
                 'Kategori',
@@ -70,5 +71,19 @@ class MarketingDashboardController extends Controller
 
         return view('dashboardMarketing', compact('stats'));
     }
+
+     public function postsPIC()
+    {
+        $userId = Auth::id();
+
+        // Asumsi: Post memiliki kolom pic_rs yang menyimpan user_id marketing
+        // Ubah sesuai struktur database Anda jika berbeda.
+        $posts = Post::where('PIC', $userId)
+                     ->orderBy('created_at', 'desc')
+                     ->paginate(9);
+
+        return view('postsPIC', compact('posts'));
+    }
+
 
 }
