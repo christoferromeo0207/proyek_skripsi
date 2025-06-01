@@ -27,6 +27,14 @@ class Post extends Model
         'deleted',
     ];
 
+    protected $casts = [
+        'tanggal_awal'  => 'date',
+        'tanggal_akhir' => 'date',
+        'created_at'    => 'datetime',
+        'updated_at'    => 'datetime',
+    ];
+
+
 
     public function category(): BelongsTo {
         return $this->belongsTo(Category::class, 'category_id');

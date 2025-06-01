@@ -113,20 +113,16 @@ class CategoryController extends Controller
             $post->tanggal_awal    = $validated['tanggal_awal'];
             $post->tanggal_akhir   = $validated['tanggal_akhir'];
             
-            // 3. Foreign key to category
             $post->category_id     = $categoryId;
             
-            // 4. Foreign key to user (PIC)
-            // Make sure PIC is lowercase in the database column name if needed
+
             $post->PIC = $validated['PIC'];
             
-            // Log the PIC assignment to help debug
             Log::debug('Assigning PIC value', [
                 'assigned_pic' => $validated['PIC'],
                 'user_exists' => User::where('id', $validated['PIC'])->exists()
             ]);
             
-            // 5. If there's a file upload, save to storage and fill file_path
             if ($request->hasFile('file_path') && $request->file('file_path')->isValid()) {
                 Log::debug('File upload detected, processing file');
                 
@@ -202,18 +198,87 @@ class CategoryController extends Controller
         }
     }
 
+    public function create()
+    {
+      
+        Log::info('Accessing category creation form', [
+            'user_id'=> Auth::id(),
+            'ip' => request()->ip(),
+        ]);
+
+  
+        return view('categoryCreate');
+    }
+
+
+     public function store(Request $request)
+    {
+        Log::info('Attempting to store new category', [
+            'user_id' => Auth::id(),
+            'ip'      => request()->ip(),
+        ]);
+
+        // Validasi input: name dan description wajib diisi
+        $validated = $request->validate([
+            'name'        => 'required|string|max:255|unique:categories,name',
+            'description' => 'nullable|string|max:1000',
+        ]);
+
+        try {
+            // 1) Buat slug dari nama
+            $slug = Str::slug($validated['name']);
+
+            // Jika slug kembar, tambahkan angka di belakang (misal rumah-sakit-2, dst):
+            $originalSlug = $slug;
+            $counter = 1;
+            while (Category::where('slug', $slug)->exists()) {
+                $slug = $originalSlug . '-' . $counter++;
+            }
+
+            // 2) Generate warna baru (hex) yang belum ada di tabel
+            //    Kita pakai loop: generate random hex, cek unique
+            do {
+                // Misal kita generate kode warna acak di rentang #000000 sampai #FFFFFF
+                $randomColor = sprintf(
+                    '#%06X', 
+                    mt_rand(0, 0xFFFFFF)
+                );
+            } while (Category::where('color', $randomColor)->exists());
+
+            // 3) Simpan data ke database
+            $category = new Category();
+            $category->name        = $validated['name'];
+            $category->slug        = $slug;
+            $category->color       = $randomColor;
+            $category->description = $validated['description'] ?? null;
+            $category->save();
+
+            Log::info('Category created successfully', [
+                'category_id'   => $category->id,
+                'category_name' => $category->name,
+                'slug'          => $category->slug,
+                'color'         => $category->color,
+            ]);
+
+            return redirect()
+                ->route('categories.index')
+                ->with('success', 'Kategori Mitra baru berhasil ditambahkan!');
+        } catch (\Exception $e) {
+            Log::error('Failed to create category', [
+                'error'   => $e->getMessage(),
+                'trace'   => $e->getTraceAsString(),
+                'user_id' => Auth::id(),
+            ]);
+
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Terjadi kesalahan saat menyimpan kategori. Silakan coba lagi.');
+        }
+    }
 
 
 
-    
-    
-    /**
-     * Log when a post is viewed
-     *
-     * @param  int  $postId
-     * @return void
-     */
-    
     private function logPostView($postId)
     {
         try {

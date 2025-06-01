@@ -24,9 +24,8 @@ class MarketingDashboardController extends Controller
 
         $myId = Auth::id();
 
-        $mitraCount       = Transaction::where('pic_rs', $myId)
-                                ->distinct()
-                                ->count('pic_rs');
+        $mitraCount       = Post::where('PIC', $myId)
+                                ->count('PIC');
 
         $kategoriCount    = Category::count();
 
@@ -65,7 +64,7 @@ class MarketingDashboardController extends Controller
                 $mitraStatusCount,
                 'Mitra yang masih proses',
                 'fas fa-hourglass-half',
-                route('dashboardMarketing') 
+                route('posts.pic') 
             ],
         ];
 

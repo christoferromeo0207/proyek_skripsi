@@ -90,11 +90,6 @@ Route::middleware(['auth'])->prefix('dashboard-mitra')->name('mitra.')->group(fu
 });  
 
 
-// Route::middleware(['auth','role:admin'])->group(function() {
-
-// });
-
-
 
 
 
@@ -210,6 +205,8 @@ Route::middleware('auth')->group(function () {
     //role: admin
     Route::prefix('authors')->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('authors.index');
+        Route::get('/categories/create', [CategoryController::class, 'create'])->name('categories.create');
+        Route::post('/categories',       [CategoryController::class, 'store'])->name('categories.store');
         Route::put('/users/{id}', [UserController::class, 'update'])->name('updateUser');
     });
     

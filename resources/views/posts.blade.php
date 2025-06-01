@@ -52,7 +52,7 @@
         href="{{ route('categories.index') }}"
         class="inline-block bg-orange-500 text-white px-4 py-2 rounded shadow hover:bg-orange-600 transition no-underline"
       >
-        Add Data
+        Tambah Mitra Baru
       </a>
 
     </div>
@@ -82,6 +82,17 @@
               <h2 class="mb-2 text-xl font-bold text-gray-900">{{ $post->title }}</h2>
             </a>
             <p class="mb-5 text-gray-600">{{ Str::limit($post->body, 100) }}</p>
+
+            
+          
+            @if ($post->tanggal_awal && $post->tanggal_akhir)
+              <p class="mb-4 text-sm text-orange-500">
+                <strong>Periode:</strong>
+                {{ $post->tanggal_awal->format('d M Y') }}
+                -
+                {{ $post->tanggal_akhir->format('d M Y') }}
+              </p>
+            @endif
 
             <div class="flex justify-between items-center">
               <span class="text-sm text-orange-600 font-medium">

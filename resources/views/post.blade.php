@@ -4,6 +4,7 @@
     <div x-data="{ fileModal: false, fileUrl: '', isImage: false }"
     class="w-full min-h-screen bg-gradient-to-br from-orange-200 to-orange-400 flex flex-col items-center py-10 space-y-8">
   
+    
       <!-- Main Card -->
       <div class="w-11/12 md:w-4/5 lg:w-3/4 bg-white/30 rounded-2xl shadow-2xl backdrop-blur-md p-8 relative">
         <!-- Action Button -->
