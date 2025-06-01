@@ -75,14 +75,17 @@ class MarketingDashboardController extends Controller
      public function postsPIC()
     {
         $userId = Auth::id();
+        $categories = Category::all();
 
-        // Asumsi: Post memiliki kolom pic_rs yang menyimpan user_id marketing
-        // Ubah sesuai struktur database Anda jika berbeda.
-        $posts = Post::where('PIC', $userId)
-                     ->orderBy('created_at', 'desc')
-                     ->paginate(9);
+        $myPosts = Post::where('PIC', $userId)
+                ->orderBy('created_at','desc')
+                ->paginate(9, ['*'], 'myPage');
 
-        return view('postsPIC', compact('posts'));
+        $otherPosts = Post::where('PIC','<>',$userId)
+                        ->orderBy('created_at','desc')
+                        ->paginate(9, ['*'], 'otherPage');
+
+        return view('postsPIC', compact('myPosts','otherPosts','categories'));
     }
 
 
