@@ -108,6 +108,26 @@ class Post extends Model
         return $this->belongsTo(Post::class, 'parent_id');
     }
 
+     public function calculateCommissionPercentage(): float
+    {
+        if (! $this->parent_id) {
+            return 0.00;
+        }
+        $parent = $this->parent()->first();
+        if ($parent && $parent->parent_id) {
+            return 5.00;
+        }
+        return 7.00;
+    }
+
+
+    public function calculateCommissionAmount(): float
+    {
+        $pct = $this->calculateCommissionPercentage();
+        $tv  = (float) $this->transaction_value;
+        return $tv * ($pct / 100);
+    }
+
 
 
 }
