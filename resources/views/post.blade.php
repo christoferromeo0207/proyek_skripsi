@@ -296,11 +296,10 @@
         </div>
       </div>
 
-      <!-- Komisi Perusahaan -->
+     <!-- Komisi Perusahaan -->
       <div class="w-11/12 md:w-4/5 lg:w-3/4 bg-white/60 rounded-xl shadow-lg p-6 mt-8">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-orange-500 font-bold text-lg">Komisi</h2>
-          {{-- Tombol Tambah Komisi (buka modal) --}}
           <button
             @click="document.getElementById('modal-komisi').classList.remove('hidden')"
             class="bg-green-500 hover:bg-green-600 text-white font-bold px-4 py-2 rounded-lg"
@@ -322,7 +321,6 @@
             </thead>
             <tbody>
               @php
-                // Kumpulkan semua transaksi dari semua anak perusahaan
                 $allChildTransactions = collect();
                 foreach ($post->children ?? [] as $child) {
                   foreach ($child->transactions as $tx) {
@@ -341,47 +339,33 @@
               @else
                 @foreach($allChildTransactions as $idx => $entry)
                   @php
-                    $child       = $entry['child'];
-                    $tx          = $entry['transaction'];
-                    $totalValue  = $tx->total_harga;
-                    $percent     = $child->commission_percentage ?? 0;
-                    $komisiValue = $totalValue * ($percent / 100.0);
+                    $child = $entry['child'];
+                    $tx = $entry['transaction'];
+                    $parent=$child->parent;
+
+
+                  $commissionAmount = $parent ? $parent->commission_amount : 0;
                   @endphp
                   <tr class="bg-white/50 hover:bg-white/70 transition">
-                    <!-- No -->
                     <td class="px-4 py-2">{{ $idx + 1 }}</td>
-
-                    <!-- Nama Anak Perusahaan -->
                     <td class="px-4 py-2">{{ $child->title }}</td>
-
-                    <!-- Item (nama produk) -->
                     <td class="px-4 py-2">{{ $tx->nama_produk ?? '-' }}</td>
-
-                    <!-- Nominal Komisi untuk transaksi ini -->
-                    <td class="px-4 py-2">
-                      Rp {{ number_format($komisiValue, 2, ',', '.') }}
-                    </td>
-
-                    <!-- Aksi -->
+                    <td class="px-4 py-2">Rp {{ number_format($commissionAmount, 2, ',', '.') }}</td>
                     <td class="px-4 py-2 flex gap-2">
-                      <!-- Edit detail anak -->
-                      <a href="{{ route('posts.edit', $child->slug) }}"
-                         class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-lg text-xs font-bold no-underline">
-                        Edit Anak
+                      <a href="{{ route('posts.transactions.edit', [$child, $tx]) }}"
+                        class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-lg text-xs font-bold no-underline">
+                        Edit
                       </a>
 
-                      <!-- Hapus transaksi -->
-                      <form
-                        action="{{ route('posts.transactions.destroy', [$child, $tx]) }}"
-                        method="POST"
-                        onsubmit="return confirm('Yakin ingin menghapus transaksi ini?');"
-                        class="inline"
-                      >
+                      <form action="{{ route('posts.transactions.destroy', [$child, $tx]) }}"
+                            method="POST"
+                            onsubmit="return confirm('Yakin ingin menghapus transaksi ini?');"
+                            class="inline">
                         @csrf
                         @method('DELETE')
                         <button type="submit"
                                 class="bg-red-400 hover:bg-red-500 text-white px-3 py-1 rounded-lg text-xs font-bold">
-                          Hapus Transaksi
+                          Delete
                         </button>
                       </form>
                     </td>
@@ -392,6 +376,7 @@
           </table>
         </div>
       </div>
+
 
       <!-- Produk Kerjasama Hasil Transaksi -->
       <div class="w-11/12 md:w-4/5 lg:w-3/4 bg-white/60 rounded-xl shadow-lg p-6 mt-8">
@@ -487,7 +472,7 @@
 
     <!-- Modal Tambah Komisi -->
     <div id="modal-komisi"
-         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
       <div class="bg-white rounded-lg shadow-lg w-11/12 md:w-2/3 lg:w-1/2">
         <!-- Header Modal -->
         <div class="flex justify-between items-center border-b px-4 py-3">
@@ -499,48 +484,41 @@
         <div class="p-6">
           <form action="{{ route('posts.store') }}" method="POST" class="space-y-4">
             @csrf
-            {{-- Karena ini akan menjadi child, kirim parent_id --}}
             <input type="hidden" name="parent_id" value="{{ $post->id }}">
 
-            {{-- Nama Anak Perusahaan --}}
             <div>
-              <label for="title" class="block font-medium text-gray-700">Nama Anak Perusahaan</label>
-              <input type="text"
-                     name="title"
-                     id="title"
-                     value="{{ old('title') }}"
-                     class="mt-1 block w-full border-gray-300 rounded-lg focus:ring-orange-400 focus:border-orange-400"
-                     placeholder="Masukkan Nama Anak"
-                     required>
-              @error('title')
+              <label for="child_post_id" class="block font-medium text-gray-700">Pilih Anak Perusahaan</label>
+              <input list="children-list"
+                    name="child_post_id"
+                    id="child_post_id"
+                    class="mt-1 block w-full border-gray-300 rounded-lg focus:ring-orange-400 focus:border-orange-400"
+                    placeholder="Cari dan pilih perusahaan anak"
+                    value="{{ old('child_post_id') }}"
+                    required>
+              <datalist id="children-list">
+                @foreach ($allChildren as $childOption)
+                  <option value="{{ $childOption->id }}">{{ $childOption->title }}</option>
+                @endforeach
+              </datalist>
+              @error('child_post_id')
                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
               @enderror
             </div>
 
-            {{-- Nilai Transaksi (Rp) --}}
             <div>
               <label for="transaction_value" class="block font-medium text-gray-700">Nilai Transaksi (Rp)</label>
               <input type="number"
-                     name="transaction_value"
-                     id="transaction_value"
-                     step="0.01"
-                     value="{{ old('transaction_value') }}"
-                     class="mt-1 block w-full border-gray-300 rounded-lg focus:ring-orange-400 focus:border-orange-400"
-                     placeholder="Contoh: 1500000"
-                     required>
+                    name="transaction_value"
+                    id="transaction_value"
+                    step="0.01"
+                    value="{{ old('transaction_value') }}"
+                    class="mt-1 block w-full border-gray-300 rounded-lg focus:ring-orange-400 focus:border-orange-400"
+                    placeholder="Contoh: 1500000"
+                    required>
               @error('transaction_value')
                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
               @enderror
             </div>
-
-            {{-- Jika validasi gagal, buka kembali modal --}}
-            @if ($errors->any() && old('parent_id') == $post->id)
-              <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                  document.getElementById('modal-komisi').classList.remove('hidden');
-                });
-              </script>
-            @endif
 
             <div class="flex justify-end space-x-2 pt-4">
               <button type="button"
@@ -557,6 +535,7 @@
         </div>
       </div>
     </div>
+
 
     {{-- Skrip untuk file preview --}}
     <script>
