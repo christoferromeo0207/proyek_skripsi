@@ -21,12 +21,12 @@ class PostController extends Controller
         $query = Post::query();
         $categories = Category::orderBy('name')->get();
 
-        // Pencarian judul
+      
         if ($request->filled('search')) {
             $query->where('title', 'like', '%' . $request->search . '%');
         }
 
-        // Filter kategori
+       
         if ($request->filled('category')) {
             $query->where('category_id', $request->category);
         }
@@ -40,7 +40,6 @@ class PostController extends Controller
     public function create()
     {
         $categories = Category::orderBy('name')->get();
-        // Pilihan induk (hanya yang belum punya parent, untuk mencegah loop)
         $parents = Post::whereNull('parent_id')->get();
 
         return view('posts.create', compact('categories', 'parents'));
@@ -48,7 +47,7 @@ class PostController extends Controller
 
     public function store(Request $request)
     {
-        // 1) Validasi termasuk parent_id & transaction_value
+     
         $data = $request->validate([
             'title'             => 'required|string|max:255',
             'category_id'       => 'required|exists:categories,id',
@@ -68,10 +67,9 @@ class PostController extends Controller
             'transaction_value' => 'required|numeric|min:0',
         ]);
 
-        // 2) Generate slug jika perlu
         $data['slug'] = $data['slug'] ?? Str::slug($data['title']);
 
-        // 3) Handle upload file jika ada
+       
         if ($request->hasFile('file_path')) {
             $paths = [];
             foreach ($request->file('file_path') as $file) {
@@ -80,7 +78,7 @@ class PostController extends Controller
             $data['file_path'] = json_encode($paths);
         }
 
-        // 4) Simpan entri baru (anak perusahaan)
+       
         $child = Post::create($data);
 
         // Penggunaan Decision Tree
@@ -109,7 +107,7 @@ class PostController extends Controller
 
     public function show(Post $post)
     {
-        // Contoh: eager‐load transaksi terkait
+
         $transactions = $post->transactions()->latest()->get();
 
         return view('post', compact('post', 'transactions'))
@@ -122,7 +120,7 @@ class PostController extends Controller
         $users = User::where('role','marketing')
                 ->orderBy('name')
                 ->get();
-        // Pilihan induk kecuali dirinya sendiri
+        // Pilihan induk untuk komisi
         $parents    = Post::whereNull('parent_id')
                           ->where('id', '!=', $post->id)
                           ->get();
@@ -133,7 +131,7 @@ class PostController extends Controller
     
     public function update(Request $request, Post $post)
     {
-        // 1) Validasi
+        // Validasi
         $data = $request->validate([
             'title'             => 'required|string|max:255',
             'category_id'       => 'required|exists:categories,id',
@@ -155,7 +153,6 @@ class PostController extends Controller
         ]);
     
 
-        // 2) Upload file baru jika ada
         if ($request->hasFile('file_path')) {
             $paths = [];
             foreach ($request->file('file_path') as $file) {
@@ -164,13 +161,12 @@ class PostController extends Controller
             $data['file_path'] = json_encode($paths);
         }
 
-        // 3) Simpan ID parent lama untuk pembersihan bila berubah
         $oldParentId = $post->parent_id;
     
-        // 4) Update data anak
+        // untuk komisi jika ada
         $post->update($data);
 
-        // 5) Penggunaan Decision Tree
+
         // $training   = CommissionTraining::all();
         // $samples    = $training->pluck('features')->toArray();
         // $labels     = $training->pluck('label')->toArray();
@@ -183,7 +179,6 @@ class PostController extends Controller
         // $percent   = $level?->percentage ?? 0;
         // $amount    = $data['transaction_value'] * ($percent / 100);
 
-        // // 6) Clear komisi di induk lama bila pindah parent
         // if ($oldParentId && $oldParentId !== $data['parent_id']) {
         //     Post::where('id', $oldParentId)
         //         ->update([
@@ -192,7 +187,7 @@ class PostController extends Controller
         //         ]);
         // }
 
-        // // 7) Update komisi di induk baru
+        // // Update komisi
         // if ($newParent = Post::find($data['parent_id'])) {
         //     $newParent->commission_percentage = $percent;
         //     $newParent->commission_amount     = $amount;
@@ -215,12 +210,11 @@ class PostController extends Controller
 
    public function renameFile(Request $request, Post $post, int $index)
     {
-        // 1) Validate new name
+        // validasi
         $request->validate([
             'new_name' => 'required|string|max:255',
         ]);
 
-        // 2) Decode the current JSON list of paths
         $files = json_decode($post->file_path ?? '[]', true);
 
         if (! isset($files[$index])) {
@@ -243,12 +237,10 @@ class PostController extends Controller
         return back()->with('success', 'File renamed successfully.');
     }
 
-    /**
-     * Delete one of the stored files.
-     */
+
     public function deleteFile(Post $post, int $index)
     {
-        // 1) Decode current list
+
         $files = json_decode($post->file_path ?? '[]', true);
 
         if (! isset($files[$index])) {
@@ -257,10 +249,10 @@ class PostController extends Controller
 
         $path = $files[$index];
 
-        // 2) Delete from public disk
+  
         Storage::disk('public')->delete($path);
 
-        // 3) Remove from array, reindex, save back
+      
         array_splice($files, $index, 1);
         $post->file_path = json_encode(array_values($files));
         $post->save();
@@ -275,15 +267,13 @@ class PostController extends Controller
             abort(404, 'File not found');
         }
 
-        // Resolve the full path on disk
+  
         $fullPath = Storage::disk('public')->path($files[$index]);
 
-        // Inline display (PDF, images, etc)
+     
         return response()->file($fullPath);
     }
-    /**
-     * Force-download the file.
-     */
+
       public function downloadFile(Post $post, int $index)
     {
         $files = json_decode($post->file_path ?? '[]', true);
@@ -291,11 +281,10 @@ class PostController extends Controller
             abort(404, 'File not found');
         }
 
-        // Resolve the full path on disk
         $fullPath = Storage::disk('public')->path($files[$index]);
         $name     = basename($files[$index]);
 
-        // Use Laravel’s response helper to force a download
+ 
         return response()->download($fullPath, $name);
     }
 

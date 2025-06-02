@@ -38,6 +38,7 @@ return new class extends Migration
                   ->cascadeOnUpdate()
                   ->nullOnDelete();
 
+            // untuk anak perusahaan (jika ada)
             $table->foreignId('parent_id')
                 ->nullable()
                 ->constrained('posts')

@@ -96,13 +96,13 @@ class Post extends Model
             ->setDescriptionForEvent(fn(string $eventName) => "Telah {$eventName} data mitra: “{$this->title}”");
     }
 
-    // children
+    // anak perusahaan
     public function children()
     {
         return $this->hasMany(Post::class, 'parent_id');
     }
 
-    // parent 
+    // induk perusahaan 
     public function parent()
     {
         return $this->belongsTo(Post::class, 'parent_id');

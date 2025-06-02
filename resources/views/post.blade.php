@@ -306,18 +306,18 @@
         </div>
       </div>
   
-      <!-- Section: Komisi Table -->
+      <!-- Komisi Perusahaan-->
       <div class="w-11/12 md:w-4/5 lg:w-3/4 bg-white/60 rounded-xl shadow-lg p-6 mt-8">
         <h2 class="text-orange-500 font-bold text-lg mb-4">Komisi</h2>
         <div class="overflow-x-auto">
           <table class="w-full text-sm text-left text-gray-700">
             <thead class="text-xs text-gray-700 uppercase bg-orange-300">
-              <tr>
+              <tr>  
                 <th class="px-4 py-2">No</th>
-                <th class="px-4 py-2">Item</th>
-                <th class="px-4 py-2">Nominal</th>
                 <th class="px-4 py-2">Anak Perusahaan</th>
-                <th class="px-4 py-2">#</th>
+                <th class="px-4 py-2">Item</th>
+                <th class="px-4 py-2">Nominal Komisi</th>
+                <th class="px-4 py-2">Action</th>
               </tr>
             </thead>
             <tbody>
