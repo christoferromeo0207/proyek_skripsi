@@ -104,22 +104,32 @@
         {{-- PIC Mitra --}}
         <div>
           <label class="block text-orange-500 font-semibold mb-1">PIC Mitra:</label>
-          <input type="text" name="pic_mitra"
-                 class="w-full rounded-lg border-gray-300 focus:ring-orange-400 focus:border-orange-400 @error('pic_mitra') border-red-500 @enderror"
-                 placeholder="Masukkan nama PIC Mitra…"
-                 value="{{ old('pic_mitra') }}" readonly>
-          @error('pic_mitra')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+          <input 
+            type="text" 
+            name="pic_mitra"
+            value="{{ $post->pic_mitra }}" 
+            readonly
+            class="w-full rounded-lg border-gray-300 bg-gray-100 cursor-not-allowed @error('pic_mitra') border-red-500 @enderror"
+          >
+          @error('pic_mitra')
+            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+          @enderror
         </div>
 
+
         {{-- Approval Mitra --}}
+        <input type="hidden" name="approval_mitra" value="0">
         <div>
           <label class="block text-orange-500 font-semibold mb-1">Approval Mitra:</label>
-          <select name="approval_mitra" disabled
-                  class="w-full rounded-lg border-gray-300 focus:ring-orange-400 focus:border-orange-400"
-                  required>
-            <option value="1">Ya</option>
-            <option value="0">Tidak</option>
-          </select>
+          <input 
+            type="text"
+            value="Tidak"
+            readonly
+            class="w-full rounded-lg border-gray-300 bg-gray-100 cursor-not-allowed"
+          >
+          @error('approval_mitra')
+            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+          @enderror
         </div>
 
         {{-- Status --}}
@@ -132,6 +142,9 @@
             readonly
             class="w-full rounded-lg border-gray-300 bg-gray-100 cursor-not-allowed"
           >
+          @error('status')
+            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+          @enderror
         </div>
 
         {{-- Submit --}}

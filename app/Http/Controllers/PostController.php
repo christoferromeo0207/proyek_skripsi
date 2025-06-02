@@ -81,25 +81,7 @@ class PostController extends Controller
        
         $child = Post::create($data);
 
-        // Penggunaan Decision Tree
-        // $training = CommissionTraining::all();
-        // $samples  = $training->pluck('features')->toArray();
-        // $labels   = $training->pluck('label')->toArray();
-        // $clf      = new DecisionTree(10, 2);
-        // $clf->train($samples, $labels);
 
-        // // ─── Predict ───
-        // $predLabel = $clf->predict([ $data['transaction_value'] ]);
-        // $level     = CommissionLevel::where('label', $predLabel)->first();
-        // $percent   = $level?->percentage ?? 0;
-
-        // // ─── Hitung & update parent ───
-        // $amount = $data['transaction_value'] * ($percent/100);
-        // if ($parent = Post::find($data['parent_id'])) {
-        //     $parent->commission_percentage = $percent;
-        //     $parent->commission_amount     = $amount;
-        //     $parent->save();
-        // }
 
         return redirect()->route('posts.index')
                          ->with('success', 'Perusahaan berhasil ditambahkan & komisi dihitung.');
@@ -167,32 +149,7 @@ class PostController extends Controller
         $post->update($data);
 
 
-        // $training   = CommissionTraining::all();
-        // $samples    = $training->pluck('features')->toArray();
-        // $labels     = $training->pluck('label')->toArray();
 
-        // $classifier = new DecisionTree(10, 2);
-        // $classifier->train($samples, $labels);
-
-        // $predLabel = $classifier->predict([ $data['transaction_value'] ]);
-        // $level     = CommissionLevel::where('label', $predLabel)->first();
-        // $percent   = $level?->percentage ?? 0;
-        // $amount    = $data['transaction_value'] * ($percent / 100);
-
-        // if ($oldParentId && $oldParentId !== $data['parent_id']) {
-        //     Post::where('id', $oldParentId)
-        //         ->update([
-        //             'commission_percentage' => null,
-        //             'commission_amount'     => null,
-        //         ]);
-        // }
-
-        // // Update komisi
-        // if ($newParent = Post::find($data['parent_id'])) {
-        //     $newParent->commission_percentage = $percent;
-        //     $newParent->commission_amount     = $amount;
-        //     $newParent->save();
-        // }
 
         return redirect()->route('posts.show', $post->slug)
                          ->with('success', 'Perusahaan & komisi berhasil diperbarui.');
