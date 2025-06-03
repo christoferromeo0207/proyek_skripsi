@@ -161,7 +161,6 @@ Route::middleware('auth')->group(function () {
 
 
 // Untuk komisi
-
 Route::resource('commissions', CommissionController::class);
 //List semua komisi
 Route::get('/commissions', [CommissionController::class, 'index'])

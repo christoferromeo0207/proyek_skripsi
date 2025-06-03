@@ -253,6 +253,54 @@
         </div>
 
 
+
+    {{-- Data Komisi (jika ada) --}}
+        @php
+          // Pastikan $commissions sudah ada
+          $commissions = $commissions ?? collect();
+        @endphp
+
+        <div class="w-11/12 md:w-4/5 lg:w-3/4 bg-white/60 rounded-xl shadow-lg p-6 mt-8">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-orange-500 font-bold text-lg">Komisi Mitra</h2>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left text-gray-700">
+              <thead class="text-xs text-gray-700 uppercase bg-orange-300">
+                <tr>
+                  <th class="px-4 py-2">No</th>
+                  <th class="px-4 py-2">Anak Perusahaan</th>
+                  <th class="px-4 py-2">Item (Transaksi)</th>
+                  <th class="px-4 py-2">Nominal Komisi</th>
+                </tr>
+              </thead>
+              <tbody>
+                @if($commissions->isEmpty())
+                  <tr class="bg-white/50">
+                    <td class="px-4 py-2" colspan="5">Tidak ada data komisi</td>
+                  </tr>
+                @else
+                  @foreach($commissions as $idx => $c)
+                    <tr class="bg-white/50 hover:bg-white/70 transition">
+                      <td class="px-4 py-2">{{ $idx + 1 }}</td>
+                      <td class="px-4 py-2">{{ $c->child->title }}</td>
+                      <td class="px-4 py-2">
+                        {{ optional($c->transaction)->nama_produk ?? '–' }}
+                      </td>
+                      <td class="px-4 py-2">
+                        Rp {{ number_format($c->commission_amount, 2, ',', '.') }}
+                      </td>
+                    </tr>
+                  @endforeach
+                @endif
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+
+
     <!-- Produk Kerjasama Hasil Transaksi -->
       <div id="produkKerjasama" class="w-11/12 md:w-4/5 lg:w-3/4 bg-white/60 rounded-xl shadow-lg p-6 mt-8">
         <div class="flex justify-between items-center mb-4">

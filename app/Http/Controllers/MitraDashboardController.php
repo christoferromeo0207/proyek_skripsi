@@ -8,6 +8,7 @@ use App\Models\Post;
 use App\Models\Message;
 use App\Models\User;
 use App\Models\Category;
+use App\Models\Commission;
 use App\Models\Transaction;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage; 
@@ -60,24 +61,30 @@ class MitraDashboardController extends Controller
     public function show(Post $post)
     {
         $user = Auth::user();
-
-    
         if ($user->role !== 'mitra') {
             abort(403, 'Unauthorized.');
         }
-    
         if ($post->pic_mitra !== $user->name) {
             abort(403, 'Unauthorized.');
         }
 
         $companyTitle = $post->title;
+        // Muat relasi dasar
         $post->load(['category', 'transactions', 'picUser']);
+
+        // Ambil semua komisi di mana post ini adalah parent (mitra)
+        $commissions = Commission::with(['child', 'transaction'])
+                        ->where('parent_post_id', $post->id)
+                        ->orderByDesc('created_at')
+                        ->get();
 
         return view('mitra.postMitra', [
             'post'         => $post,
             'companyTitle' => $companyTitle,
+            'commissions'  => $commissions,
         ]);
     }
+
 
 
     public function edit(Post $post)
