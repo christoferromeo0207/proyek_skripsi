@@ -335,12 +335,27 @@
             @endforeach
         </div>
 
-        {{-- Tombol “Back to Dashboard” --}}
+        {{-- Tombol kembali disesuaikan dengan role --}}
         <div class="mt-4 mb-4 text-start pl-6">
-            <a href="{{ route('dashboardMarketing') }}"
-               class="inline-block bg-gray-200 text-gray-800 px-4 py-2 rounded shadow hover:bg-gray-300 transition no-underline">
-                Back
-            </a>
+            @php $role = Auth::user()->role; @endphp
+
+            @if ($role === 'admin')
+                <a href="{{ route('dashboard') }}"
+                class="inline-block bg-gray-200 text-gray-800 px-4 py-2 rounded shadow hover:bg-gray-300 transition no-underline">
+                    Back 
+                </a>
+            @elseif ($role === 'marketing')
+                <a href="{{ route('dashboardMarketing') }}"
+                class="inline-block bg-gray-200 text-gray-800 px-4 py-2 rounded shadow hover:bg-gray-300 transition no-underline">
+                    Back 
+                </a>
+            @else
+                {{-- Default fallback, kalau role lain atau belum ter-set --}}
+                <a href="{{ url('/') }}"
+                class="inline-block bg-gray-200 text-gray-800 px-4 py-2 rounded shadow hover:bg-gray-300 transition no-underline">
+                    Back to Home
+                </a>
+            @endif
         </div>
     </div>
 

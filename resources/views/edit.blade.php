@@ -124,20 +124,22 @@
                           <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                         @enderror
 
+                    
                         {{-- Periode --}}
                         <label class="block text-orange-500 font-semibold">Periode Kerjasama</label>
                         <div class="flex gap-2">
                             <input type="date"
-                                   name="tanggal_awal"
-                                   value="{{ old('tanggal_awal', $post->tanggal_awal) }}"
-                                   class="w-1/2 border rounded px-3 py-2 @error('tanggal_awal') border-red-500 @enderror">
+                                name="tanggal_awal"
+                                value="{{ old('tanggal_awal', optional($post->tanggal_awal)->format('Y-m-d')) }}"
+                                class="w-1/2 border rounded px-3 py-2 @error('tanggal_awal') border-red-500 @enderror">
                             <input type="date"
-                                   name="tanggal_akhir"
-                                   value="{{ old('tanggal_akhir', $post->tanggal_akhir) }}"
-                                   class="w-1/2 border rounded px-3 py-2 @error('tanggal_akhir') border-red-500 @enderror">
+                                name="tanggal_akhir"
+                                value="{{ old('tanggal_akhir', optional($post->tanggal_akhir)->format('Y-m-d')) }}"
+                                class="w-1/2 border rounded px-3 py-2 @error('tanggal_akhir') border-red-500 @enderror">
                         </div>
                         @error('tanggal_awal')  <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
                         @error('tanggal_akhir') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
+
                     </div>
                 </div>
 
@@ -197,55 +199,7 @@
 
 
 
-                    {{-- Form Induk jika anak --}}
-                    <div x-data="{ isChild: false }">
-                        {{-- Pilihan Anak Perusahaan --}}
-                        <label class="block text-orange-500 font-semibold">Apakah Anak Perusahaan?</label>
-                        <div class="flex items-center gap-6 mt-2">
-                          <label class="inline-flex items-center">
-                            <input 
-                              type="radio" 
-                              name="is_child" 
-                              @click="isChild = true" 
-                              class="form-radio text-orange-500">
-                            <span class="ml-2">Yes</span> 
-                          </label>
-                      
-                          <label class="inline-flex items-center">
-                            <input 
-                              type="radio" 
-                              name="is_child" 
-                              @click="isChild = false" 
-                              class="form-radio text-orange-500">
-                            <span class="ml-2">No</span>
-                          </label>
-                        </div>
-                      
-                        {{-- Section Induk Perusahaan --}}
-                        <div x-show="isChild" x-transition x-cloak
-                             class="mt-4 bg-gray-100 p-4 rounded space-y-3">
-                          <h3 class="font-semibold text-gray-700">Induk Perusahaan (UI)</h3>
-                      
-                          {{-- Dropdown placeholder --}}
-                          <label class="block text-gray-700">Pilih Induk</label>
-                          <div class="relative">
-                            <button type="button"
-                                    class="w-full border rounded px-3 py-2 text-left">
-                              Pilih ↓
-                            </button>
-                          </div>
-                      
-                          {{-- Komisi & Transaksi (Masih UI) --}}
-                          <label class="block text-gray-700">Persentase Komisi (%)</label>
-                          <input type="text" disabled placeholder="— %" class="w-full border rounded px-3 py-2 bg-white/50">
-                      
-                          <label class="block text-gray-700">Besar Transaksi (Rp)</label>
-                          <input type="text" disabled placeholder="Rp. ???" class="w-full border rounded px-3 py-2 bg-white/50">
-                      
-                          <label class="block text-gray-700">Total Komisi untuk Perusahaan Induk</label>
-                          <input type="text" disabled placeholder="Rp. ???" class="w-full border rounded px-3 py-2 bg-white/50">
-                        </div>
-                      </div>
+                    
                       
                       
                 </div>

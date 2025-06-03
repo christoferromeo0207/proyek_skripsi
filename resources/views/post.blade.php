@@ -301,8 +301,8 @@
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-orange-500 font-bold text-lg">Komisi</h2>
         <button id="btn-open-komisi"
-                class="bg-green-500 hover:bg-green-600 text-white font-bold px-4 py-2 rounded-lg">
-          Tambah Komisi
+                class="bg-orange-400 hover:bg-orange-500 text-white font-bold px-4 py-2 rounded-lg">
+          Tambah 
         </button>
       </div>
 
@@ -536,7 +536,7 @@
                 Batal
               </button>
               <button type="submit"
-                      class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">
+                      class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded">
                 Simpan Komisi
               </button>
             </div>
