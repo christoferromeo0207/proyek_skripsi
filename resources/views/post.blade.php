@@ -1,7 +1,8 @@
 <x-layout>
     <x-slot:title>{{ $post->title }}</x-slot:title>
 
-    <div x-data="{ fileModal: false, fileUrl: '', isImage: false }"
+    {{-- Root Alpine untuk preview existing files --}}
+    <div id="root" x-data="{ fileModal: false, fileUrl: '', isImage: false }"
          class="w-full min-h-screen bg-gradient-to-br from-orange-200 to-orange-400 flex flex-col items-center py-10 space-y-8">
 
       <!-- Main Card -->
@@ -259,7 +260,7 @@
               >
                 <div class="truncate max-w-xs">{{ $name }}</div>
                 <div class="flex space-x-2">
-                  <!-- Preview -->
+                  <!-- Preview: jalankan fungsi openFile(fileId) -->
                   <button
                     type="button"
                     onclick="openFile('{{ $fileId }}')"
@@ -296,83 +297,81 @@
         </div>
       </div>
 
-    <!-- Komisi Perusahaan -->
-    <div class="w-11/12 md:w-4/5 lg:w-3/4 bg-white/60 rounded-xl shadow-lg p-6 mt-8">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-orange-500 font-bold text-lg">Komisi</h2>
-        <button id="btn-open-komisi"
-                class="bg-orange-400 hover:bg-orange-500 text-white font-bold px-4 py-2 rounded-lg">
-          Tambah 
-        </button>
-      </div>
+      <!-- Komisi Perusahaan -->
+      <div class="w-11/12 md:w-4/5 lg:w-3/4 bg-white/60 rounded-xl shadow-lg p-6 mt-8">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-orange-500 font-bold text-lg">Komisi</h2>
+          <button id="btn-open-komisi"
+                  class="bg-orange-400 hover:bg-orange-500 text-white font-bold px-4 py-2 rounded-lg">
+            Tambah 
+          </button>
+        </div>
 
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm text-left text-gray-700">
-          <thead class="text-xs text-gray-700 uppercase bg-orange-300">
-            <tr>
-              <th class="px-4 py-2">No</th>
-              <th class="px-4 py-2">Anak Perusahaan</th>
-              <th class="px-4 py-2">Item (Transaksi)</th>
-              <th class="px-4 py-2">Nominal Komisi</th>
-              <th class="px-4 py-2">Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            @php
-              // Kita asumsikan controller sudah melempar $commissions
-              // yaitu koleksi Commission::with(['child','transaction'])->where('parent_post_id',$post->id)->get()
-            @endphp
-
-            @if(isset($commissions) && $commissions->isEmpty())
-              <tr class="bg-white/50">
-                <td class="px-4 py-2" colspan="5">Tidak ada data komisi</td>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm text-left text-gray-700">
+            <thead class="text-xs text-gray-700 uppercase bg-orange-300">
+              <tr>
+                <th class="px-4 py-2">No</th>
+                <th class="px-4 py-2">Anak Perusahaan</th>
+                <th class="px-4 py-2">Item (Transaksi)</th>
+                <th class="px-4 py-2">Nominal Komisi</th>
+                <th class="px-4 py-2">Aksi</th>
               </tr>
-            @elseif(isset($commissions))
-              @foreach($commissions as $idx => $c)
-                <tr class="bg-white/50 hover:bg-white/70 transition">
-                  {{-- No --}}
-                  <td class="px-4 py-2">{{ $idx + 1 }}</td>
+            </thead>
+            <tbody>
+              @php
+                // Kita asumsikan controller sudah melempar $commissions
+                // yaitu koleksi Commission::with(['child','transaction'])->where('parent_post_id',$post->id)->get()
+              @endphp
 
-                  {{-- Anak Perusahaan --}}
-                  <td class="px-4 py-2">{{ $c->child->title }}</td>
-
-                  {{-- Item/Transaksi (– jika null) --}}
-                  <td class="px-4 py-2">
-                    {{ optional($c->transaction)->nama_produk ?? '–' }}
-                  </td>
-
-                  {{-- Nominal Komisi --}}
-                  <td class="px-4 py-2">
-                    Rp {{ number_format($c->commission_amount, 2, ',', '.') }}
-                  </td>
-
-                  {{-- Aksi --}}
-                  <td class="px-4 py-2 flex gap-2">
-                    <a href="{{ route('commissions.edit', $c->id) }}"
-                      class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-lg text-xs font-bold no-underline">
-                      Edit
-                    </a>
-                    <form action="{{ route('commissions.destroy', $c->id) }}"
-                          method="POST"
-                          onsubmit="return confirm('Yakin ingin menghapus komisi ini?');"
-                          class="inline">
-                      @csrf
-                      @method('DELETE')
-                      <button type="submit"
-                              class="bg-red-400 hover:bg-red-500 text-white px-3 py-1 rounded-lg text-xs font-bold">
-                        Hapus Komisi
-                      </button>
-                    </form>
-                  </td>
+              @if(isset($commissions) && $commissions->isEmpty())
+                <tr class="bg-white/50">
+                  <td class="px-4 py-2" colspan="5">Tidak ada data komisi</td>
                 </tr>
-              @endforeach
-            @endif
-          </tbody>
-        </table>
+              @elseif(isset($commissions))
+                @foreach($commissions as $idx => $c)
+                  <tr class="bg-white/50 hover:bg-white/70 transition">
+                    {{-- No --}}
+                    <td class="px-4 py-2">{{ $idx + 1 }}</td>
+
+                    {{-- Anak Perusahaan --}}
+                    <td class="px-4 py-2">{{ $c->child->title }}</td>
+
+                    {{-- Item/Transaksi (– jika null) --}}
+                    <td class="px-4 py-2">
+                      {{ optional($c->transaction)->nama_produk ?? '–' }}
+                    </td>
+
+                    {{-- Nominal Komisi --}}
+                    <td class="px-4 py-2">
+                      Rp {{ number_format($c->commission_amount, 2, ',', '.') }}
+                    </td>
+
+                   <!-- Action: -->
+                <td class="px-4 py-2 flex gap-2">
+                  <form action="{{ route('commissions.destroy', $c->id) }}"
+                        method="POST"
+                        onsubmit="return confirm('Yakin ingin menghapus komisi ini?');"
+                        class="inline"
+                  >
+                    @csrf
+                    @method('DELETE')
+                    <button
+                      type="submit"
+                      class="bg-red-400 hover:bg-red-500 text-white px-3 py-1 rounded-lg text-xs font-bold"
+                    >
+                      Hapus
+                    </button>
+                  </form>
+                </td>
+
+                  </tr>
+                @endforeach
+              @endif
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
-
-
 
       <!-- Produk Kerjasama Hasil Transaksi -->
       <div class="w-11/12 md:w-4/5 lg:w-3/4 bg-white/60 rounded-xl shadow-lg p-6 mt-8">
@@ -432,7 +431,7 @@
       </div>
     </div>
 
-    <!-- Modal Preview/Download -->
+    <!-- Modal Preview/Download (untuk existing files) -->
     <div x-show="fileModal" x-cloak
          class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
       <div class="bg-white rounded-lg overflow-auto max-w-4xl w-full max-h-[90vh]" @click.away="fileModal = false">
@@ -453,8 +452,7 @@
         </div>
         <!-- Footer -->
         <div class="p-4 border-t flex justify-end space-x-2">
-          <a :href="`/posts/${slug}/files/${fileId}/download`"
-             download
+          <a :href="fileUrl" download
              class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md">
             Download
           </a>
@@ -475,7 +473,7 @@
                   class="text-gray-500 hover:text-gray-700 text-2xl leading-none">&times;</button>
         </div>
         <div class="p-6">
-          <form action="{{ route('commissions.store') }}" method="POST" class="space-y-4">
+          <form action="{{ route('commissions.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
             @csrf
 
             <input type="hidden" name="parent_post_id" value="{{ $post->id }}">
@@ -499,14 +497,13 @@
               @enderror
             </div>
 
-            <!-- Dropdown Pilih Transaksi (akan di‐populate lewat JS) -->
+            <!-- Dropdown Pilih Transaksi (di‐populate lewat JS) -->
             <div>
               <label for="transaction_id" class="block font-medium text-gray-700">Pilih Transaksi (opsional)</label>
               <select name="transaction_id"
                       id="transaction_id"
                       class="mt-1 block w-full border-gray-300 rounded-lg focus:ring-orange-400 focus:border-orange-400">
                 <option value="" selected>-- (Pilih anak dahulu untuk melihat transaksinya) --</option>
-                <!-- Pilihan transaksi akan di‐isi lewat JavaScript berdasarkan child_post_id -->
               </select>
               <p class="text-gray-500 text-sm mt-1">Kosongkan jika ingin input nilai transaksi manual.</p>
             </div>
@@ -528,6 +525,10 @@
               @enderror
             </div>
 
+
+            <!-- Kontainer untuk menampilkan daftar file yang di‐upload -->
+            <div id="file-list" class="space-y-2"></div>
+
             <!-- Tombol Simpan & Batal -->
             <div class="flex justify-end space-x-2 pt-4">
               <button type="button"
@@ -545,143 +546,36 @@
       </div>
     </div>
 
-
-
-    {{-- Skrip untuk file preview --}}
+    {{-- Skrip untuk JS: Preview File Upload, Preview Dokumentasi, Dropdown Transaksi, dan Modal --}}
     <script>
-      const uploadBtn = document.getElementById('upload-btn');
-      const fileInput = document.getElementById('file-input');
-      const fileList  = document.getElementById('file-list');
-      const dt = new DataTransfer();
-
-      if (uploadBtn) {
-        uploadBtn.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', e => {
-          for (const file of e.target.files) {
-            dt.items.add(file);
-          }
-          fileInput.files = dt.files;
-          renderFileList();
-          fileInput.value = '';
-        });
-      }
-
-      function renderFileList() {
-        fileList.innerHTML = '';
-        Array.from(dt.files).forEach((file, idx) => {
-          const row = document.createElement('div');
-          row.className = 'flex justify-between items-center bg-gray-100 rounded px-3 py-2';
-          row.dataset.index = idx;
-
-          const name = document.createElement('span');
-          name.textContent = file.name;
-          name.className = 'truncate';
-
-          const previewBtn = document.createElement('button');
-          previewBtn.type = 'button';
-          previewBtn.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg"
-                 class="w-5 h-5 text-blue-500 hover:text-blue-700"
-                 viewBox="0 0 20 20"
-                 fill="currentColor">
-              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
-              <path fill-rule="evenodd"
-                    d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943
-                       9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732
-                       14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                    clip-rule="evenodd"/>
-            </svg>`;
-          previewBtn.title = 'Preview';
-          previewBtn.addEventListener('click', () => openPreview(idx));
-
-          const deleteBtn = document.createElement('button');
-          deleteBtn.type = 'button';
-          deleteBtn.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg"
-                 class="w-5 h-5 text-red-500 hover:text-red-700"
-                 viewBox="0 0 20 20"
-                 fill="currentColor">
-              <path fill-rule="evenodd"
-                    d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000
-                       2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1
-                       0 100-2h-3.382l-.724-1.447A1 1 0
-                       0011 2H9zM7 8a1 1 0 012 0v6a1 1 0
-                       11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1
-                       0 102 0V8a1 1 0 00-1-1z"
-                    clip-rule="evenodd"/>
-            </svg>`;
-          deleteBtn.title = 'Hapus';
-          deleteBtn.addEventListener('click', () => {
-            dt.items.remove(idx);
-            fileInput.files = dt.files;
-            renderFileList();
-          });
-
-          row.append(name, previewBtn, deleteBtn);
-          fileList.append(row);
-        });
-      }
-
-      function openPreview(index) {
-        const file = dt.files[index];
-        if (!file) return;
-        const url = URL.createObjectURL(file);
-        const isImage = file.type.startsWith('image/');
-
-        const modal = document.createElement('div');
-        modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4';
-        modal.innerHTML = `
-          <div class="bg-white rounded-lg overflow-auto max-h-full">
-            <div class="flex justify-end p-2">
-              <button id="close-modal" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
-            </div>
-            <div class="p-4">
-              ${ isImage 
-                  ? `<img src="${url}" class="max-w-full h-auto mx-auto" alt="Preview">`
-                  : `<iframe src="${url}" class="w-full h-96 border-0"></iframe>` }
-            </div>
-          </div>
-        `;
-        document.body.append(modal);
-        modal.querySelector('#close-modal').addEventListener('click', () => modal.remove());
-      }
-    </script>
-
-
-      <script>
-      // Skrip modal “Tambah Komisi”
-       document.addEventListener('DOMContentLoaded', function() {
-        // 1. Ambil elemen dropdown
+      document.addEventListener('DOMContentLoaded', function() {
+        // Inisialisasi child‐transaction dropdown
         const childSelect = document.getElementById('child_post_id');
         const trxSelect   = document.getElementById('transaction_id');
-
-        // mengambil data child
         const childTransactions = {!! json_encode(
-        $allChildren->mapWithKeys(function($child) {
+          $allChildren->mapWithKeys(function($child) {
             return [
-                $child->id => $child->transactions->map(function($t) {
-                    return [
-                        'id'           => $t->id,
-                        'nama_produk'  => $t->nama_produk,
-                        'total_harga'  => $t->total_harga,
-                    ];
-                })->toArray()
+              $child->id => $child->transactions->map(function($t) {
+                return [
+                  'id'           => $t->id,
+                  'nama_produk'  => $t->nama_produk,
+                  'total_harga'  => $t->total_harga,
+                ];
+              })->toArray()
             ];
-           })
+          })
         ) !!};
 
         function populateTransactionOptions(childId) {
           trxSelect.innerHTML = '';
-
           const defaultOption = document.createElement('option');
-          defaultOption.value = '';
+          defaultOption.value   = '';
           defaultOption.textContent = '-- (Pilih transaksi ...) --';
           trxSelect.appendChild(defaultOption);
 
           if (!childTransactions[childId] || childTransactions[childId].length === 0) {
             return;
           }
-
           childTransactions[childId].forEach(function(trx) {
             const opt = document.createElement('option');
             opt.value = trx.id;
@@ -696,12 +590,11 @@
           if (selectedChildId) {
             populateTransactionOptions(selectedChildId);
           } else {
-            // Jika user memilih opsi kosong sekali pun, kembalikan dropdown transaksi ke default saja
             trxSelect.innerHTML = '<option value="">-- (Pilih anak dahulu ...) --</option>';
           }
         });
 
-        // 5. Skrip untuk modal (sama seperti sebelumnya)
+        // Modal Tambah Komisi
         const btnOpen   = document.getElementById('btn-open-komisi');
         const btnClose  = document.getElementById('btn-close-komisi');
         const btnCancel = document.getElementById('btn-cancel-komisi');
@@ -716,6 +609,124 @@
             modal.classList.add('hidden');
           }
         });
+
+        // ==== Skrip Preview File Upload ====
+        const uploadBtn = document.getElementById('upload-btn');
+        const fileInput = document.getElementById('file-input');
+        const fileList  = document.getElementById('file-list');
+        const dt = new DataTransfer();
+
+        // Ketika tombol “Pilih File” diklik → trigger fileInput
+        uploadBtn.addEventListener('click', () => fileInput.click());
+
+        // Setelah user memilih file (bisa banyak), tambahkan ke dt dan render
+        fileInput.addEventListener('change', e => {
+          for (const file of e.target.files) {
+            dt.items.add(file);
+          }
+          fileInput.files = dt.files;
+          renderFileList();
+          fileInput.value = ''; // reset supaya onchange bisa kembali dipanggil
+        });
+
+        function renderFileList() {
+          fileList.innerHTML = '';
+          Array.from(dt.files).forEach((file, idx) => {
+            const row = document.createElement('div');
+            row.className = 'flex justify-between items-center bg-gray-100 rounded px-3 py-2';
+            row.dataset.index = idx;
+
+            const name = document.createElement('span');
+            name.textContent = file.name;
+            name.className = 'truncate';
+
+            // Tombol preview
+            const previewBtn = document.createElement('button');
+            previewBtn.type = 'button';
+            previewBtn.innerHTML = `
+              <svg xmlns="http://www.w3.org/2000/svg"
+                   class="w-5 h-5 text-blue-500 hover:text-blue-700"
+                   viewBox="0 0 20 20"
+                   fill="currentColor">
+                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                <path fill-rule="evenodd"
+                      d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943
+                         9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732
+                         14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                      clip-rule="evenodd"/>
+              </svg>`;
+            previewBtn.title = 'Preview';
+            previewBtn.addEventListener('click', () => openUploadPreview(idx));
+
+            // Tombol delete
+            const deleteBtn = document.createElement('button');
+            deleteBtn.type = 'button';
+            deleteBtn.innerHTML = `
+              <svg xmlns="http://www.w3.org/2000/svg"
+                   class="w-5 h-5 text-red-500 hover:text-red-700"
+                   viewBox="0 0 20 20"
+                   fill="currentColor">
+                <path fill-rule="evenodd"
+                      d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000
+                         2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1
+                         0 100-2h-3.382l-.724-1.447A1 1 0
+                         0011 2H9zM7 8a1 1 0 012 0v6a1 1 0
+                         11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1
+                         0 102 0V8a1 1 0 00-1-1z"
+                      clip-rule="evenodd"/>
+              </svg>`;
+            deleteBtn.title = 'Hapus';
+            deleteBtn.addEventListener('click', () => {
+              dt.items.remove(idx);
+              fileInput.files = dt.files;
+              renderFileList();
+            });
+
+            row.append(name, previewBtn, deleteBtn);
+            fileList.append(row);
+          });
+        }
+
+        function openUploadPreview(index) {
+          const file = dt.files[index];
+          if (!file) return;
+          const url = URL.createObjectURL(file);
+          const isImage = file.type.startsWith('image/');
+
+          // Modal preview sederhana (sama formatnya dengan modal existing, tapi buat upload)
+          const modalPreview = document.createElement('div');
+          modalPreview.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4';
+          modalPreview.innerHTML = `
+            <div class="bg-white rounded-lg overflow-auto max-h-full">
+              <div class="flex justify-end p-2">
+                <button id="close-upload-modal" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+              </div>
+              <div class="p-4">
+                ${ isImage 
+                    ? `<img src="${url}" class="max-w-full h-auto mx-auto" alt="Preview">`
+                    : `<iframe src="${url}" class="w-full h-96 border-0"></iframe>` }
+              </div>
+            </div>
+          `;
+          document.body.append(modalPreview);
+          modalPreview.querySelector('#close-upload-modal').addEventListener('click', () => modalPreview.remove());
+        }
+
+        // ==== Skrip Preview Existing Dokumentasi ====
+        window.openFile = function(fileId) {
+          // Cari elemen dengan data-file-id = fileId
+          const row = document.querySelector(`[data-file-id="${fileId}"]`);
+          if (!row) return;
+          const url = row.getAttribute('data-file-url');
+          // Cek ekstensi untuk menentukan isImage
+          const isImage = /\.(jpe?g|png|gif)$/i.test(url);
+
+          // Ambil state Alpine di #root
+          const alpineData = document.getElementById('root').__x.$data;
+          alpineData.fileUrl = url;
+          alpineData.isImage = isImage;
+          alpineData.fileModal = true;
+        };
       });
-</script>
+    </script>
 </x-layout>
