@@ -17,7 +17,6 @@
   {{-- SweetAlert2 --}}
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-
   @php
     // Decode JSON field bukti_pembayaran
     $raw = $transaction->getRawOriginal('bukti_pembayaran');
@@ -55,30 +54,39 @@
 
           {{-- Form Fields (Left & Middle) --}}
           <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+            {{-- Nama Produk --}}
             <div>
               <label class="block text-orange-500 font-semibold">Nama Produk</label>
               <input type="text" name="nama_produk"
                      value="{{ old('nama_produk', $transaction->nama_produk) }}"
                      class="w-full border rounded px-3 py-2" required>
             </div>
+
+            {{-- Jumlah --}}
             <div>
               <label class="block text-orange-500 font-semibold">Jumlah</label>
               <input type="number" name="jumlah" min="1"
                      value="{{ old('jumlah', $transaction->jumlah) }}"
                      class="w-full border rounded px-3 py-2" required>
             </div>
+
+            {{-- Merk Produk --}}
             <div>
               <label class="block text-orange-500 font-semibold">Merk Produk</label>
               <input type="text" name="merk"
                      value="{{ old('merk', $transaction->merk) }}"
                      class="w-full border rounded px-3 py-2" required>
             </div>
+
+            {{-- Harga per Satuan --}}
             <div>
               <label class="block text-orange-500 font-semibold">Harga per Satuan</label>
               <input type="number" name="harga_satuan" step="0.01" min="1"
                      value="{{ old('harga_satuan', $transaction->harga_satuan) }}"
                      class="w-full border rounded px-3 py-2" required>
             </div>
+
+            {{-- Tipe Pembayaran --}}
             <div>
               <label class="block text-orange-500 font-semibold">Tipe Pembayaran</label>
               <select name="tipe_pembayaran" class="w-full border rounded px-3 py-2" required>
@@ -91,22 +99,21 @@
                 @endforeach
               </select>
             </div>
+
+            {{-- Status ―**DITAMPILKAN SECARA READ‐ONLY** --}}
             <div>
-              <label class="block text-orange-500 font-semibold">Status</label>
-              <select name="status" class="w-full border rounded px-3 py-2" required>
-                @foreach(['Proses','Selesai','Dibatalkan'] as $st)
-                  <option value="{{ $st }}"
-                    {{ old('status', $transaction->status) === $st ? 'selected' : '' }}>
-                    {{ $st }}
-                  </option>
-                @endforeach
-              </select>
+              <label class="block text-orange-500 font-semibold">Status (otomatis)</label>
+              {{-- Hanya tampilkan, tanpa name= --}}
+              <input type="text"
+                     value="{{ $transaction->status }}"
+                     disabled
+                     class="w-full border rounded px-3 py-2 bg-gray-100 cursor-not-allowed text-gray-600">
             </div>
+
+            {{-- PIC RS --}}
             <div>
-              {{-- PIC RS --}}
               <label class="block text-orange-500 font-semibold">PIC Rumah Sakit</label>
-              <select name="pic_rs" class="w-full border rounded px-3 py-2" 
-              required>
+              <select name="pic_rs" class="w-full border rounded px-3 py-2" required>
                 <option value="">— Pilih PIC RS —</option>
                 @foreach($users as $user)
                   <option value="{{ $user->id }}"
@@ -116,31 +123,40 @@
                 @endforeach
               </select>
             </div>
+
             {{-- Approval RS --}}
             <div>
               <label class="block text-orange-500 font-semibold">Approval RS</label>
-              <select name="approval_rs" class="w-full border rounded px-3 py-2" 
-              required>
-                <option value="1" {{ old('approval_rs', $transaction->approval_rs)==1?'selected':'' }}>Ya</option>
-                <option value="0" {{ old('approval_rs', $transaction->approval_rs)==0?'selected':'' }}>Tidak</option>
+              <select name="approval_rs" class="w-full border rounded px-3 py-2" required>
+                <option value="1" {{ old('approval_rs', $transaction->approval_rs) == 1 ? 'selected' : '' }}>
+                  Ya
+                </option>
+                <option value="0" {{ old('approval_rs', $transaction->approval_rs) == 0 ? 'selected' : '' }}>
+                  Tidak
+                </option>
               </select>
             </div>
-            {{-- PIC Mitra --}}
+
+            {{-- PIC Mitra ―**READ‐ONLY + HIDDEN FIELD** --}}
             <div>
               <label class="block text-orange-500 font-semibold">PIC Mitra</label>
-              <input type="text" name="pic_mitra"
-                     value="{{ old('pic_mitra', $transaction->pic_mitra) }}"
-                     class="w-full border rounded px-3 py-2" 
-                     required>
+              {{-- Kirimkan nilai lewat hidden input --}}
+              <input type="hidden" name="pic_mitra" value="{{ $transaction->pic_mitra }}">
+              <input type="text"
+                     value="{{ $transaction->pic_mitra }}"
+                     disabled
+                     class="w-full border rounded px-3 py-2 bg-gray-100 cursor-not-allowed text-gray-600">
             </div>
-            {{-- Approval Mitra --}}
+
+            {{-- Approval Mitra ―**READ‐ONLY + HIDDEN FIELD** --}}
             <div>
               <label class="block text-orange-500 font-semibold">Approval Mitra</label>
-              <select name="approval_mitra" class="w-full border rounded px-3 py-2"
-              required>
-                <option value="1" {{ old('approval_mitra', $transaction->approval_mitra)==1?'selected':'' }}>Ya</option>
-                <option value="0" {{ old('approval_mitra', $transaction->approval_mitra)==0?'selected':'' }}>Tidak</option>
-              </select>
+              {{-- Kirimkan nilai lewat hidden input --}}
+              <input type="hidden" name="approval_mitra" value="{{ $transaction->approval_mitra }}">
+              <input type="text"
+                     value="{{ $transaction->approval_mitra ? 'Ya' : 'Tidak' }}"
+                     disabled
+                     class="w-full border rounded px-3 py-2 bg-gray-100 cursor-not-allowed text-gray-600">
             </div>
           </div>
 

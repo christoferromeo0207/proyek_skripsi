@@ -88,48 +88,53 @@ class TransactionController extends Controller
 
     // Update transaksi
 
-    public function update(Request $request, Post $post, Transaction $transaction)
+   public function update(Request $request, Post $post, Transaction $transaction)
     {
-
-        // 1) Handle aksi rename / delete
+        // 1) Tangani aksi rename / delete jika request 'action_type' terisi
         if ($request->filled('action_type')) {
             $files = $transaction->bukti_pembayaran ?: [];
 
             if ($request->action_type === 'delete') {
                 $idx = (int) $request->file_index;
                 if (isset($files[$idx])) {
+                    // Hapus file fisik
                     Storage::disk('public')->delete($files[$idx]);
+                    // Hapus dari array
                     array_splice($files, $idx, 1);
                 }
+                // Simpan array yang sudah di‐update
                 $transaction->bukti_pembayaran = $files;
                 $transaction->save();
 
-                return back()->with('success','File berhasil dihapus');
+                return back()->with('success', 'File berhasil dihapus');
             }
 
             if ($request->action_type === 'rename') {
                 $idx     = (int) $request->file_index;
                 $newName = trim($request->new_name);
+
                 if (isset($files[$idx]) && $newName !== '') {
                     $oldPath = $files[$idx];
                     $ext     = pathinfo($oldPath, PATHINFO_EXTENSION);
                     $dir     = dirname($oldPath);
-                    $newPath = $dir.'/'.$newName.'.'.$ext;
+                    $newPath = $dir . '/' . $newName . '.' . $ext;
 
-                    // rename fisik
+                    // Rename fisik di storage
                     Storage::disk('public')->move($oldPath, $newPath);
 
-                    // update array
+                    // Update array
                     $files[$idx] = $newPath;
                     $transaction->bukti_pembayaran = $files;
                     $transaction->save();
                 }
 
-                return back()->with('success','File berhasil di-rename');
+                return back()->with('success', 'File berhasil di‐rename');
             }
         }
 
-        // 2) Jika bukan rename/delete, maka ini normal form-update transaksi
+        // 2) Jika bukan rename/delete, maka proses update form transaksi biasa
+
+        // 2.a) Validasi input—HANYA field yang boleh diubah marketing
         $data = $request->validate([
             'nama_produk'        => 'required|string|max:255',
             'jumlah'             => 'required|integer|min:1',
@@ -138,19 +143,28 @@ class TransactionController extends Controller
             'tipe_pembayaran'    => 'required|string|max:255',
             'pic_rs'             => 'required|exists:users,id',
             'approval_rs'        => 'required|boolean',
-            'pic_mitra'          => 'required|string|max:255',
-            'approval_mitra'     => 'required|boolean',
-            'status'             => 'required|string|max:100',
+            // 'pic_mitra' dan 'approval_mitra' tidak divalidasi di sini,
+            // kita ambil dari model $transaction lama.
             'bukti_pembayaran'   => 'nullable|array',
             'bukti_pembayaran.*' => 'file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
 
-        // hitung total
-        $data['total_harga'] = $data['jumlah'] * $data['harga_satuan'];
+        // 3) Hitung total_harga berdasarkan input
+        $transaction->total_harga = $data['jumlah'] * $data['harga_satuan'];
 
-        $transaction->pic_mitra      = $data['pic_mitra'];
-        $transaction->approval_mitra = $data['approval_mitra'];
+        // 4) Assignment field‐field yang boleh diubah
+        $transaction->nama_produk     = $data['nama_produk'];
+        $transaction->jumlah          = $data['jumlah'];
+        $transaction->merk            = $data['merk'];
+        $transaction->harga_satuan    = $data['harga_satuan'];
+        $transaction->tipe_pembayaran = $data['tipe_pembayaran'];
+        $transaction->pic_rs          = $data['pic_rs'];
+        $transaction->approval_rs     = $data['approval_rs'];
 
+        // 5) Pastikan pic_mitra dan approval_mitra tetap dari database (marketing tdk boleh ubah)
+        //    Jadi kita tidak menyentuh $transaction->pic_mitra dan $transaction->approval_mitra di sini.
+
+        // 6) Hitung status otomatis dari kedua approval
         if ($transaction->approval_rs && $transaction->approval_mitra) {
             $transaction->status = 'Selesai';
         } elseif (! $transaction->approval_rs && ! $transaction->approval_mitra) {
@@ -159,29 +173,29 @@ class TransactionController extends Controller
             $transaction->status = 'Proses';
         }
 
-        // ambil list file lama
+        // 7) Proses upload file baru, gabungkan dengan file lama
         $existing = $transaction->bukti_pembayaran ?: [];
+        $newFiles = [];
 
-        // Proses upload
-        $paths = [];
-        foreach ($request->file('bukti_pembayaran', []) as $file) {
-            if ($file instanceof UploadedFile && $file->isValid()) {
-                // Simpan ke storage/app/public/bukti_pembayaran
-                $paths[] = $file->store('bukti_pembayaran', 'public');
+        if ($request->hasFile('bukti_pembayaran')) {
+            foreach ($request->file('bukti_pembayaran') as $file) {
+                if ($file instanceof UploadedFile && $file->isValid()) {
+                    // Simpan ke folder publik di storage/app/public/bukti_pembayaran
+                    $newFiles[] = $file->store('bukti_pembayaran', 'public');
+                }
             }
         }
-        if (!empty($paths)) {
-            // Akan disimpan sebagai JSON array ["bukti_pembayaran/xxx.png", …]
-            $data['bukti_pembayaran'] = $paths;
+        // Gabungkan
+        if (!empty($newFiles)) {
+            $transaction->bukti_pembayaran = array_merge($existing, $newFiles);
         }
 
-
-        // update model
-        $transaction->update($data);
+        // 8) Simpan transaksi
+        $transaction->save();
 
         return redirect()
             ->route('posts.show', $post->slug)
-            ->with('success','Transaksi berhasil diperbarui');
+            ->with('success', 'Transaksi berhasil diperbarui');
     }
 
 

@@ -16,41 +16,33 @@ class MarketingDashboardController extends Controller
         $this->middleware('auth');
     }
 
-    public function index()
+   public function index()
     {
+        // Pastikan marketing
         if (Auth::user()->role !== 'marketing') {
             abort(403);
         }
 
-        $myId = Auth::id();
+        $myId   = Auth::id();
+        $myName = Auth::user()->name; 
 
-        $mitraCount       = Post::where('PIC', $myId)
-                                ->count('PIC');
+        $mitraCount = Post::where('PIC', $myId)
+                        ->count('PIC');
 
-        $kategoriCount    = Category::count();
 
-        $mitraStatusCount = Transaction::where('pic_rs', $myId)
-            ->where(function($q) {
-                $q->where(function($q1) {
-                        $q1->where('approval_rs', 0)
-                        ->where('approval_mitra', 1);
-                    })
-                ->orWhere(function($q2) {
-                        $q2->where('approval_rs', 1)
-                        ->where('approval_mitra', 0);
-                    });
-            })
-            ->distinct()
-            ->count('pic_mitra');
+        $kategoriCount = Category::count();
+
+
+        $mitraStatusCount = Transaction::whereColumn('approval_rs', '!=', 'approval_mitra')->count();
 
 
         $stats = [
             [
-                'Total Mitra', 
-                $mitraCount, 
-                'Mitra di bawah PIC Anda', 
-                'fas fa-users', 
-                route('posts.pic')    
+                'Total Mitra',
+                $mitraCount,
+                'Mitra di bawah PIC Anda',
+                'fas fa-users',
+                route('posts.pic')
             ],
             [
                 'Kategori',
@@ -60,31 +52,34 @@ class MarketingDashboardController extends Controller
                 route('categories.index')
             ],
             [
-                'Proses Mitra',
+                'Proses Transaksi Mitra',
                 $mitraStatusCount,
-                'Mitra yang masih proses',
+                'Transaksi yang masih proses',
                 'fas fa-hourglass-half',
-                route('posts.pic') 
+                route('posts.pic')
             ],
         ];
 
         return view('dashboardMarketing', compact('stats'));
     }
 
-     public function postsPIC()
+
+      public function postsPIC()
     {
-        $userId = Auth::id();
+        $userId     = Auth::id();
         $categories = Category::all();
 
+        // Ambil semua post di bawah marketing ini
         $myPosts = Post::where('PIC', $userId)
-                ->orderBy('created_at','desc')
-                ->paginate(9, ['*'], 'myPage');
+                       ->orderBy('created_at', 'desc')
+                       ->paginate(9, ['*'], 'myPage');
 
-        $otherPosts = Post::where('PIC','<>',$userId)
-                        ->orderBy('created_at','desc')
-                        ->paginate(9, ['*'], 'otherPage');
+        // Ambil semua post selain yang di bawah marketing ini
+        $otherPosts = Post::where('PIC', '<>', $userId)
+                          ->orderBy('created_at', 'desc')
+                          ->paginate(9, ['*'], 'otherPage');
 
-        return view('postsPIC', compact('myPosts','otherPosts','categories'));
+        return view('postsPIC', compact('myPosts', 'otherPosts', 'categories'));
     }
 
 

@@ -1,6 +1,5 @@
-{{-- resources/views/transaction.blade.php --}}
+
 <x-layout>
-  {{-- Inline FontAwesome so your <i class="fas …"> icons work --}}
   <link
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"
