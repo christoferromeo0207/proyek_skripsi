@@ -296,86 +296,82 @@
         </div>
       </div>
 
-     <!-- Komisi Perusahaan -->
-      <div class="w-11/12 md:w-4/5 lg:w-3/4 bg-white/60 rounded-xl shadow-lg p-6 mt-8">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-orange-500 font-bold text-lg">Komisi</h2>
-          <button
-            @click="document.getElementById('modal-komisi').classList.remove('hidden')"
-            class="bg-green-500 hover:bg-green-600 text-white font-bold px-4 py-2 rounded-lg"
-          >
-            Tambah Komisi
-          </button>
-        </div>
-
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm text-left text-gray-700">
-            <thead class="text-xs text-gray-700 uppercase bg-orange-300">
-              <tr>
-                <th class="px-4 py-2">No</th>
-                <th class="px-4 py-2">Anak Perusahaan</th>
-                <th class="px-4 py-2">Item</th>
-                <th class="px-4 py-2">Nominal Komisi</th>
-                <th class="px-4 py-2">Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              @php
-                $allChildTransactions = collect();
-                foreach ($post->children ?? [] as $child) {
-                  foreach ($child->transactions as $tx) {
-                    $allChildTransactions->push([
-                      'child'       => $child,
-                      'transaction' => $tx,
-                    ]);
-                  }
-                }
-              @endphp
-
-              @if($allChildTransactions->isEmpty())
-                <tr class="bg-white/50">
-                  <td class="px-4 py-2" colspan="5">Tidak ada data komisi</td>
-                </tr>
-              @else
-                @foreach($allChildTransactions as $idx => $entry)
-                  @php
-                    $child = $entry['child'];
-                    $tx = $entry['transaction'];
-                    $parent=$child->parent;
-
-
-                  $commissionAmount = $parent ? $parent->commission_amount : 0;
-                  @endphp
-                  <tr class="bg-white/50 hover:bg-white/70 transition">
-                    <td class="px-4 py-2">{{ $idx + 1 }}</td>
-                    <td class="px-4 py-2">{{ $child->title }}</td>
-                    <td class="px-4 py-2">{{ $tx->nama_produk ?? '-' }}</td>
-                    <td class="px-4 py-2">Rp {{ number_format($commissionAmount, 2, ',', '.') }}</td>
-                    <td class="px-4 py-2 flex gap-2">
-                      <a href="{{ route('posts.transactions.edit', [$child, $tx]) }}"
-                        class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-lg text-xs font-bold no-underline">
-                        Edit
-                      </a>
-
-                      <form action="{{ route('posts.transactions.destroy', [$child, $tx]) }}"
-                            method="POST"
-                            onsubmit="return confirm('Yakin ingin menghapus transaksi ini?');"
-                            class="inline">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit"
-                                class="bg-red-400 hover:bg-red-500 text-white px-3 py-1 rounded-lg text-xs font-bold">
-                          Delete
-                        </button>
-                      </form>
-                    </td>
-                  </tr>
-                @endforeach
-              @endif
-            </tbody>
-          </table>
-        </div>
+    <!-- Komisi Perusahaan -->
+    <div class="w-11/12 md:w-4/5 lg:w-3/4 bg-white/60 rounded-xl shadow-lg p-6 mt-8">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-orange-500 font-bold text-lg">Komisi</h2>
+        <button id="btn-open-komisi"
+                class="bg-green-500 hover:bg-green-600 text-white font-bold px-4 py-2 rounded-lg">
+          Tambah Komisi
+        </button>
       </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm text-left text-gray-700">
+          <thead class="text-xs text-gray-700 uppercase bg-orange-300">
+            <tr>
+              <th class="px-4 py-2">No</th>
+              <th class="px-4 py-2">Anak Perusahaan</th>
+              <th class="px-4 py-2">Item (Transaksi)</th>
+              <th class="px-4 py-2">Nominal Komisi</th>
+              <th class="px-4 py-2">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            @php
+              // Kita asumsikan controller sudah melempar $commissions
+              // yaitu koleksi Commission::with(['child','transaction'])->where('parent_post_id',$post->id)->get()
+            @endphp
+
+            @if(isset($commissions) && $commissions->isEmpty())
+              <tr class="bg-white/50">
+                <td class="px-4 py-2" colspan="5">Tidak ada data komisi</td>
+              </tr>
+            @elseif(isset($commissions))
+              @foreach($commissions as $idx => $c)
+                <tr class="bg-white/50 hover:bg-white/70 transition">
+                  {{-- No --}}
+                  <td class="px-4 py-2">{{ $idx + 1 }}</td>
+
+                  {{-- Anak Perusahaan --}}
+                  <td class="px-4 py-2">{{ $c->child->title }}</td>
+
+                  {{-- Item/Transaksi (– jika null) --}}
+                  <td class="px-4 py-2">
+                    {{ optional($c->transaction)->nama_produk ?? '–' }}
+                  </td>
+
+                  {{-- Nominal Komisi --}}
+                  <td class="px-4 py-2">
+                    Rp {{ number_format($c->commission_amount, 2, ',', '.') }}
+                  </td>
+
+                  {{-- Aksi --}}
+                  <td class="px-4 py-2 flex gap-2">
+                    <a href="{{ route('commissions.edit', $c->id) }}"
+                      class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-lg text-xs font-bold no-underline">
+                      Edit
+                    </a>
+                    <form action="{{ route('commissions.destroy', $c->id) }}"
+                          method="POST"
+                          onsubmit="return confirm('Yakin ingin menghapus komisi ini?');"
+                          class="inline">
+                      @csrf
+                      @method('DELETE')
+                      <button type="submit"
+                              class="bg-red-400 hover:bg-red-500 text-white px-3 py-1 rounded-lg text-xs font-bold">
+                        Hapus Komisi
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              @endforeach
+            @endif
+          </tbody>
+        </table>
+      </div>
+    </div>
+
 
 
       <!-- Produk Kerjasama Hasil Transaksi -->
@@ -471,55 +467,68 @@
     </div>
 
     <!-- Modal Tambah Komisi -->
-    <div id="modal-komisi"
-        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+    <div id="modal-komisi" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
       <div class="bg-white rounded-lg shadow-lg w-11/12 md:w-2/3 lg:w-1/2">
-        <!-- Header Modal -->
         <div class="flex justify-between items-center border-b px-4 py-3">
           <h3 class="text-lg font-medium text-gray-800">Tambah Komisi Baru</h3>
           <button id="btn-close-komisi"
                   class="text-gray-500 hover:text-gray-700 text-2xl leading-none">&times;</button>
         </div>
-        <!-- Body Modal -->
         <div class="p-6">
-          <form action="{{ route('posts.store') }}" method="POST" class="space-y-4">
+          <form action="{{ route('commissions.store') }}" method="POST" class="space-y-4">
             @csrf
-            <input type="hidden" name="parent_id" value="{{ $post->id }}">
 
+            <input type="hidden" name="parent_post_id" value="{{ $post->id }}">
+
+            <!-- Dropdown Pilih Anak Perusahaan -->
             <div>
               <label for="child_post_id" class="block font-medium text-gray-700">Pilih Anak Perusahaan</label>
-              <input list="children-list"
-                    name="child_post_id"
-                    id="child_post_id"
-                    class="mt-1 block w-full border-gray-300 rounded-lg focus:ring-orange-400 focus:border-orange-400"
-                    placeholder="Cari dan pilih perusahaan anak"
-                    value="{{ old('child_post_id') }}"
-                    required>
-              <datalist id="children-list">
+              <select name="child_post_id"
+                      id="child_post_id"
+                      class="mt-1 block w-full border-gray-300 rounded-lg focus:ring-orange-400 focus:border-orange-400"
+                      required>
+                <option value="" disabled selected>-- Pilih perusahaan anak --</option>
                 @foreach ($allChildren as $childOption)
-                  <option value="{{ $childOption->id }}">{{ $childOption->title }}</option>
+                  <option value="{{ $childOption->id }}">
+                    {{ $childOption->title }}
+                  </option>
                 @endforeach
-              </datalist>
+              </select>
               @error('child_post_id')
                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
               @enderror
             </div>
 
+            <!-- Dropdown Pilih Transaksi (akan di‐populate lewat JS) -->
             <div>
-              <label for="transaction_value" class="block font-medium text-gray-700">Nilai Transaksi (Rp)</label>
+              <label for="transaction_id" class="block font-medium text-gray-700">Pilih Transaksi (opsional)</label>
+              <select name="transaction_id"
+                      id="transaction_id"
+                      class="mt-1 block w-full border-gray-300 rounded-lg focus:ring-orange-400 focus:border-orange-400">
+                <option value="" selected>-- (Pilih anak dahulu untuk melihat transaksinya) --</option>
+                <!-- Pilihan transaksi akan di‐isi lewat JavaScript berdasarkan child_post_id -->
+              </select>
+              <p class="text-gray-500 text-sm mt-1">Kosongkan jika ingin input nilai transaksi manual.</p>
+            </div>
+
+            <!-- Input Nilai Transaksi Manual -->
+            <div>
+              <label for="transaction_value" class="block font-medium text-gray-700">
+                Nilai Transaksi Manual (Rp)
+              </label>
               <input type="number"
                     name="transaction_value"
                     id="transaction_value"
                     step="0.01"
                     value="{{ old('transaction_value') }}"
                     class="mt-1 block w-full border-gray-300 rounded-lg focus:ring-orange-400 focus:border-orange-400"
-                    placeholder="Contoh: 1500000"
-                    required>
+                    placeholder="Contoh: 1500000">
               @error('transaction_value')
                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
               @enderror
             </div>
 
+            <!-- Tombol Simpan & Batal -->
             <div class="flex justify-end space-x-2 pt-4">
               <button type="button"
                       id="btn-cancel-komisi"
@@ -535,6 +544,7 @@
         </div>
       </div>
     </div>
+
 
 
     {{-- Skrip untuk file preview --}}
@@ -635,36 +645,77 @@
         document.body.append(modal);
         modal.querySelector('#close-modal').addEventListener('click', () => modal.remove());
       }
+    </script>
 
+
+      <script>
       // Skrip modal “Tambah Komisi”
-      document.addEventListener('DOMContentLoaded', function() {
+       document.addEventListener('DOMContentLoaded', function() {
+        // 1. Ambil elemen dropdown
+        const childSelect = document.getElementById('child_post_id');
+        const trxSelect   = document.getElementById('transaction_id');
+
+        // mengambil data child
+        const childTransactions = {!! json_encode(
+        $allChildren->mapWithKeys(function($child) {
+            return [
+                $child->id => $child->transactions->map(function($t) {
+                    return [
+                        'id'           => $t->id,
+                        'nama_produk'  => $t->nama_produk,
+                        'total_harga'  => $t->total_harga,
+                    ];
+                })->toArray()
+            ];
+           })
+        ) !!};
+
+        function populateTransactionOptions(childId) {
+          trxSelect.innerHTML = '';
+
+          const defaultOption = document.createElement('option');
+          defaultOption.value = '';
+          defaultOption.textContent = '-- (Pilih transaksi ...) --';
+          trxSelect.appendChild(defaultOption);
+
+          if (!childTransactions[childId] || childTransactions[childId].length === 0) {
+            return;
+          }
+
+          childTransactions[childId].forEach(function(trx) {
+            const opt = document.createElement('option');
+            opt.value = trx.id;
+            opt.textContent = trx.nama_produk + ' – Rp ' +
+              Number(trx.total_harga).toLocaleString('id-ID', { minimumFractionDigits: 2 });
+            trxSelect.appendChild(opt);
+          });
+        }
+
+        childSelect.addEventListener('change', function() {
+          const selectedChildId = childSelect.value;
+          if (selectedChildId) {
+            populateTransactionOptions(selectedChildId);
+          } else {
+            // Jika user memilih opsi kosong sekali pun, kembalikan dropdown transaksi ke default saja
+            trxSelect.innerHTML = '<option value="">-- (Pilih anak dahulu ...) --</option>';
+          }
+        });
+
+        // 5. Skrip untuk modal (sama seperti sebelumnya)
         const btnOpen   = document.getElementById('btn-open-komisi');
         const btnClose  = document.getElementById('btn-close-komisi');
         const btnCancel = document.getElementById('btn-cancel-komisi');
         const modal     = document.getElementById('modal-komisi');
 
-        if (btnOpen) {
-          btnOpen.addEventListener('click', () => {
-            modal.classList.remove('hidden');
-          });
-        }
-        if (btnClose) {
-          btnClose.addEventListener('click', () => {
-            modal.classList.add('hidden');
-          });
-        }
-        if (btnCancel) {
-          btnCancel.addEventListener('click', () => {
-            modal.classList.add('hidden');
-          });
-        }
+        btnOpen.addEventListener('click', () => modal.classList.remove('hidden'));
+        btnClose.addEventListener('click', () => modal.classList.add('hidden'));
+        btnCancel.addEventListener('click', () => modal.classList.add('hidden'));
 
-        // Klik di luar konten modal → menutup modal
         modal.addEventListener('click', function(evt) {
           if (evt.target === modal) {
             modal.classList.add('hidden');
           }
         });
       });
-    </script>
+</script>
 </x-layout>

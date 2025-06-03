@@ -18,6 +18,7 @@ use App\Http\Controllers\{
     MarketingDashboardController,
     MitraMessageController,
     MitraTransactionController,
+    CommissionController,
 };
 use App\Http\Controllers\Auth\{
     LoginController,
@@ -147,6 +148,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/',                'index'      )->name('posts.index');
         //Route::get('/create',          'create'     )->name('posts.create');
         Route::post('/',               'store'      )->name('posts.store');
+        Route::delete('/{child:slug}/clear-commission', 'clearCommission')
+             ->name('posts.clearCommission');
         Route::get('/{post:slug}',     'show'       )->name('posts.show');
         Route::get('/{post:slug}/edit','edit'       )->name('posts.edit');
         Route::put('/{post:slug}',     'update'     )->name('posts.update');
@@ -155,6 +158,46 @@ Route::middleware('auth')->group(function () {
         Route::post('/{post:slug}/changePIC','changePIC')->name('posts.changePIC');
         Route::get('/category/{category:slug}', 'index')->name('posts.category');
     });
+
+
+// Untuk komisi
+
+Route::resource('commissions', CommissionController::class);
+//List semua komisi
+Route::get('/commissions', [CommissionController::class, 'index'])
+     ->name('commissions.index');
+
+//Tampilkan form untuk membuat komisi baru
+Route::get('/commissions/create', [CommissionController::class, 'create'])
+     ->name('commissions.create');
+
+// Simpan komisi baru ke database
+Route::post('/commissions', [CommissionController::class, 'store'])
+     ->name('commissions.store');
+
+// Tampilkan detail satu komisi berdasarkan {id}
+Route::get('/commissions/{commission}', [CommissionController::class, 'show'])
+     ->name('commissions.show');
+
+// Tampilkan form untuk meng‐edit komisi yang sudah ada
+Route::get('/commissions/{commission}/edit', [CommissionController::class, 'edit'])
+     ->name('commissions.edit');
+
+//Update data komisi berdasarkan {id}
+Route::put('/commissions/{commission}', [CommissionController::class, 'update'])
+     ->name('commissions.update');
+
+// Hapus (delete) komisi berdasarkan {id}
+Route::delete('/commissions/{commission}', [CommissionController::class, 'destroy'])
+     ->name('commissions.destroy');
+
+
+
+
+// Route untuk mengosongkan komisi (clear commission) pada child
+Route::delete('posts/{child}/clear-commission', [PostController::class, 'clearCommission'])
+     ->name('posts.clearCommission');
+
 
     //role: admin, marketing
     Route::prefix('posts/{post}')->name('posts.')->group(function(){

@@ -16,8 +16,7 @@ class Post extends Model
 
     protected $fillable = ['title', 'pic_mitra', 'category_id', 'slug', 'body',
     'phone', 'email', 'alamat', 'keterangan_bpjs', 'pembayaran', 
-    'tanggal_awal', 'tanggal_akhir', 'file_path', 'PIC', 'parent_id', 
-    'commission_percentage', 'commission_amount', 'transaction_value',];
+    'tanggal_awal', 'tanggal_akhir', 'file_path', 'PIC', 'parent_id',];
    
     protected $with = ['category', 'picUser'];
 

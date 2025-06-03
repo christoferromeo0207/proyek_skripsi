@@ -43,15 +43,6 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('posts')
                 ->onDelete('set null');
-
-            $table->decimal('commission_percentage', 5, 2)
-                ->nullable();
-
-            $table->decimal('commission_amount', 15, 2)
-                ->nullable();
-            $table->decimal('transaction_value', 15, 2)
-                ->default(0);
-
             // Timestamps
             $table->timestamps();
         });
