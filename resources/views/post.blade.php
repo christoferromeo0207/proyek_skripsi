@@ -248,8 +248,9 @@
             @forelse($files as $idx => $path)
               @php
                 $name        = basename($path);
-                $publicUrl   = asset('storage/' . ltrim($path, '/'));
+                $publicUrl   = asset('storage/' . ltrim($path, '/')); 
                 $downloadUrl = route('posts.files.download', [$post, $idx]);
+                // ID unik untuk setiap file, misal "file-0", "file-1", dst.
                 $fileId      = "file-{$idx}";
               @endphp
 
@@ -259,8 +260,9 @@
                 data-file-url="{{ $publicUrl }}"
               >
                 <div class="truncate max-w-xs">{{ $name }}</div>
+
                 <div class="flex space-x-2">
-                  <!-- Preview: jalankan fungsi openFile(fileId) -->
+                  <!-- Tombol Preview: panggil openFile(fileId) -->
                   <button
                     type="button"
                     onclick="openFile('{{ $fileId }}')"
@@ -268,14 +270,14 @@
                     title="Preview"
                   >👁️</button>
 
-                  <!-- Download -->
+                  <!-- Tombol Download -->
                   <a
                     href="{{ $downloadUrl }}"
                     class="text-green-500 hover:text-green-700"
                     title="Download"
                   >⬇️</a>
 
-                  <!-- Delete -->
+                  <!-- Tombol Delete -->
                   <form
                     action="{{ route('posts.files.destroy', [$post, $idx]) }}"
                     method="POST"
@@ -295,6 +297,11 @@
             @endforelse
           </div>
         </div>
+
+
+
+
+
       </div>
 
       <!-- Komisi Perusahaan -->
@@ -319,6 +326,8 @@
               </tr>
             </thead>
             <tbody>
+
+
               @php
                 // Kita asumsikan controller sudah melempar $commissions
                 // yaitu koleksi Commission::with(['child','transaction'])->where('parent_post_id',$post->id)->get()
@@ -711,22 +720,53 @@
           document.body.append(modalPreview);
           modalPreview.querySelector('#close-upload-modal').addEventListener('click', () => modalPreview.remove());
         }
-
-        // ==== Skrip Preview Existing Dokumentasi ====
-        window.openFile = function(fileId) {
-          // Cari elemen dengan data-file-id = fileId
-          const row = document.querySelector(`[data-file-id="${fileId}"]`);
-          if (!row) return;
-          const url = row.getAttribute('data-file-url');
-          // Cek ekstensi untuk menentukan isImage
-          const isImage = /\.(jpe?g|png|gif)$/i.test(url);
-
-          // Ambil state Alpine di #root
-          const alpineData = document.getElementById('root').__x.$data;
-          alpineData.fileUrl = url;
-          alpineData.isImage = isImage;
-          alpineData.fileModal = true;
-        };
+  
       });
+    </script>
+
+    <script>
+      function openFile(fileId) {
+        const fileElement = document.querySelector(`[data-file-id="${fileId}"]`);
+        if (fileElement && fileElement.dataset.fileUrl) {
+          const fileUrl = fileElement.dataset.fileUrl;
+          // Jika Anda ingin cek berdasarkan <img> di dalam fileElement:
+          const isImage = !!fileElement.querySelector('img');
+          // Atau cek berdasarkan ekstensi:
+          // const isImage = /\.(jpe?g|png|gif)$/i.test(fileUrl);
+
+          const modal = document.createElement('div');
+          modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4';
+
+          modal.innerHTML = `
+            <div class="bg-white rounded-lg max-w-4xl w-full max-h-screen overflow-auto">
+              <div class="flex justify-between items-center p-4 border-b">
+                <h3 class="text-lg font-medium">Preview File</h3>
+                <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <div class="p-4">
+                ${isImage 
+                  ? `<img src="${fileUrl}" class="max-w-full h-auto mx-auto" alt="Preview">` 
+                  : `<iframe src="${fileUrl}" class="w-full h-96 border-0"></iframe>`}
+              </div>
+              <div class="p-4 border-t flex justify-end space-x-2">
+                <a href="${fileUrl}" download 
+                  class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md no-underline">
+                  Download
+                </a>
+                <button onclick="this.closest('.fixed').remove()" 
+                        class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md">
+                  Tutup
+                </button>
+              </div>
+            </div>
+          `;
+
+          document.body.appendChild(modal);
+        }
+      }
     </script>
 </x-layout>
