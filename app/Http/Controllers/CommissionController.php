@@ -9,11 +9,6 @@ use Illuminate\Http\Request;
 
 class CommissionController extends Controller
 {
-    /**
-     * Tampilkan daftar semua komisi (bisa dipakai untuk index global).
-     * Tapi kita akan menggunakannya dalam konteks detail Post, jadi biasanya
-     * per parent_post_id.
-     */
     public function index(Request $request)
     {
         // Jika ingin men‐paginate semua komisi:
@@ -24,25 +19,12 @@ class CommissionController extends Controller
         return view('commissions.index', compact('commissions'));
     }
 
-    /**
-     * Tampilkan form untuk membuat komisi baru.
-     * Tapi dalam kasus ini, kita memakai modal di post.blade, jadi method ini
-     * bisa dikosongkan atau di‐redirect.
-     */
+
     public function create()
     {
-        // Jika memang Anda ingin punya halaman terpisah,
-        // Anda bisa me‐load daftar parent dan child di sini.
         abort(404);
     }
 
-    /**
-     * Simpan komisi baru ke database.
-     * Form yang kita kirim akan berisi:
-     * - parent_post_id
-     * - child_post_id
-     * - transaction_value (atau transaction_id jika transaksi sudah tersimpan)
-     */
      public function store(Request $request)
     {
         $data = $request->validate([

@@ -263,20 +263,21 @@
 
                 <div class="flex space-x-2">
                   <!-- Tombol Preview: panggil openFile(fileId) -->
-                  <button
-                    type="button"
-                    onclick="openFile('{{ $fileId }}')"
-                    class="text-blue-500 hover:text-blue-700"
-                    title="Preview"
-                  >👁️</button>
-
-                  <!-- Tombol Download -->
-                  <a
-                    href="{{ $downloadUrl }}"
-                    class="text-green-500 hover:text-green-700"
-                    title="Download"
-                  >⬇️</a>
-
+                <button
+                  type="button"
+                  onclick="openFile('{{ $fileId }}')"
+                  class="text-orange-500 hover:text-orange-700"
+                  title="Preview">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                    <path fill-rule="evenodd"
+                          d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943
+                            9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732
+                            14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                          clip-rule="evenodd" />
+                  </svg>
+                </button>
+        
                   <!-- Tombol Delete -->
                   <form
                     action="{{ route('posts.files.destroy', [$post, $idx]) }}"
@@ -635,7 +636,7 @@
           }
           fileInput.files = dt.files;
           renderFileList();
-          fileInput.value = ''; // reset supaya onchange bisa kembali dipanggil
+          fileInput.value = ''; 
         });
 
         function renderFileList() {
@@ -754,7 +755,7 @@
               </div>
               <div class="p-4 border-t flex justify-end space-x-2">
                 <a href="${fileUrl}" download 
-                  class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md no-underline">
+                  class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md no-underline">
                   Download
                 </a>
                 <button onclick="this.closest('.fixed').remove()" 

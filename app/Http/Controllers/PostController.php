@@ -129,19 +129,18 @@ class PostController extends Controller
     {
        $post->load('children', 'transactions');
 
-        // Siapkan daftar anak untuk dropdown “Tambah Komisi”
+
         $allChildren = Post::whereNull('parent_id')
                            ->where('id', '!=', $post->id)
                            ->with('transactions')
                            ->get();
 
-        // *** Tambahkan ini: ambil semua baris komisi untuk post ini sebagai parent ***
         $commissions = Commission::with(['child', 'transaction'])
                           ->where('parent_post_id', $post->id)
                           ->orderByDesc('created_at')
                           ->get();
 
-        // Kirimkan juga $commissions ke view
+
         return view('post', compact('post', 'allChildren', 'commissions'))
             ->with('title', $post->title);
     }
