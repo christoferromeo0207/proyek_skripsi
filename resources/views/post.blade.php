@@ -725,6 +725,7 @@
       });
     </script>
 
+    {{-- Skrip untuk open file --}}
     <script>
       function openFile(fileId) {
         const fileElement = document.querySelector(`[data-file-id="${fileId}"]`);

@@ -15,6 +15,7 @@ class Commission extends Model
         'transaction_id',
         'commission_pct',
         'commission_amount',
+        'status',
     ];
 
     public function parent()
