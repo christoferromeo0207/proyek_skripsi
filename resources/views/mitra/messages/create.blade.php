@@ -57,23 +57,7 @@
         @enderror
       </div>
 
-      {{-- Attachments --}}
-      <div>
-        <label class="block text-orange-600 font-semibold mb-1">Upload File (opsional)</label>
-        <input type="file"
-               name="attachments[]"
-               multiple
-               accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"
-               class="w-full border border-orange-300 rounded-lg p-2">
-        {{-- Validasi array-level --}}
-        @error('attachments')
-          <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-        @enderror
-        {{-- Validasi per-file --}}
-        @error('attachments.*')
-          <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-        @enderror
-      </div>
+
 
       {{-- Actions --}}
       <div class="flex justify-end gap-3">

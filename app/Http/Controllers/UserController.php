@@ -11,23 +11,23 @@ use Illuminate\Support\Facades\Log;
 class UserController extends Controller
 {
     public function index(Request $request)
-        {
-            $query = User::query()->where('role', '!=', 'mitra');
+    {
+        // Hanya ambil user dengan role = 'marketing'
+        $query = User::where('role', 'marketing');
 
-
-            // Jika ada fungsi filter / pencarian:
-            if ($request->filled('search')) {
-                $query->where('name', 'like', '%'.$request->search.'%');
-            }
-
-
-            // untuk paginate
-            $users = $query
-                ->withCount('posts')  
-                ->paginate(5);
-
-            return view('user', compact('users'));
+        // Jika ada parameter search, cari berdasarkan nama
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%'.$request->search.'%');
         }
+
+        // Paginate 5 data per halaman, plus hitung jumlah posts
+        $users = $query
+            ->withCount('posts')
+            ->paginate(5);
+
+        return view('user', compact('users'));
+    }
+
 
     public function store(Request $request)
     {

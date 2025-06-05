@@ -41,7 +41,7 @@ class CommissionController extends Controller
             return back()->withErrors('Parent atau anak perusahaan tidak ditemukan.');
         }
 
-        // Tentukan persentase murah: 7% untuk level 1, 5% untuk level 2
+        // Tentukan persentase 
         $percent = $parent->parent_id ? 5.00 : 7.00;
 
         // Hitung transaction_value

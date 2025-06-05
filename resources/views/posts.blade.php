@@ -13,8 +13,7 @@
           name="search"
           value="{{ request('search') }}"
           placeholder="Cari Nama Perusahaan..."
-          class="block w-full md:w-2/3 mx-auto p-3 pl-4 text-gray-900 bg-white rounded-full border border-transparent focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-300 transition"
-        />
+          class="block w-full md:w-2/3 mx-auto p-3 pl-4 text-gray-900 bg-white rounded-full border border-transparent focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-300 transition"/>
 
         {{-- Category pills --}}
         <div class="flex flex-wrap justify-center gap-2">
