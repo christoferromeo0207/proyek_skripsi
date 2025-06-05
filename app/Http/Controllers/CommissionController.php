@@ -120,4 +120,25 @@ class CommissionController extends Controller
             ->route('posts.show', $parentSlug)
             ->with('success', 'Komisi berhasil dihapus.');
     }
+
+     public function disburse($id)
+    {
+        // Temukan data komisi berdasarkan ID
+        $commission = Commission::findOrFail($id);
+
+        // Cek jika status sudah "Sudah Diambil"
+        if ($commission->status === 'Sudah Diambil') {
+            // Kembali ke halaman sebelumnya dengan pesan (opsional)
+            return redirect()->back()
+                             ->with('error', 'Komisi sudah berstatus “Sudah Diambil”.');
+        }
+
+        // Update kolom status menjadi "Sudah Diambil"
+        $commission->status = 'Sudah Diambil';
+        $commission->save();
+
+        // Redirect kembali ke halaman yang sama, bisa sertakan flash message
+        return redirect()->back()
+                         ->with('success', 'Status komisi berhasil diubah menjadi “Sudah Diambil”.');
+    }
 }

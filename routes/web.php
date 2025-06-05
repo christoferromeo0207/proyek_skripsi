@@ -191,6 +191,9 @@ Route::delete('/commissions/{commission}', [CommissionController::class, 'destro
      ->name('commissions.destroy');
 
 
+//untuk status komisi di mitra
+Route::post('/commissions/{id}/disburse', [CommissionController::class, 'disburse'])
+     ->name('commissions.disburse');
 
 
 // Route untuk mengosongkan komisi (clear commission) pada child

@@ -292,14 +292,28 @@
                     <td class="px-4 py-2">
                       Rp {{ number_format($c->commission_amount, 2, ',', '.') }}
                     </td>
-                    <td class="px-4 py-2 space-x-2">
-                      <button
-                        type="button"
-                        class="px-3 py-1 bg-yellow-400 text-white rounded hover:bg-yellow-500 transition"
-                        onclick="handleDisbursement({{ $c->id }}, true)"
-                      >
-                        Cairkan
-                      </button>
+                    <td class="px-4 py-2">
+                      @if($c->status === 'Cairkan')
+                        {{-- Jika status = "Cairkan", tampilkan tombol untuk mengirim form POST --}}
+                        <form action="{{ route('commissions.disburse', ['id' => $c->id]) }}"
+                              method="POST"
+                              onsubmit="return confirm('Yakin ingin menandai komisi ini sebagai Sudah Diambil?');"
+                              class="inline"
+                        >
+                          @csrf
+                          <button
+                            type="submit"
+                            class="px-3 py-1 bg-yellow-400 text-white rounded hover:bg-yellow-500 transition text-xs font-semibold"
+                          >
+                            Cairkan
+                          </button>
+                        </form>
+                      @else
+                        {{-- Jika status bukan "Cairkan" (⇒ sudah “Sudah Diambil”), tampilkan badge --}}
+                        <span class="px-3 py-1 bg-gray-400 text-white rounded-full text-xs font-semibold">
+                          Sudah Diambil
+                        </span>
+                      @endif
                     </td>
                   </tr>
                 @endforeach
@@ -548,4 +562,54 @@
               .addEventListener('click', () => modal.remove());
       }
     </script>
+
+
+<script>
+  async function handleDisbursement(btnElement) {
+    // Ambil URL disburse dari data-attribute tombol
+    const url = btnElement.dataset.disburseUrl;
+
+    // Konfirmasi user
+    if (!confirm('Anda yakin ingin mencairkan komisi ini?')) {
+      return;
+    }
+
+    try {
+      const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': token,
+          'Accept': 'application/json'
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.status === 'success') {
+        // Ganti tombol menjadi badge “Sudah Diambil”
+        btnElement.textContent = 'Sudah Diambil';
+        btnElement.disabled = true;
+        btnElement.classList.remove('bg-yellow-400', 'hover:bg-yellow-500');
+        btnElement.classList.add('bg-gray-400', 'cursor-not-allowed');
+        alert('Komisi berhasil dicairkan. Notifikasi terkirim.');
+      } 
+      else if (data.status === 'already') {
+        alert('Komisi ini sudah ditandai “Sudah Diambil”.');
+      } 
+      else {
+        alert('Gagal mencairkan komisi. Silakan coba lagi.');
+      }
+    } 
+    catch (error) {
+      console.error('Fetch error:', error);
+      alert('Terjadi kesalahan, silakan muat ulang halaman.');
+    }
+  }
+</script>
+
+
+
 </x-layout>
