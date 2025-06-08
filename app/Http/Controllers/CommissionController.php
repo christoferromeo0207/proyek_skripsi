@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\DB;
 use App\Models\Commission;
 use App\Models\Post;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class CommissionController extends Controller
 {
     public function index(Request $request)
     {
-        // Jika ingin men‐paginate semua komisi:
+        
         $commissions = Commission::with(['parent', 'child', 'transaction'])
                           ->orderByDesc('created_at')
                           ->paginate(15);
@@ -25,7 +27,8 @@ class CommissionController extends Controller
         abort(404);
     }
 
-     public function store(Request $request)
+
+    public function store(Request $request)
     {
         $data = $request->validate([
             'parent_post_id'    => 'required|exists:posts,id',
@@ -34,38 +37,44 @@ class CommissionController extends Controller
             'transaction_value' => 'nullable|numeric|min:0',
         ]);
 
-        $parent = Post::find($data['parent_post_id']);
-        $child  = Post::find($data['child_post_id']);
+        // diambil dari data yang baru diinputkan
+        $parent = Post::findOrFail($data['parent_post_id']);
+        $child  = Post::findOrFail($data['child_post_id']);
 
-        if (!$parent || !$child) {
-            return back()->withErrors('Parent atau anak perusahaan tidak ditemukan.');
-        }
+        // save di parent_id di posts
+        $child->parent_id = $parent->id;
+        $child->save();
 
-        // Tentukan persentase 
-        $percent = $parent->parent_id ? 5.00 : 7.00;
+        // 2) Hitung nilai transaksi
+        $tv = $data['transaction_id']
+            ? Transaction::find($data['transaction_id'])->total_harga
+            : ($data['transaction_value'] ?? 0);
 
-        // Hitung transaction_value
-        if (!empty($data['transaction_id'])) {
-            $trx = Transaction::find($data['transaction_id']);
-            $tv  = $trx ? $trx->total_harga : 0;
-        } else {
-            $tv = $data['transaction_value'] ?? 0;
-        }
-
-        $commissionAmount = ($tv * $percent) / 100.0;
-
-        $commission = Commission::create([
+        // untuk komisi 7%
+        Commission::create([
             'parent_post_id'    => $parent->id,
             'child_post_id'     => $child->id,
             'transaction_id'    => $data['transaction_id'] ?? null,
-            'commission_pct'    => $percent,
-            'commission_amount' => $commissionAmount,
+            'commission_pct'    => 7.00,
+            'commission_amount' => $tv * 0.07,
         ]);
+
+        // untuk komisi 5% jika ada
+        if ($parent->parent_id) {
+            Commission::create([
+                'parent_post_id'    => $parent->parent_id,
+                'child_post_id'     => $parent->id,       
+                'transaction_id'    => $data['transaction_id'] ?? null,
+                'commission_pct'    => 5.00,
+                'commission_amount' => $tv * 0.05,
+            ]);
+        }
 
         return redirect()
             ->route('posts.show', $parent->slug)
-            ->with('success', 'Komisi berhasil ditambahkan.');
+            ->with('success', 'Komisi berhasil dibuat untuk dua level.');
     }
+
 
 
     public function show(Commission $commission)

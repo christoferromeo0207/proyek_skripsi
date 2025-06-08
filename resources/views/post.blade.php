@@ -322,6 +322,7 @@
                 <th class="px-4 py-2">No</th>
                 <th class="px-4 py-2">Anak Perusahaan</th>
                 <th class="px-4 py-2">Item (Transaksi)</th>
+                <th class="px-4 py-2">Persen Komisi</th>
                 <th class="px-4 py-2">Nominal Komisi</th>
                 <th class="px-4 py-2">Aksi</th>
               </tr>
@@ -350,6 +351,11 @@
                     {{-- Item/Transaksi (– jika null) --}}
                     <td class="px-4 py-2">
                       {{ optional($c->transaction)->nama_produk ?? '–' }}
+                    </td>
+
+                    {{--Persen Komisi --}}
+                    <td class="px-4 py-2">
+                     {{ number_format($c->commission_pct, 2, '.') }}%
                     </td>
 
                     {{-- Nominal Komisi --}}
@@ -515,27 +521,9 @@
                       class="mt-1 block w-full border-gray-300 rounded-lg focus:ring-orange-400 focus:border-orange-400">
                 <option value="" selected>-- (Pilih anak dahulu untuk melihat transaksinya) --</option>
               </select>
-              <p class="text-gray-500 text-sm mt-1">Kosongkan jika ingin input nilai transaksi manual.</p>
             </div>
 
-            <!-- Input Nilai Transaksi Manual -->
-            <div>
-              <label for="transaction_value" class="block font-medium text-gray-700">
-                Nilai Transaksi Manual (Rp)
-              </label>
-              <input type="number"
-                    name="transaction_value"
-                    id="transaction_value"
-                    step="0.01"
-                    value="{{ old('transaction_value') }}"
-                    class="mt-1 block w-full border-gray-300 rounded-lg focus:ring-orange-400 focus:border-orange-400"
-                    placeholder="Contoh: 1500000">
-              @error('transaction_value')
-                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-              @enderror
-            </div>
-
-
+            
             <!-- Kontainer untuk menampilkan daftar file yang di‐upload -->
             <div id="file-list" class="space-y-2"></div>
 
