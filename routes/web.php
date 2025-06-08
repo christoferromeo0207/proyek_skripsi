@@ -32,10 +32,10 @@ use App\Mail\NewMessageMail;
 
 
 // Grup Routes Milik Mitra
+
 Route::middleware(['auth'])->prefix('dashboard-mitra')->name('mitra.')->group(function() {
         Route::get('/', [MitraDashboardController::class, 'index'])
               ->name('dashboard');
-
         Route::get('informasi/{post:slug}', [MitraDashboardController::class,'show'])
              ->name('informasi.show');
 
@@ -45,7 +45,7 @@ Route::middleware(['auth'])->prefix('dashboard-mitra')->name('mitra.')->group(fu
              ->name('updateMitra');
 
         // Mitra baru
-        Route::get('mitra/create', [MitraDashboardController::class, 'createPartner'])
+        Route::get('mitra/create', [MitraDashboardController::class, 'createPartner'])  
              ->name('create');
         Route::post('mitra',      [MitraDashboardController::class, 'storePartner'])
              ->name('store');

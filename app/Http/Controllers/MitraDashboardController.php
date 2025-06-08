@@ -35,9 +35,9 @@ class MitraDashboardController extends Controller
                     ->where('pic_mitra', $user->name)
                     ->firstOrFail();
 
-        // now you have:
-        //  - $post->transactions_count  (an integer)
-        //  - $post->transactions        (a Collection if you need the rows)
+        if (! $post) {
+            abort(404, 'PIC Mitra belum terdaftar');
+        }
 
         $total         = $post->transactions_count;
         $messageCount  = Message::where('post_id', $post->id)->count();

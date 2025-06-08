@@ -13,7 +13,7 @@ class DashboardController extends Controller
     {
        $jumlahMitra = Post::count();
        $jumlahKategori = Category::count();
-       $jumlahPegawai = User::where('role', '!=', 'mitra')->count();
+       $jumlahPegawai = User::where('role', '=', 'marketing')->count();
 
         $stats = [
             ['Jumlah Mitra',           $jumlahMitra,           'Perusahaan', 'fas fa-handshake', route('posts.index')],
