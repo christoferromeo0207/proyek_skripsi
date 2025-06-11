@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Http\Request;
 use App\Http\Controllers\{
     DashboardController,
     CategoryController,
@@ -22,7 +24,8 @@ use App\Http\Controllers\{
 };
 use App\Http\Controllers\Auth\{
     LoginController,
-    RegisterController
+    RegisterController,
+    MitraRegisterController
 };
 use App\Models\{Category, Post, User};
 use App\Mail\Email;
@@ -111,13 +114,54 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
      ->middleware('auth')
      ->name('dashboard');
 
+
+
 // Authentication Routes
 //role: admin,marketing,mitra
 Route::middleware('guest')->group(function () {
-    Route::get('/', [LoginController::class, 'showLoginForm'])->name('index');
-    Route::post('/', [LoginController::class, 'login'])->name('login');
-    Route::get('register', [RegisterController::class, 'showRegisterForm'])->name('register');
+    Route::get('/',         [LoginController::class, 'showLoginForm'])->name('index');
+    Route::post('/',        [LoginController::class, 'login'])->name('login');
+
+    // marketing/admin
+    Route::get('register',  [RegisterController::class, 'showRegisterForm'])->name('register');
     Route::post('register', [RegisterController::class, 'register']);
+
+    // mitra
+    Route::get('register/mitra',       [MitraRegisterController::class, 'show'])
+         ->name('register.mitra');
+    Route::post('register/mitra',      [MitraRegisterController::class, 'register'])
+         ->name('register.mitra.submit');
+});
+
+// ─── email‐verification (must be logged in but NOT yet verified) ─────────────
+Route::middleware('auth')->group(function () {
+    // show “please verify” notice
+    Route::get('email/verify', function () {
+        return view('auth.verify-email');
+    })->name('verification.notice');
+
+    // the signed link in the email
+    Route::get('email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+        $request->fulfill();
+        return redirect('/dashboard-mitra'); // or wherever
+    })
+    ->middleware('signed')
+    ->name('verification.verify');
+
+    // resend link
+    Route::post('email/verification-notification', function (Request $request) {
+        $request->user()->sendEmailVerificationNotification();
+        return back()->with('status','Link verifikasi telah dikirim ulang.');
+    })
+    ->middleware('throttle:6,1')
+    ->name('verification.send');
+});
+
+// ─── your real, post‐login routes (only for verified users) ─────────────────────
+Route::middleware(['auth','verified'])->group(function () {
+    Route::get('/dashboard-mitra', [\App\Http\Controllers\MitraDashboardController::class,'index'])
+         ->name('dashboard-mitra');
+    // … all your other protected routes …
 });
 
 // Password Reset Routes

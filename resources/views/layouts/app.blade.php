@@ -18,7 +18,7 @@
   <div id="app">
 
 
-    @unless(request()->routeIs('register'))
+    @unless(request()->routeIs('register') ||  request()->routeIs('register.mitra'))
       <nav class="bg-white shadow">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
           <a href="{{ url('/') }}"

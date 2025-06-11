@@ -75,12 +75,21 @@
         Login
       </button>
     </form>
-    <p class="text-center text-sm text-gray-600">
+    <p class="text-center text-sm text-gray-600 space-y-2">
       Belum punya akun?
-      <a href="{{ route('register') }}" class="text-orange hover:underline">
-        Daftar sekarang
-      </a>
+      <div class="flex justify-center gap-4">
+        <a href="{{ route('register') }}"
+          class="text-orange hover:underline">
+          Daftar Marketing
+        </a>
+        <span class="text-gray-400">|</span>
+        <a href="{{ route('register.mitra') }}"
+          class="text-orange hover:underline">
+          Daftar Mitra
+        </a>
+      </div>
     </p>
+
   </div>
 </body>
 </html>
