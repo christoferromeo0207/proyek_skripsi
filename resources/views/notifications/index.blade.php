@@ -35,13 +35,14 @@
       </div>
 
       {{-- Daftar Pesan --}}
+      {{-- Pada Email hanya dapat diterima dengan email yang terdaftar di mailtrap --}}
       <div class="bg-white rounded-lg p-4 space-y-4">
         @forelse($messages as $msg)
           <div class="border-2 border-orange-300 rounded-lg bg-white p-6">
             <div class="flex justify-between items-start">
               <div class="space-y-1">
-                <div class="text-gray-500 text-sm">To: {{ $msg->receiver->name }}</div>
-                <div class="text-gray-500 text-sm">Dari: {{ $msg->sender->name }}</div>
+              <div class="text-gray-500 text-sm">To:   {{ $msg->receiver ? $msg->receiver->name : 'Unknown' }}</div>
+              <div class="text-gray-500 text-sm">Dari: {{ $msg->sender ? $msg->sender->name : 'Unknown' }}</div>
                 <h3 class="text-xl font-semibold text-orange-600">{{ $msg->subject }}</h3>
               </div>
               <div class="text-gray-500 text-xs">{{ $msg->created_at->format('d M Y H:i') }}</div>

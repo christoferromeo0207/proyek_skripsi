@@ -20,25 +20,24 @@ class NotificationController extends Controller
 
    public function index(Request $request)
     {
-        // 1) semua mitra untuk dropdown
         $posts = Post::orderBy('title')->get();
 
-        // 2) mitra terpilih (param ?post=ID)
+        //mitra terpilih 
         $postId = $request->get('post', optional($posts->first())->id);
         $selectedPost = Post::findOrFail($postId);
 
-        // 3) pesan untuk mitra ini (filter optional)
         $q = $request->get('q');
         $messages = $selectedPost->messages()
-            ->with('sender')
+            ->with(['sender', 'receiver'])
             ->when($q, fn($b) =>
                 $b->where('subject','like',"%{$q}%")
-                  ->orWhere('body','like',   "%{$q}%")
+                ->orWhere('body','like',"%{$q}%")
             )
             ->latest()
             ->get();
 
-        // 4) activity log untuk Post
+
+ 
         $postActivities = Activity::forSubject($selectedPost)
             ->when($q, fn($b) =>
                 $b->where('description','like',"%{$q}%")
@@ -46,10 +45,10 @@ class NotificationController extends Controller
             ->latest()
             ->get();
 
-        // 5) ambil semua ID Transaction milik Post ini
+
         $txIds = $selectedPost->transactions()->pluck('id');
 
-        // 6) activity log untuk Transaction
+
         $txActivities = Activity::query()
             ->where('subject_type', Transaction::class)
             ->whereIn('subject_id', $txIds)
@@ -59,13 +58,13 @@ class NotificationController extends Controller
             ->latest()
             ->get();
 
-        // 7) gabungkan dan urutkan descending
+
         $activities = $postActivities
             ->concat($txActivities)
             ->sortByDesc('created_at')
             ->values();
 
-        // 8) render view
+
         return view('notifications.index', compact(
             'posts','selectedPost','messages','q','activities'
         ));
@@ -83,7 +82,7 @@ class NotificationController extends Controller
     
         $q = $request->get('q');
         $messages = $selectedPost->messages()
-            ->with('sender')
+            ->with(['sender', 'receiver'])
             ->when($q, fn($b) =>
                 $b->where('subject', 'like', "%{$q}%")
                 ->orWhere('body',    'like', "%{$q}%")

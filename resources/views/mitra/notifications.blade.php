@@ -28,8 +28,8 @@
           <div class="border-2 border-orange-300 rounded-lg bg-white p-6">
             <div class="flex justify-between items-start">
               <div class="space-y-1">
-                <div class="text-gray-500 text-sm">
-                  To: {{ $selectedPost->title }}
+                <div class="text-orange-500 text-md">
+                  {{ $selectedPost->title }}
                 </div>
                 <div class="text-gray-500 text-sm">
                   Dari: {{ $msg->sender->name }}

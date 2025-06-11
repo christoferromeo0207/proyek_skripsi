@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\NewMessageMail;
 use App\Models\Post;
 use App\Models\Message;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -22,7 +23,7 @@ class PostMessageController extends Controller
     {
         $q = $request->get('q');
         $msgs = $post->messages()
-            ->with('sender')
+            ->with(['sender', 'receiver'])
             ->when($q, fn($qb) => $qb->where('subject','like',"%{$q}%")
             ->orWhere('body','like',"%{$q}%"))
             ->latest()
@@ -34,7 +35,8 @@ class PostMessageController extends Controller
 
     public function create(Post $post)
     {
-        return view('messages.create', compact('post'));
+        $receiver=User::where('email', $post->email)->firstOrFail();
+        return view('messages.create', compact('post', 'receiver'));
     }
 
 
@@ -46,6 +48,8 @@ class PostMessageController extends Controller
             'attachments' => 'sometimes|array',
             'attachments.*' => 'file|max:5120', 
         ]);
+
+        $receiver = User::where('email', $post->email)->firstOrFail();
 
 
         $attachments = [];
@@ -59,6 +63,7 @@ class PostMessageController extends Controller
 
         $message = $post->messages()->create([
             'user_id' => Auth::id(),
+            'receiver_id' => $receiver->id,
             'subject' => $data['subject'],
             'body'    => $data['body'],
             'attachments' => $attachments,
@@ -67,6 +72,7 @@ class PostMessageController extends Controller
 
         $mailData = [
             'sender'      => Auth::user(),
+            'receiver'    => Auth::user(),  
             'subject'     => $data['subject'],
             'bodyText'        =>$data['body'],
             'message'     => $message,
@@ -88,7 +94,7 @@ class PostMessageController extends Controller
 
         return redirect()
             ->route('posts.messages.index', $post)
-            ->with('success', 'Pesan tersimpan dan terkirim (Mailtrap & SendGrid)!');
+            ->with('success', 'Pesan tersimpan dan terkirim (Mailtrap)!');
     }
 
 

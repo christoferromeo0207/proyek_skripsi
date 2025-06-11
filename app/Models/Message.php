@@ -13,13 +13,12 @@ class Message extends Model
 
     public function sender()
     {
-        return $this->belongsTo(\App\Models\User::class, 'user_id', 'id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
-    /** Pesan ini ditujukan ke siapa (receiver) */
     public function receiver()
     {
-        return $this->belongsTo(\App\Models\User::class, 'receiver_id', 'id');
+        return $this->belongsTo(User::class, 'receiver_id');
     }
 
     /** Pesan ini milik Post mana */

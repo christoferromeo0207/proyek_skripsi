@@ -1,4 +1,3 @@
-{{-- resources/views/messages/create.blade.php --}}
 <x-layout>
   <x-slot:title>Pesan Baru – {{ $post->title }}</x-slot:title>
 
@@ -32,6 +31,11 @@
                disabled
                class="w-full border border-orange-300 rounded-lg p-2 bg-gray-100">
       </div>
+
+        <input type="hidden"
+         name="receiver_id"
+         value="{{ $post->user_id }}"
+        />
 
       {{-- Subject --}}
       <div>

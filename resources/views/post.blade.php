@@ -515,7 +515,7 @@
 
             <!-- Dropdown Pilih Transaksi (di‐populate lewat JS) -->
             <div>
-              <label for="transaction_id" class="block font-medium text-gray-700">Pilih Transaksi (opsional)</label>
+              <label for="transaction_id" class="block font-medium text-gray-700">Pilih Transaksi</label>
               <select name="transaction_id"
                       id="transaction_id"
                       class="mt-1 block w-full border-gray-300 rounded-lg focus:ring-orange-400 focus:border-orange-400">
