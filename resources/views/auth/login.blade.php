@@ -85,7 +85,7 @@
         <span class="text-gray-400">|</span>
         <a href="{{ route('register.mitra') }}"
           class="text-orange hover:underline">
-          Daftar Mitra
+          Daftar PIC Mitra
         </a>
       </div>
     </p>

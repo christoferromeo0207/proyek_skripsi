@@ -27,8 +27,8 @@ class Post extends Model
     ];
 
     protected $casts = [
-        'tanggal_awal'  => 'date',
-        'tanggal_akhir' => 'date',
+        'tanggal_awal'  => 'date:Y-m-d',
+        'tanggal_akhir' => 'date:Y-m-d',
         'created_at'    => 'datetime',
         'updated_at'    => 'datetime',
     ];

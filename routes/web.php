@@ -133,7 +133,7 @@ Route::middleware('guest')->group(function () {
          ->name('register.mitra.submit');
 });
 
-// ─── email‐verification (must be logged in but NOT yet verified) ─────────────
+// email‐verification 
 Route::middleware('auth')->group(function () {
     // show “please verify” notice
     Route::get('email/verify', function () {
@@ -157,12 +157,7 @@ Route::middleware('auth')->group(function () {
     ->name('verification.send');
 });
 
-// ─── your real, post‐login routes (only for verified users) ─────────────────────
-Route::middleware(['auth','verified'])->group(function () {
-    Route::get('/dashboard-mitra', [\App\Http\Controllers\MitraDashboardController::class,'index'])
-         ->name('dashboard-mitra');
-    // … all your other protected routes …
-});
+
 
 // Password Reset Routes
 Route::controller(PasswordController::class)->group(function () {
@@ -175,7 +170,7 @@ Route::controller(PasswordController::class)->group(function () {
 //role: admin
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::post('/logout', function () {Auth::logout();return redirect()->route('login');})->name('logout');
+    Route::post('/logout', function () {Auth::logout();return redirect()->route('login');})->name('logout');    
     Route::get('/users', [UserController::class, 'index'])->name('user.index');
     Route::get('/users/create', [UserController::class, 'create'])->name('user.create');
     Route::post('/users', [UserController::class, 'store'])->name('user.store');

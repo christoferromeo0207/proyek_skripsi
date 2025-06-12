@@ -252,6 +252,7 @@
                                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                                required>
                                     </div>
+                                    {{-- Hanya menampilkan marketing --}}
                                     <div class="mb-4">
                                         <label for="PIC"
                                                class="block text-sm font-medium text-gray-700">
@@ -259,32 +260,47 @@
                                         </label>
                                         <select id="PIC"
                                                 name="PIC"
-                                                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm rounded-md"
+                                               class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                                 required>
-                                            <option value="">Select a PIC</option>
-                                            @foreach ($users as $user)
+                                            <option value="">Pilih PIC Marketing</option>
+                                           @foreach ($users as $user)
+                                            @if($user->role === 'marketing')
                                                 <option value="{{ $user->id }}"
                                                     {{ old('PIC') == $user->id ? 'selected' : '' }}>
-                                                    {{ $user->name }}
+                                                {{ $user->name }}
                                                 </option>
+                                            @endif
                                             @endforeach
                                         </select>
                                         @error('PIC')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                         @enderror
                                     </div>
-                                    <div class="mb-4">
+
+                                    {{-- hanya menampilkan user mitra --}}
+                                   <div class="mb-4">
                                         <label for="pic_mitra"
-                                               class="block text-gray-700 text-sm font-bold mb-2">
+                                                class="block text-gray-700 text-sm font-bold mb-2">
                                             PIC Mitra:
                                         </label>
-                                        <input type="text"
-                                               name="pic_mitra"
-                                               id="pic_mitra"
-                                               class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                               placeholder="Masukkan PIC Mitra"
-                                               required>
+                                        <select id="pic_mitra"
+                                                name="pic_mitra"
+                                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                                required>
+                                            <option value="">Pilih PIC Mitra</option>
+                                            @foreach($users->where('role','mitra') as $mitra)
+                                            <option value="{{ $mitra->id }}"
+                                                {{ old('pic_mitra') == $mitra->id ? 'selected' : '' }}>
+                                                {{ $mitra->name }}
+                                            </option>
+                                            @endforeach
+                                        </select>
+                                        @error('pic_mitra')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
                                     </div>
+
+
                                     <div>
                                         <label class="block text-black-500 font-semibold mb-1">
                                             Dokumentasi:

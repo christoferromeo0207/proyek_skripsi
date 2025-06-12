@@ -111,21 +111,44 @@
               @endif
               @error('pembayaran')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
             </div>
+
             <div>
               <label class="block text-orange-500 font-semibold">Periode Kerjasama</label>
+
               @if($isMitra)
-                <input type="hidden" name="tanggal_awal" value="{{ $post->tanggal_awal }}">
+                <input type="hidden" name="tanggal_awal"  value="{{ $post->tanggal_awal }}">
                 <input type="hidden" name="tanggal_akhir" value="{{ $post->tanggal_akhir }}">
-                <div class="p-2 bg-gray-100 rounded">{{ $post->tanggal_awal }} – {{ $post->tanggal_akhir }}</div>
+                <div class="p-2 bg-gray-100 rounded">
+                  {{ \Carbon\Carbon::parse($post->tanggal_awal)->format('Y-m-d') }}
+                   – 
+                  {{ \Carbon\Carbon::parse($post->tanggal_akhir)->format('Y-m-d') }}
+                </div>
               @else
                 <div class="flex gap-2">
-                  <input type="date" name="tanggal_awal" value="{{ old('tanggal_awal', $post->tanggal_awal) }}" class="flex-1 border rounded px-3 py-2 @error('tanggal_awal') border-red-500 @enderror">
-                  <input type="date" name="tanggal_akhir" value="{{ old('tanggal_akhir', $post->tanggal_akhir) }}" class="flex-1 border rounded px-3 py-2 @error('tanggal_akhir') border-red-500 @enderror">
+                  <input
+                    type="date"
+                    name="tanggal_awal"
+                    value="{{ old('tanggal_awal', \Carbon\Carbon::parse($post->tanggal_awal)->format('Y-m-d')) }}"
+                    class="flex-1 border rounded px-3 py-2 @error('tanggal_awal') border-red-500 @enderror"
+                  >
+                  <input
+                    type="date"
+                    name="tanggal_akhir"
+                    value="{{ old('tanggal_akhir', \Carbon\Carbon::parse($post->tanggal_akhir)->format('Y-m-d')) }}"
+                    class="flex-1 border rounded px-3 py-2 @error('tanggal_akhir') border-red-500 @enderror"
+                  >
                 </div>
               @endif
-              @error('tanggal_awal')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
-              @error('tanggal_akhir')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+
+              @error('tanggal_awal')
+                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+              @enderror
+              @error('tanggal_akhir')
+                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+              @enderror
             </div>
+
+
           </div>
 
         </div>
@@ -169,40 +192,6 @@
               <input type="file" name="file_path[]" id="file-upload-input" class="hidden" accept=".png,.jpg,.jpeg,.pdf" multiple>
             </div>
             <div id="selected-files" class="mt-4 space-y-3"></div>
-          </div>
-
-          {{-- Anak Perusahaan (read-only for mitra) --}}
-          <div class="bg-gray-100 p-4 rounded">
-            <label class="block text-orange-500 font-semibold mb-2">Anak Perusahaan?</label>
-            <div class="flex items-center gap-6">
-              @if($isMitra)
-                <input type="hidden" name="is_child" value="{{ $post->is_child }}">
-                <div class="p-2 bg-gray-100 rounded">{{ $post->is_child? 'Yes':'No' }}</div>
-              @else
-                <label class="inline-flex items-center">
-                  <input type="radio" name="is_child" value="1" x-model="isChild" class="form-radio text-orange-500">
-                  <span class="ml-2">Yes</span>
-                </label>
-                <label class="inline-flex items-center">
-                  <input type="radio" name="is_child" value="0" x-model="isChild" class="form-radio text-orange-500">
-                  <span class="ml-2">No</span>
-                </label>
-              @endif
-            </div>
-            <div x-show="isChild" x-transition x-cloak class="mt-4">
-              <label class="block text-gray-700 mb-1">Pilih Induk Perusahaan</label>
-              @if($isMitra)
-                <input type="hidden" name="parent_id" value="{{ $post->parent_id }}">
-                <div class="p-2 bg-gray-100 rounded">{{ optional($post->parent)->title }}</div>
-              @else
-                <select name="parent_id" class="w-full border rounded px-3 py-2">
-                  <option value="">— Pilih Induk —</option>
-                  @foreach($parents as $p)
-                    <option value="{{ $p->id }}" @selected(old('parent_id', $post->parent_id)==$p->id)>{{ $p->title }}</option>
-                  @endforeach
-                </select>
-              @endif
-            </div>
           </div>
 
         </div>

@@ -305,7 +305,7 @@
 
       </div>
 
-      <!-- Komisi Perusahaan -->
+      {{-- Komisi --}}
       <div class="w-11/12 md:w-4/5 lg:w-3/4 bg-white/60 rounded-xl shadow-lg p-6 mt-8">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-orange-500 font-bold text-lg">Komisi</h2>
@@ -315,7 +315,7 @@
           </button>
         </div>
 
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto overflow-hidden rounded-lg">
           <table class="w-full text-sm text-left text-gray-700">
             <thead class="text-xs text-gray-700 uppercase bg-orange-300">
               <tr>
@@ -328,59 +328,36 @@
               </tr>
             </thead>
             <tbody>
-
-
-              @php
-                // Kita asumsikan controller sudah melempar $commissions
-                // yaitu koleksi Commission::with(['child','transaction'])->where('parent_post_id',$post->id)->get()
-              @endphp
-
               @if(isset($commissions) && $commissions->isEmpty())
                 <tr class="bg-white/50">
-                  <td class="px-4 py-2" colspan="5">Tidak ada data komisi</td>
+                  <td class="px-4 py-2 text-center" colspan="6">
+                    Tidak ada data komisi
+                  </td>
                 </tr>
               @elseif(isset($commissions))
                 @foreach($commissions as $idx => $c)
                   <tr class="bg-white/50 hover:bg-white/70 transition">
-                    {{-- No --}}
                     <td class="px-4 py-2">{{ $idx + 1 }}</td>
-
-                    {{-- Anak Perusahaan --}}
                     <td class="px-4 py-2">{{ $c->child->title }}</td>
-
-                    {{-- Item/Transaksi (– jika null) --}}
-                    <td class="px-4 py-2">
-                      {{ optional($c->transaction)->nama_produk ?? '–' }}
+                    <td class="px-4 py-2">{{ optional($c->transaction)->nama_produk ?? '–' }}</td>
+                    <td class="px-4 py-2">{{ number_format($c->commission_pct, 2, '.') }}%</td>
+                    <td class="px-4 py-2">Rp {{ number_format($c->commission_amount, 2, ',', '.') }}</td>
+                    <td class="px-4 py-2 flex gap-2 whitespace-nowrap">
+                      <form action="{{ route('commissions.destroy', $c->id) }}"
+                            method="POST"
+                            onsubmit="return confirm('Yakin ingin menghapus komisi ini?');"
+                            class="inline"
+                      >
+                        @csrf
+                        @method('DELETE')
+                        <button
+                          type="submit"
+                          class="bg-red-400 hover:bg-red-500 text-white px-3 py-1 rounded-lg text-xs font-bold"
+                        >
+                          Hapus
+                        </button>
+                      </form>
                     </td>
-
-                    {{--Persen Komisi --}}
-                    <td class="px-4 py-2">
-                     {{ number_format($c->commission_pct, 2, '.') }}%
-                    </td>
-
-                    {{-- Nominal Komisi --}}
-                    <td class="px-4 py-2">
-                      Rp {{ number_format($c->commission_amount, 2, ',', '.') }}
-                    </td>
-
-                   <!-- Action: -->
-                <td class="px-4 py-2 flex gap-2">
-                  <form action="{{ route('commissions.destroy', $c->id) }}"
-                        method="POST"
-                        onsubmit="return confirm('Yakin ingin menghapus komisi ini?');"
-                        class="inline"
-                  >
-                    @csrf
-                    @method('DELETE')
-                    <button
-                      type="submit"
-                      class="bg-red-400 hover:bg-red-500 text-white px-3 py-1 rounded-lg text-xs font-bold"
-                    >
-                      Hapus
-                    </button>
-                  </form>
-                </td>
-
                   </tr>
                 @endforeach
               @endif
@@ -388,6 +365,7 @@
           </table>
         </div>
       </div>
+
 
       <!-- Produk Kerjasama Hasil Transaksi -->
       <div class="w-11/12 md:w-4/5 lg:w-3/4 bg-white/60 rounded-xl shadow-lg p-6 mt-8">
