@@ -34,8 +34,9 @@
 
         <input type="hidden"
          name="receiver_id"
-         value="{{ $post->user_id }}"
-        />
+         value="{{ $receiver->id }}"/>
+
+        
 
       {{-- Subject --}}
       <div>

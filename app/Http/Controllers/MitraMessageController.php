@@ -21,14 +21,10 @@ class MitraMessageController extends Controller
     {
         abort_if($post->pic_mitra !== Auth::user()->name, 403);
 
+        
         $q = $req->get('q');
 
         $msgs = $post->messages()
-            ->with(['sender','receiver'])
-            ->where(function($query) {
-                $query->where('user_id', Auth::id())
-                    ->orWhere('receiver_id', Auth::id());
-            })
             ->with(['sender','receiver'])
             ->when($q, fn($b) => $b->where('subject','like', "%{$q}%"))
             ->latest()

@@ -35,21 +35,30 @@ class PostMessageController extends Controller
 
     public function create(Post $post)
     {
-        $receiver=User::where('email', $post->email)->firstOrFail();
-        return view('messages.create', compact('post', 'receiver'));
+        // grab the PIC user directly
+        $receiver = $post->picUser;
+
+        // optionally guard if it’s null
+        if (! $receiver) {
+        abort(404, 'This company has no PIC assigned.');
+        }
+
+        return view('messages.create', compact('post','receiver'));
     }
+
 
 
     public function store(Request $request, Post $post)
     {
         $data = $request->validate([
-            'subject'     => 'required|string|max:255',
-            'body'        => 'required|string',
+            'subject' => 'required|string|max:255',
+            'body' => 'required|string',
+            'receiver_id' => 'required|exists:users,id',
             'attachments' => 'sometimes|array',
             'attachments.*' => 'file|max:5120', 
         ]);
 
-        $receiver = User::where('email', $post->email)->firstOrFail();
+        $receiver = User::findOrFail($data['receiver_id']);
 
 
         $attachments = [];

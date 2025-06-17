@@ -64,6 +64,7 @@ class Post extends Model
             )
         );
     }
+    
 
 
     public function picUser(): BelongsTo
