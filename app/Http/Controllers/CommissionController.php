@@ -28,52 +28,107 @@ class CommissionController extends Controller
     }
 
 
+    // public function store(Request $request)
+    // {
+    //     $data = $request->validate([
+    //         'parent_post_id'    => 'required|exists:posts,id',
+    //         'child_post_id'     => 'required|exists:posts,id',
+    //         'transaction_id'    => 'nullable|exists:transactions,id',
+    //         'transaction_value' => 'nullable|numeric|min:0',
+    //     ]);
+
+    //     // diambil dari data yang baru diinputkan
+    //     $parent = Post::findOrFail($data['parent_post_id']);
+    //     $child  = Post::findOrFail($data['child_post_id']);
+
+    //     // save di parent_id di posts
+    //     $child->parent_id = $parent->id;
+    //     $child->save();
+
+    //     $tv = $data['transaction_id']
+    //         ? Transaction::find($data['transaction_id'])->total_harga
+    //         : ($data['transaction_value'] ?? 0);
+
+    //     // untuk komisi 7% (level 1)
+    //     Commission::create([
+    //         'parent_post_id'    => $parent->id,
+    //         'child_post_id'     => $child->id,
+    //         'transaction_id'    => $data['transaction_id'] ?? null,
+    //         'commission_pct'    => 7.00,
+    //         'commission_amount' => $tv * 0.07,
+    //     ]);
+
+    //     // untuk komisi 5% jika ada (level 2)
+    //     if ($parent->parent_id) {
+    //         Commission::create([
+    //             'parent_post_id'    => $parent->parent_id,
+    //             'child_post_id'     => $parent->id,       
+    //             'transaction_id'    => $data['transaction_id'] ?? null,
+    //             'commission_pct'    => 5.00,
+    //             'commission_amount' => $tv * 0.05,
+    //         ]);
+    //     }
+
+    //     return redirect()
+    //         ->route('posts.show', $parent->slug)
+    //         ->with('success', 'Komisi berhasil dibuat untuk dua level.');
+    // }
+
+
     public function store(Request $request)
     {
         $data = $request->validate([
             'parent_post_id'    => 'required|exists:posts,id',
-            'child_post_id'     => 'required|exists:posts,id',
+            'child_post_id'     => 'required|exists:posts,id|different:parent_post_id',
             'transaction_id'    => 'nullable|exists:transactions,id',
             'transaction_value' => 'nullable|numeric|min:0',
         ]);
 
-        // diambil dari data yang baru diinputkan
+        // Ambil parent dan child
         $parent = Post::findOrFail($data['parent_post_id']);
         $child  = Post::findOrFail($data['child_post_id']);
 
-        // save di parent_id di posts
+        // Set parent-child relationship
         $child->parent_id = $parent->id;
         $child->save();
 
-        // 2) Hitung nilai transaksi
+        // Hitung nilai transaksi (transaction value)
         $tv = $data['transaction_id']
             ? Transaction::find($data['transaction_id'])->total_harga
             : ($data['transaction_value'] ?? 0);
 
-        // untuk komisi 7%
-        Commission::create([
-            'parent_post_id'    => $parent->id,
-            'child_post_id'     => $child->id,
-            'transaction_id'    => $data['transaction_id'] ?? null,
-            'commission_pct'    => 7.00,
-            'commission_amount' => $tv * 0.07,
-        ]);
+        // Daftar persentase komisi tiap level (bisa diubah sesuai kebutuhan)
+        $levels = [
+            ['percent' => 0.07], // level 1
+            ['percent' => 0.05], // level 2
+            ['percent' => 0.03], // level 3
+            ['percent' => 0.03], // level 4
+        ];
 
-        // untuk komisi 5% jika ada
-        if ($parent->parent_id) {
+        // Komisi berjenjang ke atas dari parent
+        $currentParent = $parent;
+        $level = 0;
+
+        while ($currentParent && $level < count($levels)) {
+            $percent = $levels[$level]['percent'];
+
             Commission::create([
-                'parent_post_id'    => $parent->parent_id,
-                'child_post_id'     => $parent->id,       
+                'parent_post_id'    => $currentParent->id,
+                'child_post_id'     => $level === 0 ? $child->id : $parent->id,
                 'transaction_id'    => $data['transaction_id'] ?? null,
-                'commission_pct'    => 5.00,
-                'commission_amount' => $tv * 0.05,
+                'commission_pct'    => $percent * 100,
+                'commission_amount' => $tv * $percent,
             ]);
+
+            $currentParent = $currentParent->parent; // relasi Eloquent, pastikan ada
+            $level++;
         }
 
         return redirect()
             ->route('posts.show', $parent->slug)
-            ->with('success', 'Komisi berhasil dibuat untuk dua level.');
+            ->with('success', 'Komisi berhasil dibuat hingga ' . $level . ' level.');
     }
+
 
 
 

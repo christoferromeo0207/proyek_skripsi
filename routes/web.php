@@ -181,10 +181,22 @@ Route::middleware('auth')->group(function () {
     //role: admin, marketing
     Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifications');
 
+
+    // Messages
+    //role: admin, marketing
+    Route::prefix('posts/{post:slug}/messages')->name('posts.messages.')->controller(PostMessageController::class)->group(function(){
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/', 'store')->name('store');
+            Route::get('/{message}', 'show')->name('show');
+            Route::post('/{message}/read', 'markRead')->name('read');
+            Route::post('/sendgrid', 'storeViaSendgrid')->name('sendgrid');
+        });
+
     //role: admin, marketing
     // Posts Resource
     Route::prefix('posts')->controller(PostController::class)->group(function () {
-        Route::get('/',                'index'      )->name('posts.index');
+        Route::get('/', 'index')->name('posts.index');
         //Route::get('/create',          'create'     )->name('posts.create');
         Route::post('/',               'store'      )->name('posts.store');
         Route::delete('/{child:slug}/clear-commission', 'clearCommission')
@@ -264,16 +276,7 @@ Route::delete('posts/{child}/clear-commission', [PostController::class, 'clearCo
             ->name('posts.files.download');
     });
 
-    // Messages
-    //role: admin, marketing
-    Route::prefix('posts/{post}/messages')->name('posts.messages.')->controller(PostMessageController::class)->group(function(){
-            Route::get('/',           'index')->name('index');
-            Route::get('/create',     'create')->name('create');
-            Route::post('/',          'store')->name('store');
-            Route::get('/{message}',  'show')->name('show');
-            Route::post('/{message}/read', 'markRead')->name('read');
-            Route::post('/sendgrid',  'storeViaSendgrid')->name('sendgrid');
-        });
+
     
     
     
