@@ -2,16 +2,15 @@
 <x-layout>
     <x-slot:title>Categories</x-slot:title>
 
-    {{-- ALERT FLASH MESSAGE --}}
+    {{-- pesan --}}
     @if (session('success'))
-        <div class="mx-6 mt-4 px-4 py-3 rounded bg-green-100 border border-green-400 text-green-800">
-            {{ session('success') }}
-        </div>
-    @elseif (session('error'))
-        <div class="mx-6 mt-4 px-4 py-3 rounded bg-red-100 border border-red-400 text-red-800">
-            {{ session('error') }}
-        </div>
+        <div class="alert alert-success">{{ session('success') }}</div>
     @endif
+
+    @if (session('error') && !session('success'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
+
 
     <div class="min-h-screen w-full bg-gradient-to-br from-orange-200 to-orange-400 text-orange-500 p-0 m-0">
         
@@ -123,7 +122,7 @@
 
                                 <form action="{{ route('addData', $category->id) }}" method="POST" enctype="multipart/form-data">
                                     @csrf
-                                    {{-- (Sama persis seperti form Add Data yang sudah Anda miliki) --}}
+                                    {{-- (Sama seperti form Add Data ) --}}
                                     <div class="mb-4">
                                         <label for="title"
                                                class="block text-gray-700 text-sm font-bold mb-2">
@@ -289,8 +288,8 @@
                                                 required>
                                             <option value="">Pilih PIC Mitra</option>
                                             @foreach($users->where('role','mitra') as $mitra)
-                                            <option value="{{ $mitra->id }}"
-                                                {{ old('pic_mitra') == $mitra->id ? 'selected' : '' }}>
+                                           <option value="{{ $mitra->name }}"
+                                                {{ old('pic_mitra') == $mitra->name ? 'selected' : '' }}>
                                                 {{ $mitra->name }}
                                             </option>
                                             @endforeach
@@ -301,7 +300,7 @@
                                     </div>
 
 
-                                    <div>
+                                    {{-- <div>
                                         <label class="block text-black-500 font-semibold mb-1">
                                             Dokumentasi:
                                         </label>
@@ -331,7 +330,7 @@
                                                    multiple>
                                         </div>
                                         <div id="selected-files" class="mt-4 space-y-3"></div>
-                                    </div>
+                                    </div> --}}
                                     <button type="submit"
                                             class="px-4 py-2 bg-green-400 text-white rounded hover:bg-green-600">
                                         Submit

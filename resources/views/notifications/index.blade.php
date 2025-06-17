@@ -5,34 +5,38 @@
   <div class="min-h-screen bg-gradient-to-br from-orange-300 to-orange-400 text-white py-12 px-4">
     <div class="mx-auto max-w-4xl bg-white/20 backdrop-blur-md rounded-2xl p-6 space-y-6">
 
-      {{-- Header + Dropdown + Search --}}
-      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <h2 class="text-2xl font-bold text-orange-600">Notifikasi</h2>
-        <form id="form-filter" method="GET" action="{{ route('notifications') }}" class="flex items-center gap-2">
-          {{-- Dropdown Mitra --}}
-          <select name="post"
-                  onchange="document.getElementById('form-filter').submit()"
-                  class="px-4 py-2 rounded bg-white text-gray-800">
-            @foreach($posts as $p)
-              <option value="{{ $p->id }}" {{ $p->id == $selectedPost->id ? 'selected' : '' }}>
-                {{ $p->title }}
-              </option>
-            @endforeach
-          </select>
+    {{-- Header + Dropdown + Search --}}
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <h2 class="text-2xl font-bold text-orange-600">Notifikasi</h2>
 
-          {{-- Search bar --}}
-          <input type="text"
-                 name="q"
-                 value="{{ $q }}"
-                 placeholder="Cari Pesan..."
-                 class="px-4 py-2 w-64 rounded bg-white text-gray-800">
+      <form id="form-filter" method="GET" action="{{ route('notifications') }}" class="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-2 w-full md:w-auto">
+        
+        {{-- Dropdown Mitra --}}
+        <select name="post"
+                onchange="document.getElementById('form-filter').submit()"
+                class="px-3 py-2 rounded bg-white text-gray-800 border border-gray-300 w-full sm:w-80">
+          @foreach($posts as $p)
+            <option value="{{ $p->id }}" {{ $p->id == $selectedPost->id ? 'selected' : '' }}>
+              {{ $p->title }}
+            </option>
+          @endforeach
+        </select>
 
-          <button type="submit"
-                  class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">
-            Cari
-          </button>
-        </form>
-      </div>
+        {{-- Search bar --}}
+        <input type="text"
+              name="q"
+              value="{{ $q }}"
+              placeholder="Cari Pesan..."
+              class="px-3 py-2 rounded bg-white text-gray-800 placeholder-gray-500 border border-gray-300 w-full sm:w-60">
+
+        {{-- Tombol Cari --}}
+        <button type="submit"
+                class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 whitespace-nowrap">
+          Cari
+        </button>
+      </form>
+    </div>
+
 
       {{-- Daftar Pesan --}}
       {{-- Pada Email hanya dapat diterima dengan email yang terdaftar di mailtrap --}}

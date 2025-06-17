@@ -194,9 +194,11 @@
         <div class="w-11/12 md:w-4/5 lg:w-3/4 bg-white/30 rounded-2xl shadow-lg p-6">
           <h3 class="text-orange-500 font-bold text-lg mb-4">Dokumentasi</h3>
           <div class="space-y-3">
+
             @php
               $raw   = $post->file_path;
-              $files = $raw ? (json_decode($raw, true) ?: explode(',', $raw)) : [];
+              $decoded=json_decode($raw, true);
+              $files = is_array($decoded) ? $decoded : (is_string($raw) ? array_filter(explode(',', $raw)) : []);
             @endphp
 
             @forelse($files as $idx => $path)
@@ -247,7 +249,7 @@
                 </div>
               </div>
             @empty
-              <p class="text-gray-500">Belum ada dokumentasi.</p>
+              <p class="text-gray-500 italic">Tidak ada dokumentasi.</p>
             @endforelse
           </div>
         </div>
@@ -361,15 +363,11 @@
               {{ ucfirst($transaction->status) }}
             </td>
 
-            <!-- Approval RS -->
-            <td class="px-4 py-2">
-              {{ $transaction->approval_rs ? 'Ya' : 'Tidak' }}
-            </td>
-
-            <!-- Approval Mitra -->
-            <td class="px-4 py-2">
-              {{ $transaction->approval_mitra ? 'Ya' : 'Tidak' }}
-            </td>
+            {{-- Approval RS --}}
+            <td class="px-4 py-2 {{ $transaction->approval_rs ? 'bg-green-200 text-green-700 font-semibold' : 'bg-red-200 text-red-700 font-semibold' }}">{{ $transaction->approval_rs ? 'Ya' : 'Tidak' }}</td>
+            
+            {{-- Approval RS --}}
+            <td class="px-4 py-2 {{ $transaction->approval_mitra ? 'bg-green-200 text-green-700 font-semibold' : 'bg-red-200 text-red-700 font-semibold' }}">{{ $transaction->approval_mitra ? 'Ya' : 'Tidak' }}</td>
 
             <!-- Action -->
             <td class="px-4 py-2 flex gap-2">

@@ -75,7 +75,10 @@
               @else
                 <span class="text-xs text-gray-500">No Category</span>
               @endif
-              <span class="text-sm text-gray-500">{{ $post->created_at->diffForHumans() }}</span>
+            {{-- waktu pembuatan post --}}
+              <span class="text-sm text-gray-500">
+                {{ \Carbon\Carbon::parse($post->tanggal_awal)->diffForHumans() }}
+              </span>
             </div>
 
             <a href="{{ route('posts.show', $post->slug) }}" class="no-underline hover:underline">
@@ -137,7 +140,10 @@
               @else
                 <span class="text-xs text-gray-500">No Category</span>
               @endif
-              <span class="text-sm text-gray-500">{{ $post->created_at->diffForHumans() }}</span>
+              {{-- waktu pembuatan post --}}
+              <span class="text-sm text-gray-500">
+                {{ \Carbon\Carbon::parse($post->tanggal_awal)->diffForHumans() }}
+              </span>
             </div>
 
             <a href="{{ route('posts.show', $post->slug) }}" class="no-underline hover:underline">

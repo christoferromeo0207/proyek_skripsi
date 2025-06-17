@@ -110,7 +110,7 @@ class MitraDashboardController extends Controller
         $data = $request->validate([
             'title'            => 'required|string|max:255',
             'category_id'      => 'required|exists:categories,id',
-            'body'             => 'required|string',
+            'body'             => 'required|string',    
             'email'            => 'nullable|email',
             'phone'            => 'nullable|string',
             'alamat'           => 'nullable|string',
@@ -216,8 +216,11 @@ class MitraDashboardController extends Controller
             foreach ($request->file('bukti_pembayaran') as $f) {
                 $newFiles[] = $f->store("transactions/{$transaction->id}", 'public');
             }
-            $transaction->bukti_pembayaran_json =
-                array_merge($transaction->bukti_pembayaran_json, $newFiles);
+            $transaction->bukti_pembayaran = array_merge(
+                $transaction->bukti_pembayaran ?? [],
+                $newFiles
+            );
+
         }
 
         $transaction->save();

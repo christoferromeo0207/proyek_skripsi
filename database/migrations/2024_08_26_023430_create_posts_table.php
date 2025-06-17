@@ -19,7 +19,7 @@ return new class extends Migration
                   ->restrictOnDelete();
 
             $table->string('slug')->unique();
-            $table->string('body')->nullable();
+            $table->text('body')->nullable();
             $table->string('phone', 20)->nullable();
             $table->string('email')->nullable();
             $table->string('alamat')->nullable();

@@ -77,12 +77,16 @@ class PostController extends Controller
             $data['file_path'] = json_encode($paths);
         }
 
-        // Buat record Post baru (tanpa komisi)
         $post = Post::create($data);
 
+        // return redirect()
+        //     ->route('posts.show', $post->slug)
+        //     ->with('success', 'Perusahaan berhasil ditambahkan.');
+
         return redirect()
-            ->route('posts.show', $post->slug)
+            ->route('categories.index')
             ->with('success', 'Perusahaan berhasil ditambahkan.');
+
     }
     
     public function update(Request $request, Post $post)

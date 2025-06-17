@@ -15,6 +15,11 @@ class CreateActivityLogTable extends Migration
             $table->nullableMorphs('subject', 'subject');
             $table->nullableMorphs('causer', 'causer');
             $table->json('properties')->nullable();
+
+            // Tambahan untuk versi Spatie terbaru:
+            $table->uuid('batch_uuid')->nullable()->after('properties');
+            $table->string('event')->nullable()->after('batch_uuid');
+
             $table->timestamps();
             $table->index('log_name');
         });

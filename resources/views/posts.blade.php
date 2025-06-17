@@ -61,6 +61,7 @@
       <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         @forelse ($posts as $post)
           <article class="p-6 bg-white rounded-lg shadow-md">
+            
             <div class="flex justify-between items-center mb-5">
               @if($post->category)
                 <a href="{{ route('posts.index', ['category' => $post->category->id] + request()->except('page')) }}">
@@ -74,7 +75,10 @@
               @else
                 <span class="text-xs text-gray-500">No Category</span>
               @endif
-              <span class="text-sm text-gray-500">{{ $post->created_at->diffForHumans() }}</span>
+              {{-- waktu pembuatan post --}}
+              <span class="text-sm text-gray-500">
+                {{ \Carbon\Carbon::parse($post->tanggal_awal)->diffForHumans() }}
+              </span>
             </div>
 
             <a href="{{ route('posts.show', $post->slug) }}" class="no-underline hover:underline">

@@ -82,7 +82,7 @@
                   class="w-full rounded-lg border-gray-300 focus:ring-orange-400 focus:border-orange-400 @error('pic_rs') border-red-500 @enderror"
                   required>
             <option value="">— Pilih PIC RS —</option>
-            @foreach($users as $user)
+            @foreach($users->where('role', 'marketing') as $user)
               <option value="{{ $user->id }}">{{ $user->name }}</option>
             @endforeach
           </select>

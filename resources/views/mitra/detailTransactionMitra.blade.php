@@ -13,6 +13,10 @@
     </div>
   @endif
 
+  @php
+    $picMitraUser = \App\Models\User::find($transaction->pic_mitra);
+  @endphp
+
   {{-- SweetAlert2 --}}
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -86,9 +90,9 @@
               <input
                 type="text"
                 name="pic_mitra"
-                value="{{ old('pic_mitra', $transaction->pic_mitra) }}"
-                class="w-full border rounded px-3 py-2"
-                required
+                value="{{ old('pic_mitra', $picMitraUser?->name ?? '-') }}"
+                class="w-full border rounded px-3 py-2 bg-gray-100 text-gray-600"
+                disabled
               >
             </div>
 

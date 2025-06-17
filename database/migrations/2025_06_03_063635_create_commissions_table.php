@@ -16,6 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('transaction_id')->nullable();
             $table->decimal('commission_pct', 5, 2)->default(0.00);
             $table->decimal('commission_amount', 15, 2)->default(0.00);
+            $table->enum('status', ['Cairkan', 'Sudah Diambil'])->default('Cairkan'); 
             $table->timestamps();
 
             // Index & foreign key

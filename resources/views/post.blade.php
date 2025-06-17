@@ -242,7 +242,8 @@
           <div class="space-y-3">
             @php
               $raw   = $post->file_path;
-              $files = $raw ? (json_decode($raw, true) ?: []) : [];
+              $decoded=json_decode($raw, true);
+              $files = is_array($decoded) ? $decoded : (is_string($raw) ? array_filter(explode(',', $raw)) : []);
             @endphp
 
             @forelse($files as $idx => $path)
@@ -294,7 +295,7 @@
                 </div>
               </div>
             @empty
-              <p class="text-gray-500">Belum ada dokumentasi.</p>
+              <p class="text-gray-500 italic">Tidak ada dokumentasi.</p>
             @endforelse
           </div>
         </div>
@@ -393,8 +394,8 @@
                 <td class="px-4 py-2">{{ $transaction->nama_produk }} - {{ $transaction->jumlah }}</td>
                 <td class="px-4 py-2">{{ $transaction->merk }} - {{ number_format($transaction->total_harga, 2) }}</td>
                 <td class="px-4 py-2">{{ ucfirst($transaction->status) }}</td>
-                <td class="px-4 py-2">{{ $transaction->approval_rs ? 'Ya' : 'Tidak' }}</td>
-                <td class="px-4 py-2">{{ $transaction->approval_mitra ? 'Ya' : 'Tidak' }}</td>
+                <td class="px-4 py-2 {{ $transaction->approval_rs ? 'bg-green-200 text-green-700 font-semibold' : 'bg-red-200 text-red-700 font-semibold' }}">{{ $transaction->approval_rs ? 'Ya' : 'Tidak' }}</td>
+                <td class="px-4 py-2 {{ $transaction->approval_mitra ? 'bg-green-200 text-green-700 font-semibold' : 'bg-red-200 text-red-700 font-semibold' }}">{{ $transaction->approval_mitra ? 'Ya' : 'Tidak' }}</td>
                 <td class="px-4 py-2 flex gap-2">
                   <a href="{{ route('posts.transactions.show', [$post, $transaction]) }}"
                      class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-lg text-xs font-bold no-underline">
@@ -423,6 +424,8 @@
           </tbody>
         </table>
       </div>
+
+
     </div>
 
     <!-- Modal Preview/Download (untuk existing files) -->

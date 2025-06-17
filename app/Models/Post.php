@@ -127,6 +127,11 @@ class Post extends Model
         return $tv * ($pct / 100);
     }
 
+    public function files()
+    {
+        return $this->morphMany(\App\Models\File::class, 'fileable');
+    }
+
 
 
 }
