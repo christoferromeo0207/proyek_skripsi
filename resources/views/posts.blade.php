@@ -112,9 +112,8 @@
       </div>
     </div>
 
-    {{-- Pagination --}}
-    <div class="px-4 pb-8 mx-auto max-w-screen-xl">
-      {{ $posts->withQueryString()->links() }}
-    </div>
+    {{-- pagination --}}
+
+
   </div>
 </x-layout>

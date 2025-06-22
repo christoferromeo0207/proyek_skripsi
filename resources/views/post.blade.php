@@ -494,7 +494,7 @@
               @enderror
             </div>
 
-            <!-- Dropdown Pilih Transaksi (di‐populate lewat JS) -->
+            <!-- Dropdown Pilih Transaksi -->
             <div>
               <label for="transaction_id" class="block font-medium text-gray-700">Pilih Transaksi</label>
               <select name="transaction_id"
@@ -504,9 +504,22 @@
               </select>
             </div>
 
-            
-            <!-- Kontainer untuk menampilkan daftar file yang di‐upload -->
-            <div id="file-list" class="space-y-2"></div>
+            <!-- Input Persentase Komisi -->
+            <div>
+              <label for="commission_pct" class="block font-medium text-gray-700">Persentase Komisi (%)</label>
+              <input type="number"
+                    name="commission_pct"
+                    id="commission_pct"
+                    step="0.01"
+                    min="0"
+                    max="100"
+                    class="mt-1 block w-full border-gray-300 rounded-lg focus:ring-orange-400 focus:border-orange-400"
+                    placeholder="Contoh: 7.00"
+                    required>
+              @error('commission_pct')
+                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+              @enderror
+            </div>
 
             <!-- Tombol Simpan & Batal -->
             <div class="flex justify-end space-x-2 pt-4">
@@ -524,6 +537,7 @@
         </div>
       </div>
     </div>
+
 
     {{-- Skrip untuk JS: Preview File Upload, Preview Dokumentasi, Dropdown Transaksi, dan Modal --}}
     <script>
@@ -589,7 +603,7 @@
           }
         });
 
-        // ==== Skrip Preview File Upload ====
+        // Skrip Preview File Upload 
         const uploadBtn = document.getElementById('upload-btn');
         const fileInput = document.getElementById('file-input');
         const fileList  = document.getElementById('file-list');
@@ -598,7 +612,7 @@
         // Ketika tombol “Pilih File” diklik → trigger fileInput
         uploadBtn.addEventListener('click', () => fileInput.click());
 
-        // Setelah user memilih file (bisa banyak), tambahkan ke dt dan render
+        // Setelah user memilih file (bisa banyak), tambahkan ke db dan render
         fileInput.addEventListener('change', e => {
           for (const file of e.target.files) {
             dt.items.add(file);
@@ -740,4 +754,34 @@
         }
       }
     </script>
+
+    <script>
+      document.getElementById('child_post_id')?.addEventListener('change', function () {
+        const childId = this.value;
+        const transaksiDropdown = document.getElementById('transaction_id');
+
+        fetch(`/api/posts/${childId}/transactions`) // pastikan route ini ada
+          .then(response => response.json())
+          .then(data => {
+            transaksiDropdown.innerHTML = '<option value="">-- Pilih Transaksi --</option>';
+            data.forEach(trx => {
+              transaksiDropdown.innerHTML += `<option value="${trx.id}">${trx.nama_produk}</option>`;
+            });
+          });
+      });
+
+      // Modal open/close
+      document.getElementById('btn-open-komisi')?.addEventListener('click', () => {
+        document.getElementById('modal-komisi').classList.remove('hidden');
+      });
+
+      document.getElementById('btn-close-komisi')?.addEventListener('click', () => {
+        document.getElementById('modal-komisi').classList.add('hidden');
+      });
+
+      document.getElementById('btn-cancel-komisi')?.addEventListener('click', () => {
+        document.getElementById('modal-komisi').classList.add('hidden');
+      });
+    </script>
+
 </x-layout>

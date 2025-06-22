@@ -206,22 +206,6 @@
               @endforeach
             </div>
 
-            {{-- Upload New Files --}}
-            <hr class="my-4">
-            <label class="block text-gray-700 font-medium mb-2">Tambah Bukti Pembayaran</label>
-            <input
-              type="file"
-              name="bukti_pembayaran[]"
-              multiple
-              accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx"
-              class="block w-full text-sm text-gray-600
-                     file:py-2 file:px-4 file:rounded file:border-0
-                     file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700
-                     hover:file:bg-orange-100"
-            >
-            <p class="mt-1 text-xs text-gray-500">
-              Format: JPG, PNG, PDF, DOC, XLS (Max 2MB/file)
-            </p>
           </div>
 
         </div>

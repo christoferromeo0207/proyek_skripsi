@@ -27,7 +27,7 @@ class Transaction extends Model
 
     protected $fillable = [
         'nama_produk','post_id', 'jumlah', 'merk', 'harga_satuan', 'total_harga',
-        'tipe_pembayaran', 'bukti_pembayaran', 'pic_rs', 'approval_rs', 'pic_mitra', 'approval_mitra', 'status'
+        'tipe_pembayaran', 'bukti_pembayaran', 'pic_rs', 'approval_rs', 'pic_mitra', 'approval_mitra', 'status', 'jenis_transaksi'
     ];
 
 

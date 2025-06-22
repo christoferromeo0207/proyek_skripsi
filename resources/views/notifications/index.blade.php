@@ -45,7 +45,7 @@
           <div class="border-2 border-orange-300 rounded-lg bg-white p-6">
             <div class="flex justify-between items-start">
               <div class="space-y-1">
-              <div class="text-gray-500 text-sm">To:   {{ $msg->receiver ? $msg->receiver->name : 'Unknown' }}</div>
+              
               <div class="text-gray-500 text-sm">Dari: {{ $msg->sender ? $msg->sender->name : 'Unknown' }}</div>
                 <h3 class="text-xl font-semibold text-orange-600">{{ $msg->subject }}</h3>
               </div>

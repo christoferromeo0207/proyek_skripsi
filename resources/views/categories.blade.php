@@ -35,7 +35,7 @@
                     
                     {{-- Jumlah perusahaan di kategori ini --}}
                     <p class="text-gray-500 mb-2">
-                        {{ $category->posts->count() }} Perusahaan
+                        {{ $category->posts->count() }} Agensi
                     </p>
 
                     {{-- Tombol untuk membuka modal detail (lihat daftar Post di kategori ini) --}}

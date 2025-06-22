@@ -42,10 +42,10 @@ class MitraTransactionController extends Controller
 
     public function store(Request $req, Post $post)
     {
-        // 1) Cek ownership
+        
         abort_if($post->pic_mitra !== Auth::user()->name, 403);
 
-        // 2) Validasi input user
+        
         $validated = $req->validate([
             'nama_produk'      => 'required|string|max:255',
             'jumlah'           => 'required|integer|min:1',
@@ -56,10 +56,10 @@ class MitraTransactionController extends Controller
             'approval_mitra'   => 'required|boolean',
         ]);
 
-        // 3) Hitung total_harga
+        
         $totalHarga = $validated['jumlah'] * $validated['harga_satuan'];
 
-        // 4) Buat transaksi
+      
         $transaction = Transaction::create([
             'post_id'          => $post->id,
             'nama_produk'      => $validated['nama_produk'],
@@ -70,13 +70,13 @@ class MitraTransactionController extends Controller
             'tipe_pembayaran'  => $validated['tipe_pembayaran'],
             'bukti_pembayaran' => null,
             'pic_rs'           => $validated['pic_rs'],
-            'approval_rs'      => 0,                     // otomatis “Tidak”
+            'approval_rs'      => 0,                   
             'pic_mitra'        => Auth::id(),
             'approval_mitra'   => $validated['approval_mitra'],
-            'status'           => 'Proses',              // selalu Proses di awal
+            'status'           => 'Proses',             
         ]);
 
-        // 5) Redirect kembali ke detail post
+      
         return redirect()
             ->route('mitra.informasi.show', $post)
             ->with('success','Transaksi berhasil dibuat.');
@@ -86,9 +86,9 @@ class MitraTransactionController extends Controller
   
     public function update(Request $request, Transaction $transaction)
     {
-        // 1) validasi hanya untuk mitra‐editable
+        
         $data = $request->validate([
-            'pic_mitra'          => 'required|string|max:255',
+            'pic_mitra'          => 'required|exists:users,id',
             'approval_mitra'     => 'required|boolean',
             'bukti_pembayaran.*' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx,xls,xlsx|max:2048',
             'action_type'        => 'sometimes|in:rename,delete',
@@ -96,7 +96,7 @@ class MitraTransactionController extends Controller
             'new_name'           => 'sometimes|string|max:255',
         ]);
 
-        // 2) jika ada aksi rename/delete pada file
+     
         if ($request->filled('action_type')) {
             $files = $transaction->bukti_pembayaran_json;
             $idx   = $data['file_index'];
@@ -121,11 +121,11 @@ class MitraTransactionController extends Controller
             return back()->with('success', 'File berhasil diperbarui.');
         }
 
-        // 3) update PIC Mitra & Approval Mitra
-        $transaction->pic_mitra      = $data['pic_mitra'];
+ 
+        $transaction->pic_mitra = $data['pic_mitra'];
         $transaction->approval_mitra = $data['approval_mitra'];
 
-        // 4) recompute status
+      
         if ($transaction->approval_rs && $transaction->approval_mitra) {
             $transaction->status = 'Selesai';
         } elseif (! $transaction->approval_rs && ! $transaction->approval_mitra) {
@@ -134,7 +134,7 @@ class MitraTransactionController extends Controller
             $transaction->status = 'Proses';
         }
 
-        // 5) simpan upload baru, jika ada
+      
         if ($request->hasFile('bukti_pembayaran')) {
             $stored = [];
             foreach ($request->file('bukti_pembayaran') as $file) {
@@ -147,7 +147,7 @@ class MitraTransactionController extends Controller
             );
         }
 
-        // 6) simpan perubahan
+  
         $transaction->save();
 
         return back()->with('success', 'Data transaksi berhasil diperbarui.');

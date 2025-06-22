@@ -30,7 +30,7 @@ class PostController extends Controller
             $query->where('category_id', $request->category);
         }
 
-        $posts = $query->paginate(10);
+        $posts = $query->paginate(200);
 
         return view('posts', compact('posts', 'categories'))
                ->with('title', 'Daftar Perusahaan');
@@ -170,24 +170,18 @@ class PostController extends Controller
 
     public function clearCommission(Post $child)
     {
-        // 1. Pastikan ini memang anak (memiliki parent_id)
         if (is_null($child->parent_id)) {
             return redirect()->back()
                             ->with('error', 'Tidak dapat menghapus komisi: ini bukan anak perusahaan.');
         }
 
-        // 2. Ambil parent‐nya
         $parent = $child->parent;
 
-        // 3. Kosongkan (reset) kolom komisi di child
         $child->commission_percentage = null;
         $child->commission_amount     = null;
         $child->transaction_value     = null;
         $child->save();
 
-        // 4. Kosongkan kolom komisi di parent juga
-        //    (jika Anda benar‐benar ingin me‐null seluruh field komisi parent,
-        //     termasuk transaction_value, commission_percentage, dan commission_amount)
         if ($parent) {
             $parent->transaction_value      = null;
             $parent->commission_percentage  = null;
@@ -195,11 +189,6 @@ class PostController extends Controller
             $parent->save();
         }
 
-        // 5. Redirect kembali ke halaman detail parent
-        //    (Jika saja ingin tetap menghitung ulang berdasarkan anak lain, 
-        //     lewati langkah 4 dan gunakan logika perhitungan ulang. 
-        //     Tetapi karena Anda meminta agar parent juga “dikosongkan”,
-        //     maka kita tidak menghitung ulang, melainkan langsung null.)
         return redirect()
             ->route('posts.show', $parent->slug)
             ->with('success', 'Komisi berhasil dihapus untuk ' . $child->title . ' dan parent telah dikosongkan.');

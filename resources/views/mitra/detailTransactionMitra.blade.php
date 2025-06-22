@@ -86,14 +86,12 @@
 
             {{-- Editable: PIC Mitra --}}
             <div>
-              <label class="block text-orange-500 font-semibold">PIC Mitra</label>
-              <input
-                type="text"
-                name="pic_mitra"
-                value="{{ old('pic_mitra', $picMitraUser?->name ?? '-') }}"
-                class="w-full border rounded px-3 py-2 bg-gray-100 text-gray-600"
-                disabled
-              >
+            <input type="hidden" name="pic_mitra" value="{{ $transaction->pic_mitra }}">
+
+            <label class="block text-orange-500 font-semibold">PIC Mitra</label>
+            <p class="w-full border rounded px-3 py-2 bg-gray-100 text-gray-600">
+              {{ $transaction->pic_mitra}}
+            </p>
             </div>
 
             {{-- Editable: Approval Mitra --}}

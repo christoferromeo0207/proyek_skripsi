@@ -82,51 +82,30 @@ class CommissionController extends Controller
             'child_post_id'     => 'required|exists:posts,id|different:parent_post_id',
             'transaction_id'    => 'nullable|exists:transactions,id',
             'transaction_value' => 'nullable|numeric|min:0',
+            'commission_pct'    => 'required|numeric|min:0|max:100',
         ]);
 
-        // Ambil parent dan child
         $parent = Post::findOrFail($data['parent_post_id']);
         $child  = Post::findOrFail($data['child_post_id']);
 
-        // Set parent-child relationship
         $child->parent_id = $parent->id;
         $child->save();
 
-        // Hitung nilai transaksi (transaction value)
         $tv = $data['transaction_id']
             ? Transaction::find($data['transaction_id'])->total_harga
             : ($data['transaction_value'] ?? 0);
 
-        // Daftar persentase komisi tiap level (bisa diubah sesuai kebutuhan)
-        $levels = [
-            ['percent' => 0.07], // level 1
-            ['percent' => 0.05], // level 2
-            ['percent' => 0.03], // level 3
-            ['percent' => 0.03], // level 4
-        ];
-
-        // Komisi berjenjang ke atas dari parent
-        $currentParent = $parent;
-        $level = 0;
-
-        while ($currentParent && $level < count($levels)) {
-            $percent = $levels[$level]['percent'];
-
-            Commission::create([
-                'parent_post_id'    => $currentParent->id,
-                'child_post_id'     => $level === 0 ? $child->id : $parent->id,
-                'transaction_id'    => $data['transaction_id'] ?? null,
-                'commission_pct'    => $percent * 100,
-                'commission_amount' => $tv * $percent,
-            ]);
-
-            $currentParent = $currentParent->parent; // relasi Eloquent, pastikan ada
-            $level++;
-        }
+        Commission::create([
+            'parent_post_id'    => $parent->id,
+            'child_post_id'     => $child->id,
+            'transaction_id'    => $data['transaction_id'] ?? null,
+            'commission_pct'    => $data['commission_pct'],
+            'commission_amount' => ($tv * $data['commission_pct']) / 100,
+        ]);
 
         return redirect()
             ->route('posts.show', $parent->slug)
-            ->with('success', 'Komisi berhasil dibuat hingga ' . $level . ' level.');
+            ->with('success', 'Komisi berhasil dibuat.');
     }
 
 
@@ -187,21 +166,20 @@ class CommissionController extends Controller
 
      public function disburse($id)
     {
-        // Temukan data komisi berdasarkan ID
+        // cari id komisi
         $commission = Commission::findOrFail($id);
 
         // Cek jika status sudah "Sudah Diambil"
         if ($commission->status === 'Sudah Diambil') {
-            // Kembali ke halaman sebelumnya dengan pesan (opsional)
+            
             return redirect()->back()
                              ->with('error', 'Komisi sudah berstatus “Sudah Diambil”.');
         }
 
-        // Update kolom status menjadi "Sudah Diambil"
+        // ubah status
         $commission->status = 'Sudah Diambil';
         $commission->save();
 
-        // Redirect kembali ke halaman yang sama, bisa sertakan flash message
         return redirect()->back()
                          ->with('success', 'Status komisi berhasil diubah menjadi “Sudah Diambil”.');
     }

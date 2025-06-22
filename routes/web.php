@@ -97,7 +97,7 @@ Route::middleware(['auth'])->prefix('dashboard-mitra')->name('mitra.')->group(fu
 
 
 
-// marketing (only authenticated users with role=marketing)
+// marketing 
 Route::middleware(['auth'])
      ->get('/dashboardMarketing', [MarketingDashboardController::class, 'index'])
      ->name('dashboardMarketing');
@@ -135,12 +135,12 @@ Route::middleware('guest')->group(function () {
 
 // email‐verification 
 Route::middleware('auth')->group(function () {
-    // show “please verify” notice
+    // verifikasi
     Route::get('email/verify', function () {
         return view('auth.verify-email');
     })->name('verification.notice');
 
-    // the signed link in the email
+    // link ke email
     Route::get('email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
         $request->fulfill();
         return redirect('/dashboard-mitra'); // or wherever

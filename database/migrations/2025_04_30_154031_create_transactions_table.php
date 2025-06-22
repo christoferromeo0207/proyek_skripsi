@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('merk');
             $table->decimal('harga_satuan', 12, 2);
             $table->decimal('total_harga', 12, 2);
+            $table->enum('jenis_transaksi', ['barang', 'jasa'])->default('barang');
             $table->string('tipe_pembayaran');
             $table->string('bukti_pembayaran')->nullable();
             $table->string('pic_rs');
