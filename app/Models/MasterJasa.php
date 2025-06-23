@@ -10,7 +10,7 @@ class MasterJasa extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nama_jasa', 'harga'];
+    protected $fillable = ['nama_jasa', 'harga', 'kategori_id'];
 
     public function transactions()
     {

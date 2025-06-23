@@ -11,7 +11,7 @@ class MasterBarang extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nama_barang'];
+    protected $fillable = ['nama_barang', 'kategori_id'];
 
     public function transactions()
     {
