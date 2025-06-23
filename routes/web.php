@@ -112,9 +112,20 @@ Route::get('/posts-pic', [MarketingDashboardController::class, 'postsPIC'])
 Route::post('/master-barangs', [MasterBarangController::class, 'store'])->name('master_barangs.store');
 Route::post('/master-jasas', [MasterJasaController::class, 'store'])->name('master_jasas.store');
 
+// Inline store untuk MasterBarang
+Route::post('/master-barangs/inline', [App\Http\Controllers\MasterBarangController::class, 'storeInline'])
+    ->name('master-barangs.store.inline');
+
+// Inline store untuk MasterJasa
+Route::post('/master-jasas/inline', [App\Http\Controllers\MasterJasaController::class, 'storeInline'])
+    ->name('master-jasas.store.inline');
 
 
 
+
+
+
+    
 //role: admin
 Route::get('/dashboard', [DashboardController::class, 'index'])
      ->middleware('auth')

@@ -40,7 +40,7 @@ class TransactionController extends Controller
         return view('detailTransaction', compact('post','transaction','users'));
     }
 
-    public function store(Post $post, Request $request)
+  public function store(Post $post, Request $request)
     {
         $jenis = $request->input('jenis_transaksi');
 
@@ -66,33 +66,46 @@ class TransactionController extends Controller
         } elseif ($jenis === 'jasa') {
             $rules = array_merge($rules, [
                 'master_jasa_id'   => 'required|exists:master_jasas,id',
-                'tanggal_mulai'    => 'required|date',
-                'tanggal_selesai'  => 'required|date|after_or_equal:tanggal_mulai',
+                'tanggal_mulai'   => 'required|date',
+                'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
             ]);
+
+            if ($request->input('gunakan_harga_default_jasa') == '0') {
+                $rules['harga_satuan'] = 'required|numeric|min:0';
+            }
         }
+
+        $request->merge([
+            'gunakan_harga_default_jasa' => $request->input('gunakan_harga_default_jasa', 0),
+        ]);
 
         $data = $request->validate($rules);
 
+        $kataJasa = [
+            'jasa', 'service', 'pelayanan', 'kunjungan', 'rawat', 'periksa',
+            'pengiriman', 'perawatan', 'layanan', 'konsultasi', 'asuransi',
+            'pengujian', 'pemeriksaan', 'diagnostik', 'cek', 'terapi',
+            'injeksi', 'vaksinasi', 'kamar', 'pembayaran', 'registrasi',
+            'administrasi', 'penjemputan', 'penanganan', 'analisis',
+            'pemrosesan', 'telemedisin', 'booking', 'reservasi', 'survei',
+            'verifikasi', 'klaim'
+        ];
+
         if ($jenis === 'barang') {
             $barang = MasterBarang::findOrFail($data['master_barang_id']);
-
-            // Deteksi kata indikasi jasa
-            $kataJasa = [
-                'jasa', 'service', 'pelayanan', 'kunjungan', 'rawat', 'periksa',
-                'pengiriman', 'perawatan', 'layanan', 'konsultasi', 'asuransi',
-                'pengujian', 'pemeriksaan', 'diagnostik', 'cek', 'terapi',
-                'injeksi', 'vaksinasi', 'kamar', 'pembayaran', 'registrasi',
-                'administrasi', 'penjemputan', 'penanganan', 'analisis',
-                'pemrosesan', 'telemedisin', 'booking',
-                'reservasi', 'survei', 'verifikasi', 'klaim'
-            ];
+            $namaBarang = strtolower($barang->nama_barang);
 
             foreach ($kataJasa as $kata) {
-                if (Str::contains(strtolower($barang->nama_barang), $kata)) {
+                if (Str::contains($namaBarang, strtolower($kata))) {
                     return back()->withErrors([
                         'master_barang_id' => "Nama barang mengandung kata '$kata' yang terindikasi jasa. Silakan periksa kembali."
                     ])->withInput();
                 }
+            }
+
+            if (is_null($barang->kategori_id)) {
+                $barang->kategori_id = $post->category_id;
+                $barang->save();
             }
 
             $data['nama_produk']       = $barang->nama_barang;
@@ -100,15 +113,31 @@ class TransactionController extends Controller
             $data['master_jasa_id']    = null;
             $data['tanggal_mulai']     = null;
             $data['tanggal_selesai']   = null;
-
-        } else { // jasa
+        } else {
             $jasa = MasterJasa::findOrFail($data['master_jasa_id']);
+            $namaJasa = strtolower($jasa->nama_jasa);
+
+            $isValid = false;
+            foreach ($kataJasa as $kata) {
+                if (Str::startsWith($namaJasa, strtolower($kata))) {
+                    $isValid = true;
+                    break;
+                }
+            }
+
+            if (! $isValid) {
+                return back()->withErrors([
+                    'master_jasa_id' => "Nama jasa harus diawali dengan kata jasa (misal: 'jasa pengiriman', 'pelayanan...', dll). Nama '$jasa->nama_jasa' terindikasi barang."
+                ])->withInput();
+            }
 
             $data['nama_produk']       = $jasa->nama_jasa;
             $data['merk']              = null;
             $data['jumlah']            = 1;
-            $data['harga_satuan']      = $jasa->harga;
-            $data['total_harga']       = $jasa->harga;
+            $data['harga_satuan']      = $request->input('gunakan_harga_default_jasa') == '1'
+                ? $jasa->harga
+                : ($data['harga_satuan'] ?? $jasa->harga);
+            $data['total_harga']       = $data['harga_satuan'];
             $data['master_barang_id']  = null;
         }
 
@@ -129,6 +158,11 @@ class TransactionController extends Controller
             ->route('posts.show', $post->slug)
             ->with('success', 'Transaksi berhasil ditambahkan');
     }
+
+
+
+
+
     public function edit(Post $post, Transaction $transaction)
     {
         $users = User::all();
