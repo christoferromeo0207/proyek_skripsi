@@ -21,6 +21,8 @@ use App\Http\Controllers\{
     MitraMessageController,
     MitraTransactionController,
     CommissionController,
+    MasterBarangController,
+    MasterJasaController,
 };
 use App\Http\Controllers\Auth\{
     LoginController,
@@ -105,6 +107,10 @@ Route::middleware(['auth'])
 Route::get('/posts-pic', [MarketingDashboardController::class, 'postsPIC'])
 ->middleware(['auth'])
 ->name('posts.pic');
+
+
+Route::post('/master-barangs', [MasterBarangController::class, 'store'])->name('master_barangs.store');
+Route::post('/master-jasas', [MasterJasaController::class, 'store'])->name('master_jasas.store');
 
 
 

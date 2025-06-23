@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Post;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Models\MasterBarang;
+use App\Models\MasterJasa;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
@@ -13,7 +15,6 @@ use Illuminate\Support\Facades\Log;
 
 class TransactionController extends Controller
 {
-    
     public function index()
     {
         $transactions = Transaction::latest()->get();
@@ -23,11 +24,12 @@ class TransactionController extends Controller
         ]);
     }
 
-    // Form tambah transaksi
     public function create(Post $post)
     {
-        $users = User::all();
-        return view('transaction', compact('post','users'), [
+        $users   = User::all();
+        $barangs = MasterBarang::where('kategori_id', $post->category_id)->get();
+        $jasas   = MasterJasa::where('kategori_id', $post->category_id)->get();
+        return view('transaction', compact('post', 'users', 'barangs', 'jasas'), [
             'title'=> 'Data Transaksi Produk',
         ]);
     }
@@ -38,47 +40,95 @@ class TransactionController extends Controller
         return view('detailTransaction', compact('post','transaction','users'));
     }
 
-       // Simpan transaksi baru
     public function store(Post $post, Request $request)
     {
-        $data = $request->validate([
-            'nama_produk'         => 'required|string|max:255',
-            'jumlah'              => 'required|numeric|min:1',
-            'merk'                => 'required|string',
-            'harga_satuan'        => 'required|numeric|min:1',
-            'tipe_pembayaran'     => 'required|string',
-            'pic_rs'              => 'required|exists:users,id',
-            'approval_rs'         => 'required|boolean',
-            'pic_mitra'           => 'required|string',
-            'approval_mitra'      => 'required|boolean',
-            'status'              => 'required|string',
-            'bukti_pembayaran'    => 'nullable|array',
-            'bukti_pembayaran.*'  => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
-        ]);
-        // dd($data);
+        $jenis = $request->input('jenis_transaksi');
 
-        $data['total_harga'] = $data['jumlah'] * $data['harga_satuan'];
+        $rules = [
+            'jenis_transaksi'    => 'required|in:barang,jasa',
+            'tipe_pembayaran'    => 'required|string',
+            'pic_rs'             => 'required|exists:users,id',
+            'approval_rs'        => 'required|boolean',
+            'pic_mitra'          => 'required|string',
+            'approval_mitra'     => 'required|boolean',
+            'status'             => 'required|string',
+            'bukti_pembayaran'   => 'nullable|array',
+            'bukti_pembayaran.*' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
+        ];
 
-       // Proses upload
+        if ($jenis === 'barang') {
+            $rules = array_merge($rules, [
+                'master_barang_id' => 'required|exists:master_barangs,id',
+                'merk'             => 'nullable|string|max:255',
+                'jumlah'           => 'required|numeric|min:1',
+                'harga_satuan'     => 'required|numeric|min:0',
+            ]);
+        } elseif ($jenis === 'jasa') {
+            $rules = array_merge($rules, [
+                'master_jasa_id'   => 'required|exists:master_jasas,id',
+                'tanggal_mulai'    => 'required|date',
+                'tanggal_selesai'  => 'required|date|after_or_equal:tanggal_mulai',
+            ]);
+        }
+
+        $data = $request->validate($rules);
+
+        if ($jenis === 'barang') {
+            $barang = MasterBarang::findOrFail($data['master_barang_id']);
+
+            // Deteksi kata indikasi jasa
+            $kataJasa = [
+                'jasa', 'service', 'pelayanan', 'kunjungan', 'rawat', 'periksa',
+                'pengiriman', 'perawatan', 'layanan', 'konsultasi', 'asuransi',
+                'pengujian', 'pemeriksaan', 'diagnostik', 'cek', 'terapi',
+                'injeksi', 'vaksinasi', 'kamar', 'pembayaran', 'registrasi',
+                'administrasi', 'penjemputan', 'penanganan', 'analisis',
+                'pemrosesan', 'telemedisin', 'booking',
+                'reservasi', 'survei', 'verifikasi', 'klaim'
+            ];
+
+            foreach ($kataJasa as $kata) {
+                if (Str::contains(strtolower($barang->nama_barang), $kata)) {
+                    return back()->withErrors([
+                        'master_barang_id' => "Nama barang mengandung kata '$kata' yang terindikasi jasa. Silakan periksa kembali."
+                    ])->withInput();
+                }
+            }
+
+            $data['nama_produk']       = $barang->nama_barang;
+            $data['total_harga']       = $data['harga_satuan'] * $data['jumlah'];
+            $data['master_jasa_id']    = null;
+            $data['tanggal_mulai']     = null;
+            $data['tanggal_selesai']   = null;
+
+        } else { // jasa
+            $jasa = MasterJasa::findOrFail($data['master_jasa_id']);
+
+            $data['nama_produk']       = $jasa->nama_jasa;
+            $data['merk']              = null;
+            $data['jumlah']            = 1;
+            $data['harga_satuan']      = $jasa->harga;
+            $data['total_harga']       = $jasa->harga;
+            $data['master_barang_id']  = null;
+        }
+
+        // Upload file
         $paths = [];
         foreach ($request->file('bukti_pembayaran', []) as $file) {
             if ($file instanceof UploadedFile && $file->isValid()) {
-                // Simpan ke storage/app/public/bukti_pembayaran
                 $paths[] = $file->store('bukti_pembayaran', 'public');
             }
         }
-        if (count($paths)) {
+        if (!empty($paths)) {
             $data['bukti_pembayaran'] = $paths;
         }
 
-       $post->transactions()->create($data);
+        $post->transactions()->create($data);
 
         return redirect()
             ->route('posts.show', $post->slug)
-            ->with('success','Transaksi berhasil diperbarui');
+            ->with('success', 'Transaksi berhasil ditambahkan');
     }
-
-    // Form edit transaksi
     public function edit(Post $post, Transaction $transaction)
     {
         $users = User::all();
@@ -86,59 +136,13 @@ class TransactionController extends Controller
         return view('detailTransaction', compact('post','transaction','users'));
     }
 
-    // Update transaksi
-
-   public function update(Request $request, Post $post, Transaction $transaction)
+    public function update(Request $request, Post $post, Transaction $transaction)
     {
-        // 1) Tangani aksi rename / delete jika request 'action_type' terisi
-        if ($request->filled('action_type')) {
-            $files = $transaction->bukti_pembayaran ?: [];
-
-            if ($request->action_type === 'delete') {
-                $idx = (int) $request->file_index;
-                if (isset($files[$idx])) {
-                    // Hapus file fisik
-                    Storage::disk('public')->delete($files[$idx]);
-                    // Hapus dari array
-                    array_splice($files, $idx, 1);
-                }
-                // Simpan array yang sudah di‐update
-                $transaction->bukti_pembayaran = $files;
-                $transaction->save();
-
-                return back()->with('success', 'File berhasil dihapus');
-            }
-
-            if ($request->action_type === 'rename') {
-                $idx     = (int) $request->file_index;
-                $newName = trim($request->new_name);
-
-                if (isset($files[$idx]) && $newName !== '') {
-                    $oldPath = $files[$idx];
-                    $ext     = pathinfo($oldPath, PATHINFO_EXTENSION);
-                    $dir     = dirname($oldPath);
-                    $newPath = $dir . '/' . $newName . '.' . $ext;
-
-                    // Rename fisik di storage
-                    Storage::disk('public')->move($oldPath, $newPath);
-
-                    // Update array
-                    $files[$idx] = $newPath;
-                    $transaction->bukti_pembayaran = $files;
-                    $transaction->save();
-                }
-
-                return back()->with('success', 'File berhasil di‐rename');
-            }
-        }
-
-        // 2) Jika bukan rename/delete, maka proses update form transaksi biasa
-
-        // 2.a) Validasi input—HANYA field yang boleh diubah marketing
+        // Validasi hanya untuk barang
         $data = $request->validate([
             'nama_produk'        => 'required|string|max:255',
-            'jumlah'             => 'required|integer|min:1',
-            'merk'               => 'required|string|max:255',
+            'jumlah'             => 'nullable|integer|min:1',
+            'merk'               => 'nullable|string|max:255',
             'harga_satuan'       => 'required|numeric|min:0',
             'tipe_pembayaran'    => 'required|string|max:255',
             'pic_rs'             => 'required|exists:users,id',
@@ -147,11 +151,10 @@ class TransactionController extends Controller
             'bukti_pembayaran.*' => 'file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
 
-        $transaction->total_harga = $data['jumlah'] * $data['harga_satuan'];
-
+        $transaction->total_harga     = ($data['jumlah'] ?? 1) * $data['harga_satuan'];
         $transaction->nama_produk     = $data['nama_produk'];
-        $transaction->jumlah          = $data['jumlah'];
-        $transaction->merk            = $data['merk'];
+        $transaction->jumlah          = $data['jumlah'] ?? 1;
+        $transaction->merk            = $data['merk'] ?? null;
         $transaction->harga_satuan    = $data['harga_satuan'];
         $transaction->tipe_pembayaran = $data['tipe_pembayaran'];
         $transaction->pic_rs          = $data['pic_rs'];
@@ -167,11 +170,9 @@ class TransactionController extends Controller
 
         $existing = $transaction->bukti_pembayaran ?: [];
         $newFiles = [];
-
         if ($request->hasFile('bukti_pembayaran')) {
             foreach ($request->file('bukti_pembayaran') as $file) {
                 if ($file instanceof UploadedFile && $file->isValid()) {
-                    // Simpan ke folder publik di storage/app/public/bukti_pembayaran
                     $newFiles[] = $file->store('bukti_pembayaran', 'public');
                 }
             }
@@ -187,13 +188,9 @@ class TransactionController extends Controller
             ->with('success', 'Transaksi berhasil diperbarui');
     }
 
-
-    // Hapus transaksi
     public function destroy(Post $post, Transaction $transaction)
     {
         $transaction->delete();
         return back()->with('success','Transaksi berhasil dihapus');
     }
-
-
 }

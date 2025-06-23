@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('merk');
             $table->decimal('harga_satuan', 12, 2);
             $table->decimal('total_harga', 12, 2);
+            $table->date('tanggal_mulai')->nullable();
+            $table->date('tanggal_selesai')->nullable();
             $table->enum('jenis_transaksi', ['barang', 'jasa'])->default('barang');
             $table->string('tipe_pembayaran');
             $table->string('bukti_pembayaran')->nullable();
@@ -24,6 +26,9 @@ return new class extends Migration
             $table->string('pic_mitra');
             $table->boolean('approval_mitra')->default('false');
             $table->string('status')->default('proses');
+            $table->foreignId('master_barang_id')->nullable()->constrained('master_barangs')->nullOnDelete();
+            $table->foreignId('master_jasa_id')->nullable()->constrained('master_jasas')->nullOnDelete();
+
             $table->timestamps();
             
         });

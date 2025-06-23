@@ -392,7 +392,7 @@
             @forelse($post->transactions as $transaction)
               <tr class="bg-white/50 hover:bg-white/70 transition">
                 <td class="px-4 py-2">{{ $transaction->nama_produk }} - {{ $transaction->jumlah }}</td>
-                <td class="px-4 py-2">{{ $transaction->merk }} - {{ number_format($transaction->total_harga, 2) }}</td>
+                <td class="px-4 py-2">{{ $transaction->merk ?? "Jasa"}} - {{ number_format($transaction->total_harga, 2) }}</td>
                 <td class="px-4 py-2">{{ ucfirst($transaction->status) }}</td>
                 <td class="px-4 py-2 {{ $transaction->approval_rs ? 'bg-green-200 text-green-700 font-semibold' : 'bg-red-200 text-red-700 font-semibold' }}">{{ $transaction->approval_rs ? 'Ya' : 'Tidak' }}</td>
                 <td class="px-4 py-2 {{ $transaction->approval_mitra ? 'bg-green-200 text-green-700 font-semibold' : 'bg-red-200 text-red-700 font-semibold' }}">{{ $transaction->approval_mitra ? 'Ya' : 'Tidak' }}</td>
