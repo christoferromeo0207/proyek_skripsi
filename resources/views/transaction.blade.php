@@ -33,7 +33,8 @@
           </select>
         </div>
 
-         <div id="field_barang_only" class="hidden">
+        {{-- barang --}}
+         <div id="field_barang_only">
           <div>
             <label class="block text-orange-500 font-semibold mb-1">Pilih Barang:</label>
             <select name="master_barang_id" id="master_barang_id" class="w-full rounded-lg border-gray-300 focus:ring-orange-400 focus:border-orange-400">
@@ -55,10 +56,22 @@
               <input type="number" name="jumlah" min="1" value="{{ old('jumlah') }}" placeholder="Contoh: 10" class="w-full rounded-lg border-gray-300 focus:ring-orange-400 focus:border-orange-400">
             </div>
 
-            <div class="mt-4">
-              <label class="block text-orange-500 font-semibold mb-1">Harga per Satuan (Rp):</label>
-              <input type="number" name="harga_satuan" step="0.01" min="0" value="{{ old('harga_satuan') }}" placeholder="Contoh: 250000" class="w-full rounded-lg border-gray-300 focus:ring-orange-400 focus:border-orange-400">
+            {{-- Harga Satuan --}}
+            <div id="field_harga_satuan" class="mt-4">
+              <label class="block text-orange-500 font-semibold mb-1">Harga per Satuan</label>
+             <input
+                type="number"
+                name="harga_satuan"
+                id="harga_satuan"
+                placeholder="Masukkan Harga"
+                class="w-full rounded border-gray-300 focus:ring-orange-400 focus:border-orange-400"
+                value="{{ old('harga_satuan', $transaction->harga_satuan ?? '') }}"
+                min="0"
+                step="0.01"
+                
+              >
             </div>
+
           </div>
         </div>
 
@@ -82,13 +95,22 @@
             <div class="flex items-center gap-2 mb-2">
               <input type="hidden" name="gunakan_harga_default_jasa" value="0">
               <input type="checkbox" name="gunakan_harga_default_jasa" id="gunakan_harga_default_jasa" value="1" onchange="toggleHargaManual()" {{ old('gunakan_harga_default_jasa') ? 'checked' : '' }}>
+
               <label for="gunakan_harga_default_jasa" class="text-sm text-gray-700">Tetap menggunakan harga Jasa diatas</label>
 
             </div>
 
-            <input type="number" name="harga_satuan" id="harga_jasa_input" step="0.01" min="0"
-                  value="{{ old('harga_satuan') }}"
-                  class="w-full rounded-lg border-gray-300 focus:ring-orange-400 focus:border-orange-400">
+            <input
+              type="number"
+              name="harga_satuan_jasa"
+              id="harga_jasa_input"
+              step="0.01"
+              min="0"
+              value="{{ old('harga_satuan_jasa') }}"
+              class="w-full rounded-lg border-gray-300 focus:ring-orange-400 focus:border-orange-400"
+             
+            />
+
           </div>
 
 
@@ -206,78 +228,87 @@
   </div>
 </div>
 
-  <script>
-    function toggleJenis() {
-      const jenis = document.getElementById('jenis_transaksi').value;
 
-      const barangFields = document.getElementById('field_barang_only');
-      const jasaFields = document.getElementById('field_jasa_only');
 
-      if (jenis === 'barang') {
-        barangFields.classList.remove('hidden');
-        jasaFields.classList.add('hidden');
-      } else if (jenis === 'jasa') {
-        barangFields.classList.add('hidden');
-        jasaFields.classList.remove('hidden');
-      } else {
-        barangFields.classList.add('hidden');
-        jasaFields.classList.add('hidden');
-      }
+<script>
+  // Tampilkan hanya field barang atau jasa sesuai pilihan
+  function toggleJenis() {
+    const jenis = document.getElementById('jenis_transaksi').value;
+    const barangField = document.getElementById('field_barang_only');
+    const jasaField = document.getElementById('field_jasa_only');
+
+    if (jenis === 'barang') {
+      barangField.classList.remove('hidden');
+      jasaField.classList.add('hidden');
+    } else if (jenis === 'jasa') {
+      barangField.classList.add('hidden');
+      jasaField.classList.remove('hidden');
+    } else {
+      barangField.classList.add('hidden');
+      jasaField.classList.add('hidden');
     }
-
-    window.addEventListener('DOMContentLoaded', toggleJenis);
-  </script>
-
-   <script>
-    function toggleJenis() {
-      const jenis = document.getElementById('jenis_transaksi').value;
-      document.getElementById('field_barang_only').classList.toggle('hidden', jenis !== 'barang');
-      document.getElementById('field_jasa_only').classList.toggle('hidden', jenis !== 'jasa');
-    }
-
-    function openModal(id) {
-      document.getElementById(id).classList.remove('hidden');
-    }
-
-    function closeModal(id) {
-      document.getElementById(id).classList.add('hidden');
-    }
-
-    function setHargaJasa() {
-      const select = document.getElementById('master_jasa_id');
-      const hargaInput = document.getElementById('harga_jasa_input');
-      const selected = select.options[select.selectedIndex];
-      const harga = selected.getAttribute('data-harga');
-      if (harga && !isNaN(harga)) hargaInput.value = harga;
-    }
-
-    window.addEventListener('DOMContentLoaded', toggleJenis);
-  </script>
-
-  <script>
-  function toggleHargaManual() {
-    const checkbox = document.getElementById('gunakan_harga_default');
-    const inputHarga = document.getElementById('harga_jasa_input');
-    inputHarga.readOnly = checkbox.checked;
-    if (checkbox.checked) setHargaJasa(); // Isi otomatis
   }
 
+  // Modal buka/tutup
+  function openModal(id) {
+    document.getElementById(id).classList.remove('hidden');
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).classList.add('hidden');
+  }
+
+  // Atur harga jasa dari opsi yang dipilih
   function setHargaJasa() {
     const select = document.getElementById('master_jasa_id');
     const hargaInput = document.getElementById('harga_jasa_input');
     const selected = select.options[select.selectedIndex];
     const harga = selected.getAttribute('data-harga');
+    const checkbox = document.getElementById('gunakan_harga_default_jasa');
+
     if (harga && !isNaN(harga)) {
-      if (document.getElementById('gunakan_harga_default').checked) {
+      if (checkbox.checked) {
         hargaInput.value = harga;
       }
     }
   }
 
+
+  // Toggle input harga manual/otomatis untuk jasa
+  function toggleHargaManual() {
+    const checkbox = document.getElementById('gunakan_harga_default_jasa');
+    const inputHarga = document.getElementById('harga_jasa_input');
+
+    inputHarga.readOnly = checkbox.checked;
+
+    if (checkbox.checked) {
+      setHargaJasa();
+    }
+  }
+
+  // Jalankan saat halaman pertama kali dimuat
   window.addEventListener('DOMContentLoaded', () => {
     toggleJenis();
+    setHargaJasa();
     toggleHargaManual();
+
+    // Jaga-jaga jika pengguna klik dropdown ulang
+    const jenisSelect = document.getElementById('jenis_transaksi');
+    if (jenisSelect) {
+      jenisSelect.addEventListener('change', toggleJenis);
+    }
+
+    const jasaSelect = document.getElementById('master_jasa_id');
+    if (jasaSelect) {
+      jasaSelect.addEventListener('change', setHargaJasa);
+    }
+
+    const checkbox = document.getElementById('gunakan_harga_default_jasa');
+    if (checkbox) {
+      checkbox.addEventListener('change', toggleHargaManual);
+    }
   });
 </script>
+
 
 </x-layout>

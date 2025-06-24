@@ -1,6 +1,6 @@
 {{-- resources/views/posts/transactions/edit.blade.php --}}
 <x-layout>
-  <x-slot:title>Detail &amp; Edit Transaksi – {{ $transaction->nama_produk }}</x-slot:title>
+  <x-slot:title>Detail &amp; Transaksi Barang – {{ $transaction->nama_produk }}</x-slot:title>
 
   {{-- Feedback Messages --}}
   @if(session('success'))
@@ -46,7 +46,7 @@
 
         {{-- Header --}}
         <div class="flex justify-between items-center mb-6">
-          <h1 class="text-2xl font-bold text-orange-600">Detail &amp; Edit Transaksi</h1>
+          <h1 class="text-2xl font-bold text-orange-600">Detail &amp; Transaksi Barang</h1>
         </div>
 
         {{-- Grid: 2 kolom field + 1 kolom bukti pembayaran --}}
@@ -115,7 +115,7 @@
               <label class="block text-orange-500 font-semibold">PIC Rumah Sakit</label>
               <select name="pic_rs" class="w-full border rounded px-3 py-2" required>
                 <option value="">— Pilih PIC RS —</option>
-                @foreach($users as $user)
+                @foreach($users->where('role', 'marketing') as $user)
                   <option value="{{ $user->id }}"
                     {{ old('pic_rs', $transaction->pic_rs) == $user->id ? 'selected' : '' }}>
                     {{ $user->name }}

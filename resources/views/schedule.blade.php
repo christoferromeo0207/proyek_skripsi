@@ -15,7 +15,6 @@
             <button onclick="changeYear(1)" class="text-xl hover:text-orange-800">&#8594;</button>
         </div>
 
-        
         <!-- Table -->
         <div class="w-full max-w-6xl mx-auto overflow-auto bg-white rounded-xl shadow-md">
             <table class="w-full border border-orange-200 text-sm">
@@ -30,7 +29,8 @@
                 <tbody>
                     @foreach($categories as $category)
                         <tr class="hover:bg-orange-50 transition">
-                            <td class="px-4 py-3 border border-orange-200 text-gray-800 font-medium">
+                            <td class="px-4 py-3 border border-orange-200 text-gray-800 font-medium cursor-pointer"
+                                onclick="toggleCompanies('{{ $category->id }}')">
                                 {{ $category->name }}
                             </td>
 
@@ -54,7 +54,7 @@
                                         ->count();
                                 @endphp
 
-                                <!--Penanda ada perusahaan yang aktif atau tidak-->
+                                <!-- Penanda ada perusahaan yang aktif atau tidak -->
                                 <td class="px-2 py-3 text-center border border-orange-200
                                 {{ $count > 0 ? 'bg-green-200 text-green-800 font-bold' : '' }}">
                                     {{ $count > 0 ? $count : '' }}
@@ -62,19 +62,35 @@
                             @endforeach
 
                         </tr>
+
+                        <!-- Tampilkan perusahaan ketika kategori diklik -->
+                        <tr id="companies-{{ $category->id }}" class="hidden">
+                            <td colspan="14" class="px-4 py-3 border border-orange-200">
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    @foreach($category->posts as $post)
+                                        <div class="bg-white p-4 rounded-lg shadow-md">
+                                            <h3 class="text-lg font-semibold text-orange-500">{{ $post->title }}</h3>
+                                            @if($post->tanggal_akhir)
+                                                <p class="text-sm text-gray-500">Berakhir pada: {{ \Carbon\Carbon::parse($post->tanggal_akhir)->format('d F Y') }}</p>
+                                            @else
+                                                <p class="text-sm text-gray-500">Tidak ada tanggal akhir</p>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </td>
+                        </tr>
                     @endforeach
                 </tbody>
-                
             </table>
         </div>
-        
-        {{-- total --}}
-        
+
+        {{-- Total --}}
         <div class="mt-6 max-w-6xl mx-auto">
-        <span class="text-orange-600 font-bold">
-            Jumlah Mitra Kerjasama: {{ $totalMitra }}
-        </span>
-    </div>
+            <span class="text-orange-600 font-bold">
+                Jumlah Mitra Kerjasama: {{ $totalMitra }}
+            </span>
+        </div>
 
     </div>
     
@@ -85,6 +101,11 @@
         const url = new URL(window.location.href);
         url.searchParams.set('year', yr);
         window.location.href = url;
+    }
+
+    function toggleCompanies(categoryId) {
+        const row = document.getElementById('companies-' + categoryId);
+        row.classList.toggle('hidden');
     }
     </script>
 </x-layout>

@@ -121,6 +121,8 @@ Route::post('/master-jasas/inline', [App\Http\Controllers\MasterJasaController::
     ->name('master-jasas.store.inline');
 
 
+// Route detail transaksi jasa
+Route::get('/posts/{post}/transactions/jasa/{transaction}', [TransactionController::class, 'showJasa'])->name('posts.transactions.jasa.show');
 
 
 

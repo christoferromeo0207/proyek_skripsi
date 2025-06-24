@@ -368,63 +368,109 @@
       </div>
 
 
-      <!-- Produk Kerjasama Hasil Transaksi -->
+      <!-- Produk & Jasa Kerjasama Container -->
       <div class="w-11/12 md:w-4/5 lg:w-3/4 bg-white/60 rounded-xl shadow-lg p-6 mt-8">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-orange-500 font-bold text-lg">Produk Kerjasama</h2>
+
+        <!-- Header dengan Tombol Tambah -->
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-orange-500 font-bold text-2xl">Kerjasama Barang & Jasa</h2>
           <a href="{{ route('posts.transactions.create', $post) }}"
-             class="bg-orange-400 hover:bg-orange-500 text-white font-bold px-4 py-2 rounded-lg no-underline">
+            class="bg-orange-400 hover:bg-orange-500 text-white font-bold px-4 py-2 rounded-lg no-underline">
             Tambah
           </a>
         </div>
-        <table class="w-full text-sm text-left text-gray-700">
-          <thead class="text-xs text-gray-700 uppercase bg-orange-300">
-            <tr>
-              <th class="px-4 py-2">Produk-Jumlah</th>
-              <th class="px-4 py-2">Merk-Harga</th>
-              <th class="px-4 py-2">Status</th>
-              <th class="px-4 py-2">Approval RS</th>
-              <th class="px-4 py-2">Approval Mitra</th>
-              <th class="px-4 py-2">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            @forelse($post->transactions as $transaction)
-              <tr class="bg-white/50 hover:bg-white/70 transition">
-                <td class="px-4 py-2">{{ $transaction->nama_produk }} - {{ $transaction->jumlah }}</td>
-                <td class="px-4 py-2">{{ $transaction->merk ?? "Jasa"}} - {{ number_format($transaction->total_harga, 2) }}</td>
-                <td class="px-4 py-2">{{ ucfirst($transaction->status) }}</td>
-                <td class="px-4 py-2 {{ $transaction->approval_rs ? 'bg-green-200 text-green-700 font-semibold' : 'bg-red-200 text-red-700 font-semibold' }}">{{ $transaction->approval_rs ? 'Ya' : 'Tidak' }}</td>
-                <td class="px-4 py-2 {{ $transaction->approval_mitra ? 'bg-green-200 text-green-700 font-semibold' : 'bg-red-200 text-red-700 font-semibold' }}">{{ $transaction->approval_mitra ? 'Ya' : 'Tidak' }}</td>
-                <td class="px-4 py-2 flex gap-2">
-                  <a href="{{ route('posts.transactions.show', [$post, $transaction]) }}"
-                     class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-lg text-xs font-bold no-underline">
-                    Detail
-                  </a>
-                  <form
-                    action="{{ route('posts.transactions.destroy', [$post, $transaction]) }}"
-                    method="POST"
-                    onsubmit="return confirm('Yakin ingin menghapus transaksi ini?');"
-                    class="inline"
-                  >
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit"
-                            class="bg-red-400 hover:bg-red-500 text-white px-3 py-1 rounded-lg text-xs font-bold">
-                      Hapus
-                    </button>
-                  </form>
-                </td>
-              </tr>
-            @empty
-              <tr>
-                <td colspan="6" class="px-4 py-2 text-center text-gray-600">Belum ada transaksi.</td>
-              </tr>
-            @endforelse
-          </tbody>
-        </table>
-      </div>
 
+        {{-- Tabel Produk Kerjasama (Barang) --}}
+        <div class="mb-8">
+          <h3 class="text-md font-bold text-orange-500 mb-2 text-lg">Barang</h3>
+          <table class="w-full text-sm text-left text-gray-700">
+            <thead class="text-xs text-gray-700 uppercase bg-orange-300">
+              <tr>
+                <th class="px-4 py-2">Produk - Jumlah</th>
+                <th class="px-4 py-2">Merk - Harga</th>
+                <th class="px-4 py-2">Status</th>
+                <th class="px-4 py-2">Approval RS</th>
+                <th class="px-4 py-2">Approval Mitra</th>
+                <th class="px-4 py-2">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              @forelse($post->transactions->where('jenis_transaksi', 'barang') as $transaction)
+                <tr class="bg-white/50 hover:bg-white/70 transition">
+                  <td class="px-4 py-2">{{ $transaction->nama_produk }} - {{ $transaction->jumlah }}</td>
+                  <td class="px-4 py-2">{{ $transaction->merk  }} - {{ number_format($transaction->total_harga, 2) }}</td>
+                  <td class="px-4 py-2">{{ ucfirst($transaction->status) }}</td>
+                  <td class="px-4 py-2 {{ $transaction->approval_rs ? 'bg-green-200 text-green-700 font-semibold' : 'bg-red-200 text-red-700 font-semibold' }}">{{ $transaction->approval_rs ? 'Ya' : 'Tidak' }}</td>
+                  <td class="px-4 py-2 {{ $transaction->approval_mitra ? 'bg-green-200 text-green-700 font-semibold' : 'bg-red-200 text-red-700 font-semibold' }}">{{ $transaction->approval_mitra ? 'Ya' : 'Tidak' }}</td>
+                  <td class="px-4 py-2 flex gap-2">
+                    <a href="{{ route('posts.transactions.show', [$post, $transaction]) }}"
+                      class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-lg text-xs font-bold no-underline">Detail</a>
+                    <form action="{{ route('posts.transactions.destroy', [$post, $transaction]) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus transaksi ini?');" class="inline">
+                      @csrf
+                      @method('DELETE')
+                      <button type="submit"
+                              class="bg-red-400 hover:bg-red-500 text-white px-3 py-1 rounded-lg text-xs font-bold">
+                        Hapus
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              @empty
+                <tr>
+                  <td colspan="6" class="px-4 py-2 text-center text-gray-600">Belum ada transaksi produk.</td>
+                </tr>
+              @endforelse
+            </tbody>
+          </table>
+        </div>
+
+        {{-- Tabel Jasa Kerjasama --}}
+        <div>
+          <h3 class="text-md font-bold text-orange-500 mb-2 text-lg">Jasa</h3>
+          <table class="w-full text-sm text-left text-gray-700">
+            <thead class="text-xs text-gray-700 uppercase bg-orange-300">
+              <tr>
+                <th class="px-4 py-2">Jasa</th>
+                <th class="px-4 py-2">Tanggal</th>
+                <th class="px-4 py-2">Harga</th>
+                <th class="px-4 py-2">Status</th>
+                <th class="px-4 py-2">Approval RS</th>
+                <th class="px-4 py-2">Approval Mitra</th>
+                <th class="px-4 py-2">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              @forelse($post->transactions->where('jenis_transaksi', 'jasa') as $transaction)
+                <tr class="bg-white/50 hover:bg-white/70 transition">
+                  <td class="px-4 py-2">{{ $transaction->nama_produk }}</td>
+                  <td class="px-4 py-2">{{ $transaction->tanggal_mulai }} s/d {{ $transaction->tanggal_selesai }}</td>
+                  <td class="px-4 py-2">{{ number_format($transaction->total_harga, 2) }}</td>
+                  <td class="px-4 py-2">{{ ucfirst($transaction->status) }}</td>
+                  <td class="px-4 py-2 {{ $transaction->approval_rs ? 'bg-green-200 text-green-700 font-semibold' : 'bg-red-200 text-red-700 font-semibold' }}">{{ $transaction->approval_rs ? 'Ya' : 'Tidak' }}</td>
+                  <td class="px-4 py-2 {{ $transaction->approval_mitra ? 'bg-green-200 text-green-700 font-semibold' : 'bg-red-200 text-red-700 font-semibold' }}">{{ $transaction->approval_mitra ? 'Ya' : 'Tidak' }}</td>
+                  <td class="px-4 py-2 flex gap-2">
+                    <a href="{{ route('posts.transactions.jasa.show', [$post, $transaction]) }}"
+                      class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-lg text-xs font-bold no-underline">Detail</a>
+                    <form action="{{ route('posts.transactions.destroy', [$post, $transaction]) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus transaksi ini?');" class="inline">
+                      @csrf
+                      @method('DELETE')
+                      <button type="submit"
+                              class="bg-red-400 hover:bg-red-500 text-white px-3 py-1 rounded-lg text-xs font-bold">
+                        Hapus
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              @empty
+                <tr>
+                  <td colspan="7" class="px-4 py-2 text-center text-gray-600">Belum ada transaksi jasa.</td>
+                </tr>
+              @endforelse
+            </tbody>
+          </table>
+        </div>
+
+      </div>
 
     </div>
 

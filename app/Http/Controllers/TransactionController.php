@@ -17,12 +17,19 @@ class TransactionController extends Controller
 {
     public function index()
     {
-        $transactions = Transaction::latest()->get();
+        $transactions = Transaction::latest()->get()->map(function($transaction) {
+            if ($transaction->jenis_transaksi == 'jasa') {
+                $transaction->durasi = \Carbon\Carbon::parse($transaction->tanggal_mulai)->diffInDays(\Carbon\Carbon::parse($transaction->tanggal_selesai));
+            }
+            return $transaction;
+        });
+
         return view('transactions.index', [
             'title'        => 'Data Transaksi Produk',
             'transactions' => $transactions,
         ]);
     }
+
 
     public function create(Post $post)
     {
@@ -40,9 +47,45 @@ class TransactionController extends Controller
         return view('detailTransaction', compact('post','transaction','users'));
     }
 
-  public function store(Post $post, Request $request)
+    public function showJasa(Post $post, Transaction $transaction)
+    {
+        abort_if($transaction->jenis_transaksi !== 'jasa', 404);
+
+        $users = User::all(); // Jika diperlukan untuk dropdown
+
+        return view('detailJasa', compact('post', 'transaction', 'users'));
+    }
+
+
+    public function store(Post $post, Request $request)
     {
         $jenis = $request->input('jenis_transaksi');
+
+        // Tambahkan flag default jasa ke input request yang diproses validator
+        $request->request->add([
+            'gunakan_harga_default_jasa' => $request->input('gunakan_harga_default_jasa', 0),
+        ]);
+
+        // Pre-isi harga_satuan jika menggunakan harga default jasa
+        if ($jenis === 'jasa') {
+            $jasa = MasterJasa::find($request->input('master_jasa_id'));
+            if ($jasa) {
+                if ($request->input('gunakan_harga_default_jasa') == '1') {
+                    // Jika pakai default harga, assign ke harga_satuan
+                    $request->merge([
+                        'harga_satuan' => $jasa->harga,
+                        'harga_satuan_jasa' => $jasa->harga, // agar validasi tidak gagal
+                    ]);
+                } else {
+                    // Jika input manual, pastikan harga_satuan diisi dari input user
+                    $request->merge([
+                        'harga_satuan' => $request->input('harga_satuan_jasa'),
+                    ]);
+                }
+            }
+        }
+
+        //@dd($request->all());
 
         $rules = [
             'jenis_transaksi'    => 'required|in:barang,jasa',
@@ -66,29 +109,25 @@ class TransactionController extends Controller
         } elseif ($jenis === 'jasa') {
             $rules = array_merge($rules, [
                 'master_jasa_id'   => 'required|exists:master_jasas,id',
-                'tanggal_mulai'   => 'required|date',
-                'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
+                'tanggal_mulai'    => 'required|date',
+                'tanggal_selesai'  => 'required|date|after_or_equal:tanggal_mulai',
+                'harga_satuan_jasa' => 'required|numeric|min:0'
             ]);
 
+            // Harga jasa hanya required jika tidak pakai default
             if ($request->input('gunakan_harga_default_jasa') == '0') {
                 $rules['harga_satuan'] = 'required|numeric|min:0';
             }
         }
 
-        $request->merge([
-            'gunakan_harga_default_jasa' => $request->input('gunakan_harga_default_jasa', 0),
-        ]);
-
         $data = $request->validate($rules);
 
         $kataJasa = [
             'jasa', 'service', 'pelayanan', 'kunjungan', 'rawat', 'periksa',
-            'pengiriman', 'perawatan', 'layanan', 'konsultasi', 'asuransi',
-            'pengujian', 'pemeriksaan', 'diagnostik', 'cek', 'terapi',
-            'injeksi', 'vaksinasi', 'kamar', 'pembayaran', 'registrasi',
-            'administrasi', 'penjemputan', 'penanganan', 'analisis',
-            'pemrosesan', 'telemedisin', 'booking', 'reservasi', 'survei',
-            'verifikasi', 'klaim'
+            'pengiriman', 'perawatan', 'layanan', 'konsultasi', 'asuransi', 'pengujian',
+            'pemeriksaan', 'diagnostik', 'cek', 'terapi', 'injeksi', 'vaksinasi', 'kamar',
+            'pembayaran', 'registrasi', 'administrasi', 'penjemputan', 'penanganan', 'analisis',
+            'pemrosesan', 'telemedisin', 'booking', 'reservasi', 'survei', 'verifikasi', 'klaim'
         ];
 
         if ($jenis === 'barang') {
@@ -136,7 +175,7 @@ class TransactionController extends Controller
             $data['jumlah']            = 1;
             $data['harga_satuan']      = $request->input('gunakan_harga_default_jasa') == '1'
                 ? $jasa->harga
-                : ($data['harga_satuan'] ?? $jasa->harga);
+                : ($data['harga_satuan_jasa'] ?? $jasa->harga);
             $data['total_harga']       = $data['harga_satuan'];
             $data['master_barang_id']  = null;
         }
@@ -152,12 +191,14 @@ class TransactionController extends Controller
             $data['bukti_pembayaran'] = $paths;
         }
 
+        // Simpan transaksi
         $post->transactions()->create($data);
 
         return redirect()
             ->route('posts.show', $post->slug)
             ->with('success', 'Transaksi berhasil ditambahkan');
     }
+
 
 
 
@@ -172,28 +213,42 @@ class TransactionController extends Controller
 
     public function update(Request $request, Post $post, Transaction $transaction)
     {
-        // Validasi hanya untuk barang
-        $data = $request->validate([
+        $isJasa = $transaction->jenis_transaksi === 'jasa';
+
+        $rules = [
             'nama_produk'        => 'required|string|max:255',
-            'jumlah'             => 'nullable|integer|min:1',
-            'merk'               => 'nullable|string|max:255',
             'harga_satuan'       => 'required|numeric|min:0',
             'tipe_pembayaran'    => 'required|string|max:255',
             'pic_rs'             => 'required|exists:users,id',
             'approval_rs'        => 'required|boolean',
             'bukti_pembayaran'   => 'nullable|array',
             'bukti_pembayaran.*' => 'file|mimes:jpg,jpeg,png,pdf|max:2048',
-        ]);
+        ];
 
-        $transaction->total_harga     = ($data['jumlah'] ?? 1) * $data['harga_satuan'];
+        if (! $isJasa) {
+            $rules['jumlah'] = 'required|integer|min:1';
+            $rules['merk']   = 'nullable|string|max:255';
+        }
+
+        $data = $request->validate($rules);
+
+        // Assign data
         $transaction->nama_produk     = $data['nama_produk'];
-        $transaction->jumlah          = $data['jumlah'] ?? 1;
-        $transaction->merk            = $data['merk'] ?? null;
         $transaction->harga_satuan    = $data['harga_satuan'];
         $transaction->tipe_pembayaran = $data['tipe_pembayaran'];
         $transaction->pic_rs          = $data['pic_rs'];
         $transaction->approval_rs     = $data['approval_rs'];
 
+        if (! $isJasa) {
+            $transaction->jumlah = $data['jumlah'];
+            $transaction->merk   = $data['merk'] ?? null;
+            $transaction->total_harga = $data['harga_satuan'] * $data['jumlah'];
+        } else {
+            $transaction->jumlah = 1;
+            $transaction->total_harga = $data['harga_satuan'];
+        }
+
+        // Status otomatis
         if ($transaction->approval_rs && $transaction->approval_mitra) {
             $transaction->status = 'Selesai';
         } elseif (! $transaction->approval_rs && ! $transaction->approval_mitra) {
@@ -202,6 +257,7 @@ class TransactionController extends Controller
             $transaction->status = 'Proses';
         }
 
+        // Upload file baru
         $existing = $transaction->bukti_pembayaran ?: [];
         $newFiles = [];
         if ($request->hasFile('bukti_pembayaran')) {
@@ -221,6 +277,7 @@ class TransactionController extends Controller
             ->route('posts.show', $post->slug)
             ->with('success', 'Transaksi berhasil diperbarui');
     }
+
 
     public function destroy(Post $post, Transaction $transaction)
     {
