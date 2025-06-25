@@ -125,8 +125,6 @@ Route::post('/master-jasas/inline', [App\Http\Controllers\MasterJasaController::
 Route::get('/posts/{post}/transactions/jasa/{transaction}', [TransactionController::class, 'showJasa'])->name('posts.transactions.jasa.show');
 
 
-
-
     
 //role: admin
 Route::get('/dashboard', [DashboardController::class, 'index'])
@@ -315,6 +313,10 @@ Route::delete('posts/{child}/clear-commission', [PostController::class, 'clearCo
         Route::post('/categories',       [CategoryController::class, 'store'])->name('categories.store');
         Route::put('/users/{id}', [UserController::class, 'update'])->name('updateUser');
     });
+
+    // membuaka card pada schedule
+    Route::get('/posts/{post}/transactions', [TransactionController::class, 'getTransactionsForPost']);
+
     
     //role: admin,marketing
     Route::prefix('posts/{post}/transactions')->name('posts.transactions.')->controller(TransactionController::class)->group(function(){
@@ -328,6 +330,9 @@ Route::delete('posts/{child}/clear-commission', [PostController::class, 'clearCo
          Route::post('/{transaction}/files/delete', 'deleteFile')->name('files.delete');
          Route::post('/{transaction}/files/rename', 'renameFile')->name('files.rename');
      });
+
+
+
 
 
     // Schedule

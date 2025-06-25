@@ -284,4 +284,22 @@ class TransactionController extends Controller
         $transaction->delete();
         return back()->with('success','Transaksi berhasil dihapus');
     }
+
+    public function getTransactionsForPost(Post $post)
+    {
+        try {
+            $transactions = $post->transactions()->with('masterJasa', 'masterBarang')->get();
+            return response()->json(['transactions' => $transactions]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'error' => true,
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ], 500);
+        }
+    }
+
+
+
+    
 }

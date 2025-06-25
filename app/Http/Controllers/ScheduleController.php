@@ -14,14 +14,24 @@ class ScheduleController extends Controller
     {
         $selectedYear = $request->input('year', date('Y'));
         $years        = range(date('Y') - 5, date('Y') + 5);
-        
-        $categories = Category::with(['posts' => function($query) use ($selectedYear) {
-            $query->whereYear('tanggal_awal', '<=', $selectedYear)
-                ->whereYear('tanggal_akhir', '>=', $selectedYear)
-                ->orderBy('title'); 
+
+        $categories = Category::with(['posts' => function ($q) use ($selectedYear) {
+            $q->where(function ($query) use ($selectedYear) {
+                $query->whereYear('tanggal_awal', '<', $selectedYear)
+                    ->orWhere(function ($sub) use ($selectedYear) {
+                        $sub->whereYear('tanggal_awal', $selectedYear);
+                    });
+            })
+                ->where(function ($query) use ($selectedYear) {
+                    $query->whereYear('tanggal_akhir', '>', $selectedYear)
+                        ->orWhere(function ($sub) use ($selectedYear) {
+                            $sub->whereYear('tanggal_akhir', $selectedYear);
+                        });
+                })
+                ->with('transactions') // ← transactions ikut dimuat setelah filter posts
+                ->orderBy('title');
         }])->orderBy('name')->get();
 
-        // ← ADD THIS:
         $totalMitra = Post::count();
 
         return view('schedule', [
